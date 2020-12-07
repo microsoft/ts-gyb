@@ -1,0 +1,49 @@
+{
+  "name": "ts-codegen-swift",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "gulp build",
+    "clean": "gulp clean",
+    "start": "gulp start",
+    "dev": "gulp dev",
+    "start:example": "ts-node ./src/example/exampleDemo",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint ./src --ext .js,.jsx,.ts,.tsx",
+    "prettier:write": "npx prettier --write \"src/**/*.ts\"",
+    "prettier:check": "npx prettier --check \"src/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix && npm run prettier:write",
+    "lint:ci": "npm run lint && npm run prettier:check"
+  },
+  "bin": {
+    "ts-codegen-swift": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*.js"
+  ],
+  "types": "typings/*/**.d.ts",
+  "keywords": [],
+  "author": "",
+  "license": "private",
+  "devDependencies": {
+    "@types/gulp": "^4.0.6",
+    "@types/yargs": "^15.0.9",
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
+    "del": "^5.1.0",
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "gulp": "^4.0.2",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "prettier": "^2.2.1",
+    "ts-node": "^8.10.2"
+  },
+  "dependencies": {
+    "glob": "^7.1.6",
+    "typescript": "^3.9.7",
+    "yargs": "^16.1.0"
+  }
+}

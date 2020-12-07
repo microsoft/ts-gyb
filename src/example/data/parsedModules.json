@@ -1,0 +1,253 @@
+[
+    {
+        "name": "IHtmlApi",
+        "methods": [
+            {
+                "name": "getHeight",
+                "parameters": [
+                    {
+                        "name": "test",
+                        "type": {
+                            "kind": {
+                                "flag": "customType",
+                                "name": "Test",
+                                "members": [
+                                    {
+                                        "name": "st",
+                                        "type": {
+                                            "kind": {
+                                                "flag": "basicType",
+                                                "value": "string"
+                                            },
+                                            "nullable": false
+                                        }
+                                    }
+                                ]
+                            },
+                            "nullable": true
+                        }
+                    },
+                    {
+                        "name": "test2",
+                        "type": {
+                            "kind": {
+                                "flag": "customType",
+                                "name": "getHeightParametersTest2Type",
+                                "isTypeLiteral": true,
+                                "members": [
+                                    {
+                                        "name": "st",
+                                        "type": {
+                                            "kind": {
+                                                "flag": "basicType",
+                                                "value": "string"
+                                            },
+                                            "nullable": false
+                                        }
+                                    },
+                                    {
+                                        "name": "embed",
+                                        "type": {
+                                            "kind": {
+                                                "flag": "customType",
+                                                "name": "getHeightParametersTest2MembersEmbedType",
+                                                "isTypeLiteral": true,
+                                                "members": [
+                                                    {
+                                                        "name": "a",
+                                                        "type": {
+                                                            "kind": {
+                                                                "flag": "basicType",
+                                                                "value": "string"
+                                                            },
+                                                            "nullable": true
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            "nullable": false
+                                        }
+                                    }
+                                ]
+                            },
+                            "nullable": true
+                        }
+                    }
+                ],
+                "returnType": {
+                    "kind": {
+                        "flag": "arrayType",
+                        "elementType": {
+                            "kind": {
+                                "flag": "customType",
+                                "name": "Test",
+                                "members": [
+                                    {
+                                        "name": "st",
+                                        "type": {
+                                            "kind": {
+                                                "flag": "basicType",
+                                                "value": "string"
+                                            },
+                                            "nullable": false
+                                        }
+                                    }
+                                ]
+                            },
+                            "nullable": false
+                        }
+                    },
+                    "nullable": false
+                }
+            },
+            {
+                "name": "getHeightWithBottomAnchor",
+                "parameters": [
+                    {
+                        "name": "sta",
+                        "type": {
+                            "kind": {
+                                "flag": "arrayType",
+                                "elementType": {
+                                    "kind": {
+                                        "flag": "basicType",
+                                        "value": "string"
+                                    },
+                                    "nullable": false
+                                }
+                            },
+                            "nullable": false
+                        }
+                    }
+                ],
+                "returnType": {
+                    "kind": {
+                        "flag": "basicType",
+                        "value": "number"
+                    },
+                    "nullable": false
+                }
+            },
+            {
+                "name": "getHTML",
+                "parameters": [],
+                "returnType": {
+                    "kind": {
+                        "flag": "customType",
+                        "name": "Test",
+                        "members": [
+                            {
+                                "name": "st",
+                                "type": {
+                                    "kind": {
+                                        "flag": "basicType",
+                                        "value": "string"
+                                    },
+                                    "nullable": false
+                                }
+                            }
+                        ]
+                    },
+                    "nullable": false
+                }
+            },
+            {
+                "name": "requestRenderingResult",
+                "parameters": [],
+                "returnType": null
+            }
+        ]
+    },
+    {
+        "name": "IImageOptionApi",
+        "methods": [
+            {
+                "name": "hideElementWithID",
+                "parameters": [
+                    {
+                        "name": "ID",
+                        "type": {
+                            "kind": {
+                                "flag": "basicType",
+                                "value": "string"
+                            },
+                            "nullable": false
+                        }
+                    }
+                ],
+                "returnType": null
+            },
+            {
+                "name": "restoreElementVisibilityWithID",
+                "parameters": [
+                    {
+                        "name": "ID",
+                        "type": {
+                            "kind": {
+                                "flag": "basicType",
+                                "value": "string"
+                            },
+                            "nullable": false
+                        }
+                    }
+                ],
+                "returnType": null
+            },
+            {
+                "name": "getSourceOfImageWithID",
+                "parameters": [
+                    {
+                        "name": "ID",
+                        "type": {
+                            "kind": {
+                                "flag": "basicType",
+                                "value": "string"
+                            },
+                            "nullable": false
+                        }
+                    }
+                ],
+                "returnType": {
+                    "kind": {
+                        "flag": "basicType",
+                        "value": "string"
+                    },
+                    "nullable": true
+                }
+            },
+            {
+                "name": "getImageDataList",
+                "parameters": [],
+                "returnType": {
+                    "kind": {
+                        "flag": "basicType",
+                        "value": "string"
+                    },
+                    "nullable": false
+                }
+            },
+            {
+                "name": "getContentBoundsOfElementWithID",
+                "parameters": [
+                    {
+                        "name": "ID",
+                        "type": {
+                            "kind": {
+                                "flag": "basicType",
+                                "value": "string"
+                            },
+                            "nullable": false
+                        }
+                    }
+                ],
+                "returnType": {
+                    "kind": {
+                        "flag": "basicType",
+                        "value": "string"
+                    },
+                    "nullable": true
+                }
+            }
+        ]
+    }
+]
