@@ -82,7 +82,6 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
     if (this.rendererConfig.footerTemplate) {
       content = `${content}\n${this.rendererConfig.footerTemplate}`;
     }
-    // console.log(content);
     fs.writeFileSync(this.outputPath, content);
     console.log('Generated api has been printed successfully');
   }
