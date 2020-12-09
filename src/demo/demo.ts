@@ -1,7 +1,7 @@
 import { Parser } from '../Parser';
 import { RendererConfig, DefaultSwiftRendererConfig } from '../renderer/RenderConfig';
 import { CustomTypeCollector } from '../renderer/CustomTypeCollector';
-import { ExampleCodeRenderer } from './exampleCodeRenderer';
+import { ExampleCodeRenderer } from './demoCodeRenderer';
 
 function run(): void {
   const config = new DefaultSwiftRendererConfig();
