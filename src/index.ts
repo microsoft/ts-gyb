@@ -36,7 +36,7 @@ function run(): void {
   const configJson = fs.readFileSync(args.config, { encoding: 'utf8' });
 
   const config = JSON.parse(configJson) as RendererConfig;
-  console.log('Native Api will be generated with config: \n', config);
+  console.log('Native Api will be generated with config: \n', JSON.stringify(config, null, 2));
 
   const parser = new Parser([args.path]);
   const apiModules = parser.parse();

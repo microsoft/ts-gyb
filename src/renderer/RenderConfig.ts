@@ -1,8 +1,14 @@
+export interface ModuleMeta {
+  pathMap: string;
+  fileName: string;
+  definedValues?: {[k: string]: string};
+}
+
 export interface RendererConfig {
   globalEntry: string;
-  pathMap: Record<string, string>;
+  modules: Record<string, ModuleMeta>;
   tsCustomTypePrefix: string;
-  mergeCustomInterface: boolean;
+  customInterfaceFileName?: string;
   headerTemplate?: string;
   footerTemplate?: string;
   makeFunctionPublic?: boolean;
@@ -12,16 +18,14 @@ export interface RendererConfig {
 export class DefaultSwiftRendererConfig implements RendererConfig {
   'globalEntry' = 'Test';
 
-  'pathMap' = {
-    IHtmlApi: 'htmlApi',
-    IImageOptionApi: 'imageOptionApi',
+  'modules' = {
+    IHtmlApi: { pathMap: 'htmlApi', definedValues: { name: 'htmlApi'}, fileName: 'htmlApi' },
+    IImageOptionApi: { pathMap: 'imageOptionApi', definedValues: { name: 'imageOptionApi'}, fileName: 'imageOptionApi'},
   };
 
   'tsCustomTypePrefix' = 'I';
 
-  'mergeCustomInterface' = true;
-
-  'headerTemplate' = '{';
+  'headerTemplate' = '{ // %%name%%';
 
   'footerTemplate' = '}';
 

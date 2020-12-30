@@ -3,7 +3,7 @@ import { IExportedApi } from '../../index';
 export interface IHtmlApi extends IExportedApi {
   getHeight: () => number;
   getHeightWithBottomAnchor: (sta: string[]) => number;
-  getHTML: () => string;
+  getHTML: (args: {title: string}) => string;
   requestRenderingResult: () => void;
 }
 

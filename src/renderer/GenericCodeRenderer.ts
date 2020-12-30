@@ -2,7 +2,7 @@ import { SourceLike } from './SourceLike';
 import { RendererConfig } from './RenderConfig';
 
 export abstract class GenericCodeRenderer {
-  private sourceLines: SourceLike[] = [];
+  protected currentSourceLines: SourceLike[] = [];
 
   private typeLines: SourceLike[] = [];
 
@@ -12,18 +12,18 @@ export abstract class GenericCodeRenderer {
 
   public toSourceCode(): SourceLike[] {
     this.render();
-    return this.sourceLines;
+    return this.currentSourceLines;
   }
 
   protected abstract render(): void;
 
   protected resolveEndpoint(moduleName: string): string {
-    return this.rendererConfig.pathMap[moduleName];
+    return this.rendererConfig.modules[moduleName].pathMap;
   }
 
   protected emitLine(indent: number, content: SourceLike): void {
     const indentString = ' '.repeat(indent);
-    this.sourceLines.push(`${indentString}${content}`);
+    this.currentSourceLines.push(`${indentString}${content}`);
   }
 
   protected emitLines(indent: number, contents: SourceLike[]): void {
@@ -31,7 +31,7 @@ export abstract class GenericCodeRenderer {
   }
 
   protected emitNewLine(): void {
-    this.sourceLines.push('');
+    this.currentSourceLines.push('');
   }
 
   protected emitCurlyBracketBegin(indent = 0): void {
