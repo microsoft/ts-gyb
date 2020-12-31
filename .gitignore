@@ -118,5 +118,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# typescript output
+# TypeScript output
 typings
