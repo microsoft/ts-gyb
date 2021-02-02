@@ -384,7 +384,7 @@ export class Parser {
       return false;
     }
     const extendedInterface = extendHeritageClause.types.find(
-      (item) => this.checker.getTypeAtLocation(item).symbol.escapedName === extendedInterfaceName
+      (item) => this.checker.getTypeAtLocation(item).symbol?.escapedName === extendedInterfaceName
     );
     return !!extendedInterface;
   }

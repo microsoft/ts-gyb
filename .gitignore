@@ -118,5 +118,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# TypeScript output
-typings
+# publish config
+.npmrc
+
+# debug config
+.vscode/launch.json
