@@ -91,7 +91,7 @@ export class Parser {
 
   private methodFromMethodNode = (methodName: string, node: ts.FunctionTypeNode): Method | null => {
     let parameters: Field[] = [];
-    const fields = this.fieldsFromFunctionTypeNodeForParameters(node, methodName);
+    const fields = this.fieldsFromFunctionTypeNodeForParameters(node, methodName, true);
     if (fields !== null) {
       parameters = fields;
     }
@@ -176,10 +176,15 @@ export class Parser {
 
   private fieldsFromFunctionTypeNodeForParameters = (
     node: ts.FunctionTypeNode,
-    literalTypeDescription: string
+    literalTypeDescription: string,
+    oneParameterRestriction: boolean
   ): Field[] | null => {
     if (!node.parameters || !node.parameters.length) {
       return null;
+    }
+
+    if (oneParameterRestriction && node.parameters.length > 1) {
+      throw new Error("The exported API can only have one parameter, if multiple parameters are needed, use an object");
     }
 
     return node.parameters
