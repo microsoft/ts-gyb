@@ -124,7 +124,9 @@ export class Parser {
     return this.valueTypeFromTypeNode(node.type, nullable, literalTypeDescription);
   };
 
-  private isValueTypeNullableFromNode = (node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }): boolean => {
+  private isValueTypeNullableFromNode = (
+    node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }
+  ): boolean => {
     const nullable = node.questionToken !== undefined;
 
     return nullable;
@@ -184,7 +186,7 @@ export class Parser {
     }
 
     if (oneParameterRestriction && node.parameters.length > 1) {
-      throw new Error("The exported API can only have one parameter, if multiple parameters are needed, use an object");
+      throw new Error('The exported API can only have one parameter, if multiple parameters are needed, use an object');
     }
 
     return node.parameters
@@ -289,7 +291,10 @@ export class Parser {
 
     const members = declNode.members
       .map((item, index) =>
-        this.fieldFromTypeElement(item, `${name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`)
+        this.fieldFromTypeElement(
+          item,
+          `${name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`
+        )
       )
       .filter((field): field is Field => field !== null);
 
@@ -334,7 +339,11 @@ export class Parser {
     return null;
   };
 
-  private extractUnionTypeNode = (node: ts.Node, literalTypeDescription: string, nullable: boolean): ValueType | null => {
+  private extractUnionTypeNode = (
+    node: ts.Node,
+    literalTypeDescription: string,
+    nullable: boolean
+  ): ValueType | null => {
     if (!ts.isUnionTypeNode(node)) {
       return null;
     }

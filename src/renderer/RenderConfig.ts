@@ -1,7 +1,7 @@
 export interface ModuleMeta {
   pathMap: string;
   fileName: string;
-  definedValues?: {[k: string]: string};
+  definedValues?: { [k: string]: string };
 }
 
 export interface RendererConfig {
@@ -19,8 +19,12 @@ export class DefaultSwiftRendererConfig implements RendererConfig {
   'globalEntry' = 'Test';
 
   'modules' = {
-    IHtmlApi: { pathMap: 'htmlApi', definedValues: { name: 'htmlApi'}, fileName: 'htmlApi' },
-    IImageOptionApi: { pathMap: 'imageOptionApi', definedValues: { name: 'imageOptionApi'}, fileName: 'imageOptionApi'},
+    IHtmlApi: { pathMap: 'htmlApi', definedValues: { name: 'htmlApi' }, fileName: 'htmlApi' },
+    IImageOptionApi: {
+      pathMap: 'imageOptionApi',
+      definedValues: { name: 'imageOptionApi' },
+      fileName: 'imageOptionApi',
+    },
   };
 
   'tsCustomTypePrefix' = 'I';
