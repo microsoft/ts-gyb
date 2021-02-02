@@ -114,3 +114,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# publish config
+.npmrc
+
+# debug config
+.vscode/launch.json

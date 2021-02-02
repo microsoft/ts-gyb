@@ -1,8 +1,7 @@
 {
-  "name": "ts-codegen-swift",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "name": "@olm/ts-codegen",
+  "version": "0.1.2",
+  "description": "Generate Native API based on TS interface",
   "scripts": {
     "build": "gulp build",
     "clean": "gulp clean",
@@ -16,13 +15,15 @@
     "lint:fix": "npm run lint -- --fix && npm run prettier:write",
     "lint:ci": "npm run lint && npm run prettier:check"
   },
+  "main": "dist/index.js",
   "bin": {
-    "ts-codegen-swift": "dist/index.js"
+    "ts-codegen": "dist/index.js"
   },
   "files": [
-    "dist/**/*.js"
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
   ],
-  "types": "typings/*/**.d.ts",
+  "types": "index.d.ts",
   "keywords": [],
   "author": "",
   "license": "private",
