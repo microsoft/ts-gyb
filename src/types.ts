@@ -39,6 +39,7 @@ export interface CustomTypeKind extends ValueTypeKind {
   isTypeLiteral?: boolean;
   name: string;
   members: Field[];
+  isAnyKeyDictionary?: boolean;
 }
 
 export interface BasicTypeKind extends ValueTypeKind {

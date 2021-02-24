@@ -1,13 +1,37 @@
-import { IExportedApi } from '../../index';
+interface BaseSize {
+  width: number;
+  height: number;
+}
 
-export interface IHtmlApi extends IExportedApi {
+interface CustomSize {
+  scale: number;
+}
+
+interface FullSize extends BaseSize, CustomSize {
+  size: number;
+}
+
+interface DictionaryWithAnyKey {
+  [key: string]: string;
+}
+
+/**
+ * @shouldExport true
+ */
+export interface IHtmlApi {
   getHeight: () => number;
   getHeightWithBottomAnchor: (sta: string[]) => number;
   getHTML: (args: { title: string }) => string;
   requestRenderingResult: () => void;
+  getSize: () => FullSize;
+  setMentionClassNames: (args: { [id: string]: string[] }) => void;
+  testDictionaryWithAnyKey: (args: DictionaryWithAnyKey) => void;
 }
 
-export interface IImageOptionApi extends IExportedApi {
+/**
+ * @shouldExport true
+ */
+export interface IImageOptionApi {
   hideElementWithID: (ID: string) => void;
   restoreElementVisibilityWithID: (ID: string) => void;
   getSourceOfImageWithID: (ID: string) => string | null;

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Method, Module, ValueTypeKindFlag } from '../types';
 import { RendererConfig } from './RenderConfig';
-import { InternalDataStructure } from './InternalDataStructure';
+import { CodableProtocol, InternalDataStructure } from './InternalDataStructure';
 import { GenericCodeRenderer } from './GenericCodeRenderer';
 import { TypeTransformer } from './CustomTypeCollector';
 import { SourceLike } from './SourceLike';
@@ -50,10 +50,19 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
     return result;
   }
 
+  protected getCustomInterfaceContentWithTemplate(): string {
+    let content = this.interfaceSourceLines.join('\n');
+    const { customInterfaceFileHeaderTemplate } = this.rendererConfig;
+    if (customInterfaceFileHeaderTemplate) {
+      content = customInterfaceFileHeaderTemplate + content;
+    }
+    return content;
+  }
+
   private updateTemplateWithParams(template: string, params: { [k: string]: string }): string {
     return template.replace(
       /%%([a-zA-Z_$][a-zA-Z_$0-9]*)%%/g,
-      (match: string, paramName: string): string => params[paramName] || 'undefined'
+      (match: string, paramName: string): string => typeof params[paramName] === 'string' ? params[paramName] : 'undefined'
     );
   }
 
@@ -96,7 +105,8 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
           this.rendererConfig,
           'Args',
           this.typeTransformer,
-          parameterType.kind.members
+          parameterType.kind.members,
+          CodableProtocol.encodable
         ).toSourceCode();
         this.emitLines(2 + baseIndent, argSource);
 
@@ -186,7 +196,7 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
 
     const { customInterfaceFileName } = this.rendererConfig;
     if (customInterfaceFileName && this.interfaceSourceLines.length > 0) {
-      fs.writeFileSync(path.join(this.outputPath, customInterfaceFileName), this.interfaceSourceLines.join('\n'));
+      fs.writeFileSync(path.join(this.outputPath, customInterfaceFileName), this.getCustomInterfaceContentWithTemplate());
     }
     console.log('Generated api has been printed successfully');
   }

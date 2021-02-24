@@ -1,7 +1,7 @@
 import { CustomTypeKind, ValueType, Field, ArrayTypeKind, BasicTypeKind, ValueTypeKindFlag } from '../types';
 import { SourceLike } from './SourceLike';
 import { RendererConfig } from './RenderConfig';
-import { InternalDataStructure } from './InternalDataStructure';
+import { CodableProtocol, InternalDataStructure } from './InternalDataStructure';
 
 export interface TypeTransformer {
   transformType(fieldType: ValueType | Field[], ignoreNullable?: boolean): string;
@@ -20,12 +20,15 @@ export class CustomTypeCollector implements TypeTransformer {
     let result: SourceLike[] = [];
 
     Object.keys(this.customTypes).forEach((typeName) => {
-      const refinedTypeName = typeName.replace(this.rendererConfig.tsCustomTypePrefix, '');
+      const refinedTypeName = this.replacePrefix(typeName);
       const customDataStructure = new InternalDataStructure(
         this.rendererConfig,
         refinedTypeName,
         this,
-        this.customTypes[typeName].members
+        this.customTypes[typeName].members,
+        CodableProtocol.codable,
+        this.rendererConfig.makeFunctionPublic,
+        true
       );
       result = result.concat(customDataStructure.toSourceCode());
     });
@@ -52,13 +55,24 @@ export class CustomTypeCollector implements TypeTransformer {
           targetType = UNKNOWN_TYPE;
       }
     } else if (this.isCustomTypeKind(fieldType.kind)) {
-      targetType = fieldType.kind.name;
-      if (targetType.startsWith(this.rendererConfig.tsCustomTypePrefix)) {
-        targetType = targetType.replace(this.rendererConfig.tsCustomTypePrefix, '');
+      if (fieldType.kind.isAnyKeyDictionary) {
+        targetType = `[String: ${this.transformType(fieldType.kind.members[0].type)}]`;
+      } else {
+        targetType = this.replacePrefix(fieldType.kind.name);
+        this.emit(fieldType.kind);
+        fieldType.kind.members.forEach((member: Field) => {
+          if (!this.isBasicTypeKind(member.type.kind)) {
+            // Recursively convert sub-members which is custom type or array type
+            this.transformType(member.type);
+          }
+        });
       }
-      this.emit(fieldType.kind);
     } else if (this.isArrayTypeKind(fieldType.kind)) {
       targetType = `[${this.transformType(fieldType.kind.elementType)}]`;
+      if (!this.isBasicTypeKind(fieldType.kind.elementType.kind)) {
+        // Recursively convert elementType which is custom type or array type
+        this.transformType(fieldType.kind.elementType);
+      }
     } else {
       targetType = UNKNOWN_TYPE;
     }
@@ -79,5 +93,29 @@ export class CustomTypeCollector implements TypeTransformer {
 
   private isArrayTypeKind(kind: ValueType['kind']): kind is ArrayTypeKind {
     return kind.flag === ValueTypeKindFlag.arrayType;
+  }
+
+  private replacePrefix(originalName: string): string {
+    let result = originalName;
+    const { tsCustomTypePrefixToBeRemoved, customInterfacePrefixToBeAdded} = this.rendererConfig;
+    if (tsCustomTypePrefixToBeRemoved) {
+      const findIndex = originalName.indexOf(tsCustomTypePrefixToBeRemoved);
+
+      if (findIndex === 0
+        && originalName.length > tsCustomTypePrefixToBeRemoved.length
+        && this.isUpperCase(originalName[tsCustomTypePrefixToBeRemoved.length])) {
+          result = originalName.slice(tsCustomTypePrefixToBeRemoved.length);
+      }
+    }
+
+    if (customInterfacePrefixToBeAdded) {
+      result = customInterfacePrefixToBeAdded + result;
+    }
+
+    return result;
+  }
+
+  private isUpperCase(ch: string){
+    return ch >= 'A' && ch <= 'Z'
   }
 }

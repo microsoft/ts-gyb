@@ -54,7 +54,10 @@ export class Parser {
       return null;
     }
 
-    if (!this.isNodeExtended(node, 'IExportedApi')) {
+    const { symbol } = this.checker.getTypeAtLocation(node);
+    const jsDocTags = symbol.getJsDocTags();
+
+    if (!this.shouldExportInJsDocTags(jsDocTags)) {
       return null;
     }
 
@@ -91,7 +94,7 @@ export class Parser {
 
   private methodFromMethodNode = (methodName: string, node: ts.FunctionTypeNode): Method | null => {
     let parameters: Field[] = [];
-    const fields = this.fieldsFromFunctionTypeNodeForParameters(node, methodName, true);
+    const fields = this.fieldsFromFunctionTypeNodeForParameters(node, this.capitalizeFirstLetter(methodName), true);
     if (fields !== null) {
       parameters = fields;
     }
@@ -99,7 +102,7 @@ export class Parser {
     let returnValueType: ValueType | null = null;
 
     if (node.type !== undefined) {
-      const valueType = this.valueTypeFromNode(node, `${methodName}Return`);
+      const valueType = this.valueTypeFromNode(node, `${this.capitalizeFirstLetter(methodName)}Return`);
       if (valueType !== null) {
         returnValueType = valueType;
       }
@@ -249,6 +252,29 @@ export class Parser {
     return null;
   };
 
+
+  private indexFieldFromMembersParent = (type: {members: ts.NodeArray<ts.TypeElement>}, literalTypeDescription: string): Field | null => {
+    if (type.members && type.members.length !== 1) {
+      // Only support interface with one index signature, like { [key: string]: string }
+      return null;
+    }
+
+    const typeElement = type.members[0];
+    if (ts.isIndexSignatureDeclaration(typeElement)) {
+      const name = typeElement.parameters[0].name.getText();
+      const valueType = this.valueTypeFromNode(typeElement, `${literalTypeDescription}IndexMember${this.getNameWithCapitalFirstLetter(name)}`)
+      
+      if (valueType !== null && name) {
+        return {
+          name,
+          type: valueType,
+        }
+      }
+    }
+    
+    return null
+  }
+
   private basicTypeKindFromTypeNode = (node: ts.TypeNode): BasicTypeKind | null => {
     if (node.kind === ts.SyntaxKind.StringKeyword) {
       return {
@@ -277,37 +303,90 @@ export class Parser {
       return null;
     }
 
-    const declarations = this.checker.getTypeFromTypeNode(node).symbol.getDeclarations();
-    if (declarations === undefined || declarations.length !== 1) {
+    const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(this.checker.getTypeFromTypeNode(node));
+    if (members.length === 0) {
       return null;
     }
-
-    const declNode = declarations[0];
-    if (!ts.isInterfaceDeclaration(declNode)) {
-      return null;
-    }
-
-    const name = declNode.name.getText();
-
-    const members = declNode.members
-      .map((item, index) =>
-        this.fieldFromTypeElement(
-          item,
-          `${name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`
-        )
-      )
-      .filter((field): field is Field => field !== null);
 
     return {
       flag: ValueTypeKindFlag.customType,
       name,
       members,
+      isAnyKeyDictionary,
     };
   };
+
+  private getInterfaceMembersAndNameFromType(type: ts.Type): {name: string, members: Field[], isAnyKeyDictionary: boolean} {
+    const result = {
+      name: '',
+      members: [] as Field[],
+      isAnyKeyDictionary: false,
+    };
+    const declarations = type.symbol.getDeclarations();
+    if (declarations === undefined || declarations.length !== 1) {
+      return result;
+    }
+
+    const declNode = declarations[0];
+    if (!ts.isInterfaceDeclaration(declNode)) {
+      return result;
+    }
+
+    result.name = declNode.name.getText();
+
+    const indexField = this.indexFieldFromMembersParent(declNode, `${result.name}`);
+    if (indexField) {
+      result.members = [indexField];
+      result.isAnyKeyDictionary = true;
+    } else {
+      result.members = declNode.members
+      .map((item, index) =>
+        this.fieldFromTypeElement(
+          item,
+          `${result.name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`
+        )
+      )
+      .filter((field): field is Field => field !== null);
+
+      const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(declNode);
+      if (membersInExtendingInterface.length) {
+        result.members.push(...membersInExtendingInterface);
+      }
+    }
+
+    return result;
+  }
+
+  private getExtendingMembersFromInterfaceDeclaration(node: ts.InterfaceDeclaration): Field[] {
+    if (!node.heritageClauses?.length) {
+      return [];
+    }
+    const extendHeritageClause = node.heritageClauses.find((item) => item.token === ts.SyntaxKind.ExtendsKeyword);
+    if (!extendHeritageClause) {
+      return [];
+    }
+
+    return extendHeritageClause.types.flatMap((extendingInterface): Field[] => {
+      const type = this.checker.getTypeAtLocation(extendingInterface);
+      const {members, isAnyKeyDictionary} = this.getInterfaceMembersAndNameFromType(type);
+      return isAnyKeyDictionary ? [] : members;
+    })
+  }
 
   private literalTypeKindFromTypeNode = (node: ts.TypeNode, literalTypeDescription: string): CustomTypeKind | null => {
     if (!ts.isTypeLiteralNode(node)) {
       return null;
+    }
+
+    const indexField =  this.indexFieldFromMembersParent(node, literalTypeDescription);
+    if (indexField) {
+      return {
+        flag: ValueTypeKindFlag.customType,
+        name: `${literalTypeDescription}Type`,
+        isTypeLiteral: true,
+        members: [indexField],
+        isAnyKeyDictionary: true,
+      }
     }
 
     const fields = this.fieldsFromLiteralTypeNode(node, literalTypeDescription);
@@ -404,5 +483,18 @@ export class Parser {
       targetName = name[0].toUpperCase() + name.slice(1);
     }
     return targetName;
+  }
+
+  private shouldExportInJsDocTags(tags: ts.JSDocTagInfo[]): boolean {
+    return !!tags.find((tag) => tag.name === 'shouldExport' && tag.text === 'true');
+  }
+
+  private capitalizeFirstLetter(name: string): string {
+    let res = name;
+    if (res.length === 0) {
+      return res;
+    }
+    res = res[0].toUpperCase() + res.slice(1);
+    return res
   }
 }
