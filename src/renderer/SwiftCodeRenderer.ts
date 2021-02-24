@@ -163,6 +163,14 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
         const parameterSourceStatement = parameterSource.join(', ');
 
         const modifier = this.rendererConfig.makeFunctionPublic ? 'public ' : '';
+
+        if (method.comment !== undefined && method.comment.length !== 0) {
+          const comments = method.comment.split('\n');
+          comments.forEach(comment => {
+            this.emitLine(0 + baseIndent, `/// ${comment}`);
+          });
+        }
+
         this.emitLine(0 + baseIndent, `${modifier}func ${source}(${parameterSourceStatement}`);
 
         this.emitCurlyBracketBegin(baseIndent);

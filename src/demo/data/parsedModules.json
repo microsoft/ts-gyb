@@ -169,7 +169,8 @@
                         }
                     }
                 ],
-                "returnType": null
+                "returnType": null,
+                "comment": "Set Mention class names\nused to map id to class names"
             },
             {
                 "name": "testDictionaryWithAnyKey",

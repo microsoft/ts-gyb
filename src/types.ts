@@ -7,6 +7,7 @@ export interface Method {
   name: string;
   parameters: Field[];
   returnType: ValueType | null;
+  comment?: string;
 }
 
 export interface Field {

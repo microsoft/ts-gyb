@@ -12,6 +12,11 @@ import {
   ValueTypeKindFlag,
 } from './types';
 
+// Defined tags
+const SHOULD_EXPORT = 'shouldExport';
+const COMMENT = 'comment';
+
+
 export class Parser {
   program: ts.Program;
 
@@ -66,17 +71,8 @@ export class Parser {
       if (!ts.isPropertySignature(methodNode)) {
         return;
       }
-
-      const methodType = methodNode.type;
-      if (!methodType) {
-        return;
-      }
-
-      if (!ts.isFunctionTypeNode(methodType)) {
-        return;
-      }
-
-      const method = this.methodFromMethodNode(methodNode.name.getText(), methodType);
+      
+      const method = this.methodFromMethodNode(methodNode);
       if (method) {
         methods.push(method);
       }
@@ -92,17 +88,30 @@ export class Parser {
     };
   };
 
-  private methodFromMethodNode = (methodName: string, node: ts.FunctionTypeNode): Method | null => {
+  private methodFromMethodNode = (methodNode: ts.PropertySignature): Method | null => {
+    const methodType = methodNode.type;
+    const methodName = methodNode.name.getText();
+    if (!methodType) {
+      return null;
+    }
+
+    if (!ts.isFunctionTypeNode(methodType)) {
+      return null;
+    }
+
+    const jsDocTags = ts.getJSDocTags(methodNode) as ts.JSDocTag[];
+    const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
+
     let parameters: Field[] = [];
-    const fields = this.fieldsFromFunctionTypeNodeForParameters(node, this.capitalizeFirstLetter(methodName), true);
+    const fields = this.fieldsFromFunctionTypeNodeForParameters(methodType, this.capitalizeFirstLetter(methodName), true);
     if (fields !== null) {
       parameters = fields;
     }
 
     let returnValueType: ValueType | null = null;
 
-    if (node.type !== undefined) {
-      const valueType = this.valueTypeFromNode(node, `${this.capitalizeFirstLetter(methodName)}Return`);
+    if (methodType.type !== undefined) {
+      const valueType = this.valueTypeFromNode(methodType, `${this.capitalizeFirstLetter(methodName)}Return`);
       if (valueType !== null) {
         returnValueType = valueType;
       }
@@ -112,6 +121,7 @@ export class Parser {
       name: methodName,
       parameters,
       returnType: returnValueType,
+      comment: nativeComment
     };
   };
 
@@ -486,7 +496,7 @@ export class Parser {
   }
 
   private shouldExportInJsDocTags(tags: ts.JSDocTagInfo[]): boolean {
-    return !!tags.find((tag) => tag.name === 'shouldExport' && tag.text === 'true');
+    return !!tags.find((tag) => tag.name === SHOULD_EXPORT && tag.text === 'true');
   }
 
   private capitalizeFirstLetter(name: string): string {
@@ -496,5 +506,25 @@ export class Parser {
     }
     res = res[0].toUpperCase() + res.slice(1);
     return res
+  }
+
+  private getPropertyFromJsDocNodes(tags: ts.JSDocTag[], name: string): ts.JSDocTagInfo | undefined {
+    const target = tags.find((tagNode) => ts.unescapeLeadingUnderscores(tagNode.tagName.escapedText) === name);
+    if (target) {
+      return {
+        name: ts.unescapeLeadingUnderscores(target.tagName.escapedText),
+        text: target.comment
+      }
+    }
+    return;
+  }
+
+  private getCommentFromJsDocNodes(tags: ts.JSDocTag[]): string | undefined {
+    const commentTag = this.getPropertyFromJsDocNodes(tags, COMMENT);
+    if (commentTag && commentTag.text) {
+      return commentTag.text;
+    }
+
+    return;
   }
 }

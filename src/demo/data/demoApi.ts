@@ -19,12 +19,17 @@ interface DictionaryWithAnyKey {
  * @shouldExport true
  */
 export interface IHtmlApi {
+  /**
+   * @comment 
+   * Set Mention class names
+   * used to map id to class names
+   */
+  setMentionClassNames: (args: { [id: string]: string[] }) => void;
   getHeight: () => number;
   getHeightWithBottomAnchor: (sta: string[]) => number;
   getHTML: (args: { title: string }) => string;
   requestRenderingResult: () => void;
   getSize: () => FullSize;
-  setMentionClassNames: (args: { [id: string]: string[] }) => void;
   testDictionaryWithAnyKey: (args: DictionaryWithAnyKey) => void;
 }
 
