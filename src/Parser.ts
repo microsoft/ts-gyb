@@ -10,6 +10,8 @@ import {
   ArrayTypeKind,
   BasicTypeKind,
   ValueTypeKindFlag,
+  EnumTypeKind,
+  EnumSubType,
 } from './types';
 
 // Defined tags
@@ -308,22 +310,28 @@ export class Parser {
     return null;
   };
 
-  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | null => {
+  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | EnumTypeKind | null => {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
 
-    const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(this.checker.getTypeFromTypeNode(node));
-    if (members.length === 0) {
-      return null;
+    const referenceType =  this.checker.getTypeFromTypeNode(node);
+    const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(referenceType);
+    if (members.length !== 0) {
+      return {
+        flag: ValueTypeKindFlag.customType,
+        name,
+        members,
+        isAnyKeyDictionary,
+      };
     }
 
-    return {
-      flag: ValueTypeKindFlag.customType,
-      name,
-      members,
-      isAnyKeyDictionary,
-    };
+    const enumTypeKind = this.enumTypeKindFromType(referenceType);
+    if (enumTypeKind) {
+      return enumTypeKind
+    }
+
+    return null;
   };
 
   private getInterfaceMembersAndNameFromType(type: ts.Type): {name: string, members: Field[], isAnyKeyDictionary: boolean} {
@@ -381,6 +389,58 @@ export class Parser {
       const {members, isAnyKeyDictionary} = this.getInterfaceMembersAndNameFromType(type);
       return isAnyKeyDictionary ? [] : members;
     })
+  }
+
+  private enumTypeKindFromType(type: ts.Type): EnumTypeKind | null {
+    const declarations = type.symbol.getDeclarations();
+    if (declarations === undefined || declarations.length !== 1) {
+      return null;
+    }
+
+    const declNode = declarations[0];
+    if (!ts.isEnumDeclaration(declNode)) {
+      return null;
+    }
+
+    const name = declNode.name.getText();
+    let enumSubType: EnumSubType = EnumSubType.string;
+    const keys: string[] = [];
+    const values: (string | number)[] = [];
+    let hasMultipleSubType = false;
+
+    declNode.members.forEach((enumMember, index) => {
+      const key = enumMember.name.getText();
+      let value: string | number = key;
+      const subType = ((): EnumSubType => {
+        if (enumMember.initializer) {
+          const valueInitializer = enumMember.initializer;
+          if (ts.isStringLiteral(valueInitializer)) {
+            value = valueInitializer.text;
+            return EnumSubType.string;
+          } else if (ts.isNumericLiteral(valueInitializer)) {
+            value = Number(valueInitializer.text);
+            return EnumSubType.number;
+          }
+        }
+        return EnumSubType.string;
+      })();
+      if (index > 0 && enumSubType !== subType) {
+        hasMultipleSubType = true;
+        return;
+      }
+
+      enumSubType = subType;
+      keys.push(key);
+      values.push(value);
+    });
+
+    return {
+      flag: ValueTypeKindFlag.enumType,
+      name,
+      subType: enumSubType,
+      keys,
+      values,
+    }
   }
 
   private literalTypeKindFromTypeNode = (node: ts.TypeNode, literalTypeDescription: string): CustomTypeKind | null => {

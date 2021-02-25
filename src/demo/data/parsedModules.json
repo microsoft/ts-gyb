@@ -3,6 +3,43 @@
         "name": "IHtmlApi",
         "methods": [
             {
+                "name": "setMentionClassNames",
+                "parameters": [
+                    {
+                        "name": "args",
+                        "type": {
+                            "kind": {
+                                "flag": "customType",
+                                "name": "SetMentionClassNamesParametersArgsType",
+                                "isTypeLiteral": true,
+                                "members": [
+                                    {
+                                        "name": "id",
+                                        "type": {
+                                            "kind": {
+                                                "flag": "arrayType",
+                                                "elementType": {
+                                                    "kind": {
+                                                        "flag": "basicType",
+                                                        "value": "string"
+                                                    },
+                                                    "nullable": false
+                                                }
+                                            },
+                                            "nullable": false
+                                        }
+                                    }
+                                ],
+                                "isAnyKeyDictionary": true
+                            },
+                            "nullable": false
+                        }
+                    }
+                ],
+                "returnType": null,
+                "comment": "Set Mention class names\nused to map id to class names"
+            },
+            {
                 "name": "getHeight",
                 "parameters": [],
                 "returnType": {
@@ -100,6 +137,63 @@
                                 }
                             },
                             {
+                                "name": "stringEnum",
+                                "type": {
+                                    "kind": {
+                                        "flag": "enumType",
+                                        "name": "StringEnum",
+                                        "subType": "string",
+                                        "keys": [
+                                            "a",
+                                            "b"
+                                        ],
+                                        "values": [
+                                            "a",
+                                            "b"
+                                        ]
+                                    },
+                                    "nullable": false
+                                }
+                            },
+                            {
+                                "name": "numEnum",
+                                "type": {
+                                    "kind": {
+                                        "flag": "enumType",
+                                        "name": "NumEnum",
+                                        "subType": "number",
+                                        "keys": [
+                                            "one",
+                                            "two"
+                                        ],
+                                        "values": [
+                                            1,
+                                            2
+                                        ]
+                                    },
+                                    "nullable": false
+                                }
+                            },
+                            {
+                                "name": "defEnum",
+                                "type": {
+                                    "kind": {
+                                        "flag": "enumType",
+                                        "name": "DefaultEnum",
+                                        "subType": "string",
+                                        "keys": [
+                                            "c",
+                                            "d"
+                                        ],
+                                        "values": [
+                                            "c",
+                                            "d"
+                                        ]
+                                    },
+                                    "nullable": false
+                                }
+                            },
+                            {
                                 "name": "width",
                                 "type": {
                                     "kind": {
@@ -134,43 +228,6 @@
                     },
                     "nullable": false
                 }
-            },
-            {
-                "name": "setMentionClassNames",
-                "parameters": [
-                    {
-                        "name": "args",
-                        "type": {
-                            "kind": {
-                                "flag": "customType",
-                                "name": "SetMentionClassNamesParametersArgsType",
-                                "isTypeLiteral": true,
-                                "members": [
-                                    {
-                                        "name": "id",
-                                        "type": {
-                                            "kind": {
-                                                "flag": "arrayType",
-                                                "elementType": {
-                                                    "kind": {
-                                                        "flag": "basicType",
-                                                        "value": "string"
-                                                    },
-                                                    "nullable": false
-                                                }
-                                            },
-                                            "nullable": false
-                                        }
-                                    }
-                                ],
-                                "isAnyKeyDictionary": true
-                            },
-                            "nullable": false
-                        }
-                    }
-                ],
-                "returnType": null,
-                "comment": "Set Mention class names\nused to map id to class names"
             },
             {
                 "name": "testDictionaryWithAnyKey",

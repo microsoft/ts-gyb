@@ -7,8 +7,26 @@ interface CustomSize {
   scale: number;
 }
 
+enum StringEnum {
+  a = 'a',
+  b = 'b',
+}
+
+enum NumEnum {
+  one = 1,
+  two = 2,
+}
+
+enum DefaultEnum {
+  c,
+  d,
+}
+
 interface FullSize extends BaseSize, CustomSize {
   size: number;
+  stringEnum: StringEnum;
+  numEnum: NumEnum;
+  defEnum: DefaultEnum;
 }
 
 interface DictionaryWithAnyKey {

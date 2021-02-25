@@ -1,7 +1,8 @@
-import { CustomTypeKind, ValueType, Field, ArrayTypeKind, BasicTypeKind, ValueTypeKindFlag } from '../types';
+import { CustomTypeKind, ValueType, Field, ArrayTypeKind, BasicTypeKind, ValueTypeKindFlag, EnumTypeKind } from '../types';
 import { SourceLike } from './SourceLike';
 import { RendererConfig } from './RenderConfig';
 import { CodableProtocol, InternalDataStructure } from './InternalDataStructure';
+import { InternalEnum } from './InternalEnum';
 
 export interface TypeTransformer {
   transformType(fieldType: ValueType | Field[], ignoreNullable?: boolean): string;
@@ -9,11 +10,16 @@ export interface TypeTransformer {
 }
 export class CustomTypeCollector implements TypeTransformer {
   private customTypes: Record<string, CustomTypeKind> = {};
+  private enumTypes: Record<string, EnumTypeKind> = {};
 
   constructor(protected rendererConfig: RendererConfig) {}
 
-  public emit(customType: CustomTypeKind): void {
+  public emitCustomType(customType: CustomTypeKind): void {
     this.customTypes[customType.name] = customType;
+  }
+
+  public emitEnumType(enumType: EnumTypeKind): void {
+    this.enumTypes[enumType.name] = enumType;
   }
 
   public toSourceLike(): SourceLike[] {
@@ -31,6 +37,17 @@ export class CustomTypeCollector implements TypeTransformer {
         true
       );
       result = result.concat(customDataStructure.toSourceCode());
+    });
+
+    Object.keys(this.enumTypes).forEach((typeName) => {
+      const refinedTypeName = this.replacePrefix(typeName);
+      const customEnum = new InternalEnum(
+        this.rendererConfig,
+        refinedTypeName,
+        CodableProtocol.codable,
+        this.enumTypes[typeName]
+      );
+      result = result.concat(customEnum.toSourceCode());
     });
 
     return result;
@@ -59,7 +76,7 @@ export class CustomTypeCollector implements TypeTransformer {
         targetType = `[String: ${this.transformType(fieldType.kind.members[0].type)}]`;
       } else {
         targetType = this.replacePrefix(fieldType.kind.name);
-        this.emit(fieldType.kind);
+        this.emitCustomType(fieldType.kind);
         fieldType.kind.members.forEach((member: Field) => {
           if (!this.isBasicTypeKind(member.type.kind)) {
             // Recursively convert sub-members which is custom type or array type
@@ -73,6 +90,9 @@ export class CustomTypeCollector implements TypeTransformer {
         // Recursively convert elementType which is custom type or array type
         this.transformType(fieldType.kind.elementType);
       }
+    } else if (this.isEnumTypeKind(fieldType.kind)) {
+      targetType = this.replacePrefix(fieldType.kind.name);
+      this.emitEnumType(fieldType.kind);
     } else {
       targetType = UNKNOWN_TYPE;
     }
@@ -95,6 +115,9 @@ export class CustomTypeCollector implements TypeTransformer {
     return kind.flag === ValueTypeKindFlag.arrayType;
   }
 
+  private isEnumTypeKind(kind: ValueType['kind']): kind is EnumTypeKind {
+    return kind.flag === ValueTypeKindFlag.enumType;
+  }
   private replacePrefix(originalName: string): string {
     let result = originalName;
     const { tsCustomTypePrefixToBeRemoved, customInterfacePrefixToBeAdded} = this.rendererConfig;
