@@ -10,7 +10,13 @@ import {
   ArrayTypeKind,
   BasicTypeKind,
   ValueTypeKindFlag,
+  EnumKind,
+  EnumSubType,
 } from './types';
+
+// Defined tags
+const SHOULD_EXPORT = 'shouldExport';
+const COMMENT = 'comment';
 
 export class Parser {
   program: ts.Program;
@@ -54,7 +60,10 @@ export class Parser {
       return null;
     }
 
-    if (!this.isNodeExtended(node, 'IExportedApi')) {
+    const { symbol } = this.checker.getTypeAtLocation(node);
+    const jsDocTags = symbol.getJsDocTags();
+
+    if (!this.shouldExportInJsDocTags(jsDocTags)) {
       return null;
     }
 
@@ -64,16 +73,7 @@ export class Parser {
         return;
       }
 
-      const methodType = methodNode.type;
-      if (!methodType) {
-        return;
-      }
-
-      if (!ts.isFunctionTypeNode(methodType)) {
-        return;
-      }
-
-      const method = this.methodFromMethodNode(methodNode.name.getText(), methodType);
+      const method = this.methodFromMethodNode(methodNode);
       if (method) {
         methods.push(method);
       }
@@ -89,17 +89,34 @@ export class Parser {
     };
   };
 
-  private methodFromMethodNode = (methodName: string, node: ts.FunctionTypeNode): Method | null => {
+  private methodFromMethodNode = (methodNode: ts.PropertySignature): Method | null => {
+    const methodType = methodNode.type;
+    const methodName = methodNode.name.getText();
+    if (!methodType) {
+      return null;
+    }
+
+    if (!ts.isFunctionTypeNode(methodType)) {
+      return null;
+    }
+
+    const jsDocTags = ts.getJSDocTags(methodNode) as ts.JSDocTag[];
+    const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
+
     let parameters: Field[] = [];
-    const fields = this.fieldsFromFunctionTypeNodeForParameters(node, methodName, true);
+    const fields = this.fieldsFromFunctionTypeNodeForParameters(
+      methodType,
+      this.capitalizeFirstLetter(methodName),
+      true
+    );
     if (fields !== null) {
       parameters = fields;
     }
 
     let returnValueType: ValueType | null = null;
 
-    if (node.type !== undefined) {
-      const valueType = this.valueTypeFromNode(node, `${methodName}Return`);
+    if (methodType.type !== undefined) {
+      const valueType = this.valueTypeFromNode(methodType, `${this.capitalizeFirstLetter(methodName)}Return`);
       if (valueType !== null) {
         returnValueType = valueType;
       }
@@ -109,6 +126,7 @@ export class Parser {
       name: methodName,
       parameters,
       returnType: returnValueType,
+      comment: nativeComment,
     };
   };
 
@@ -124,7 +142,9 @@ export class Parser {
     return this.valueTypeFromTypeNode(node.type, nullable, literalTypeDescription);
   };
 
-  private isValueTypeNullableFromNode = (node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }): boolean => {
+  private isValueTypeNullableFromNode = (
+    node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }
+  ): boolean => {
     const nullable = node.questionToken !== undefined;
 
     return nullable;
@@ -184,7 +204,7 @@ export class Parser {
     }
 
     if (oneParameterRestriction && node.parameters.length > 1) {
-      throw new Error("The exported API can only have one parameter, if multiple parameters are needed, use an object");
+      throw new Error('The exported API can only have one parameter, if multiple parameters are needed, use an object');
     }
 
     return node.parameters
@@ -247,6 +267,34 @@ export class Parser {
     return null;
   };
 
+  private indexFieldFromMembersParent = (
+    type: { members: ts.NodeArray<ts.TypeElement> },
+    literalTypeDescription: string
+  ): Field | null => {
+    if (type.members && type.members.length !== 1) {
+      // Only support interface with one index signature, like { [key: string]: string }
+      return null;
+    }
+
+    const typeElement = type.members[0];
+    if (ts.isIndexSignatureDeclaration(typeElement)) {
+      const name = typeElement.parameters[0].name.getText();
+      const valueType = this.valueTypeFromNode(
+        typeElement,
+        `${literalTypeDescription}IndexMember${this.getNameWithCapitalFirstLetter(name)}`
+      );
+
+      if (valueType !== null && name) {
+        return {
+          name,
+          type: valueType,
+        };
+      }
+    }
+
+    return null;
+  };
+
   private basicTypeKindFromTypeNode = (node: ts.TypeNode): BasicTypeKind | null => {
     if (node.kind === ts.SyntaxKind.StringKeyword) {
       return {
@@ -270,39 +318,163 @@ export class Parser {
     return null;
   };
 
-  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | null => {
+  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | EnumKind | null => {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
 
-    const declarations = this.checker.getTypeFromTypeNode(node).symbol.getDeclarations();
+    const referenceType = this.checker.getTypeFromTypeNode(node);
+    const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(referenceType);
+    if (members.length !== 0) {
+      return {
+        flag: ValueTypeKindFlag.customType,
+        name,
+        members,
+        isAnyKeyDictionary,
+      };
+    }
+
+    const enumTypeKind = this.enumTypeKindFromType(referenceType);
+    if (enumTypeKind) {
+      return enumTypeKind;
+    }
+
+    return null;
+  };
+
+  private getInterfaceMembersAndNameFromType(
+    type: ts.Type
+  ): { name: string; members: Field[]; isAnyKeyDictionary: boolean } {
+    const result = {
+      name: '',
+      members: [] as Field[],
+      isAnyKeyDictionary: false,
+    };
+    const declarations = type.symbol.getDeclarations();
+    if (declarations === undefined || declarations.length !== 1) {
+      return result;
+    }
+
+    const interfaceDeclaration = declarations[0];
+    if (!ts.isInterfaceDeclaration(interfaceDeclaration)) {
+      return result;
+    }
+
+    result.name = interfaceDeclaration.name.getText();
+
+    const indexField = this.indexFieldFromMembersParent(interfaceDeclaration, `${result.name}`);
+    if (indexField) {
+      result.members = [indexField];
+      result.isAnyKeyDictionary = true;
+    } else {
+      result.members = interfaceDeclaration.members
+        .map((item, index) =>
+          this.fieldFromTypeElement(
+            item,
+            `${result.name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`
+          )
+        )
+        .filter((field): field is Field => field !== null);
+
+      const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(interfaceDeclaration);
+      if (membersInExtendingInterface.length) {
+        result.members.push(...membersInExtendingInterface);
+      }
+    }
+
+    return result;
+  }
+
+  private getExtendingMembersFromInterfaceDeclaration(node: ts.InterfaceDeclaration): Field[] {
+    if (!node.heritageClauses?.length) {
+      return [];
+    }
+    const extendHeritageClause = node.heritageClauses.find((item) => item.token === ts.SyntaxKind.ExtendsKeyword);
+    if (!extendHeritageClause) {
+      return [];
+    }
+
+    return extendHeritageClause.types.flatMap((extendingInterface): Field[] => {
+      const type = this.checker.getTypeAtLocation(extendingInterface);
+      const { members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(type);
+      return isAnyKeyDictionary ? [] : members;
+    });
+  }
+
+  private enumTypeKindFromType(type: ts.Type): EnumKind | null {
+    const declarations = type.symbol.getDeclarations();
     if (declarations === undefined || declarations.length !== 1) {
       return null;
     }
 
-    const declNode = declarations[0];
-    if (!ts.isInterfaceDeclaration(declNode)) {
+    const enumDeclaration = declarations[0];
+    if (!ts.isEnumDeclaration(enumDeclaration)) {
       return null;
     }
 
-    const name = declNode.name.getText();
+    const name = enumDeclaration.name.getText();
+    let enumSubType: EnumSubType = EnumSubType.string;
+    const keys: string[] = [];
+    const values: (string | number)[] = [];
+    let hasMultipleSubType = false;
 
-    const members = declNode.members
-      .map((item, index) =>
-        this.fieldFromTypeElement(item, `${name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`)
-      )
-      .filter((field): field is Field => field !== null);
+    enumDeclaration.members.forEach((enumMember, index) => {
+      if (hasMultipleSubType) {
+        return;
+      }
+      const key = enumMember.name.getText();
+      let value: string | number = key;
+      const subType = ((): EnumSubType => {
+        if (enumMember.initializer) {
+          const valueInitializer = enumMember.initializer;
+          if (ts.isStringLiteral(valueInitializer)) {
+            value = valueInitializer.text;
+            return EnumSubType.string;
+          }
+          if (ts.isNumericLiteral(valueInitializer)) {
+            value = Number(valueInitializer.text);
+            return EnumSubType.number;
+          }
+        }
+        return EnumSubType.string;
+      })();
+      if (index > 0 && enumSubType !== subType) {
+        hasMultipleSubType = true;
+        return;
+      }
+
+      enumSubType = subType;
+      keys.push(key);
+      values.push(value);
+    });
+
+    if (hasMultipleSubType) {
+      throw new Error("Enum doesn't support multiple sub types");
+    }
 
     return {
-      flag: ValueTypeKindFlag.customType,
+      flag: ValueTypeKindFlag.enumType,
       name,
-      members,
+      subType: enumSubType,
+      keys,
+      values,
     };
-  };
+  }
 
   private literalTypeKindFromTypeNode = (node: ts.TypeNode, literalTypeDescription: string): CustomTypeKind | null => {
     if (!ts.isTypeLiteralNode(node)) {
       return null;
+    }
+
+    const indexField = this.indexFieldFromMembersParent(node, literalTypeDescription);
+    if (indexField) {
+      return {
+        flag: ValueTypeKindFlag.customType,
+        name: `${literalTypeDescription}Type`,
+        isTypeLiteral: true,
+        members: [indexField],
+        isAnyKeyDictionary: true,
+      };
     }
 
     const fields = this.fieldsFromLiteralTypeNode(node, literalTypeDescription);
@@ -334,7 +506,11 @@ export class Parser {
     return null;
   };
 
-  private extractUnionTypeNode = (node: ts.Node, literalTypeDescription: string, nullable: boolean): ValueType | null => {
+  private extractUnionTypeNode = (
+    node: ts.Node,
+    literalTypeDescription: string,
+    nullable: boolean
+  ): ValueType | null => {
     if (!ts.isUnionTypeNode(node)) {
       return null;
     }
@@ -395,5 +571,37 @@ export class Parser {
       targetName = name[0].toUpperCase() + name.slice(1);
     }
     return targetName;
+  }
+
+  private shouldExportInJsDocTags(tags: ts.JSDocTagInfo[]): boolean {
+    return !!tags.find((tag) => tag.name === SHOULD_EXPORT && tag.text === 'true');
+  }
+
+  private capitalizeFirstLetter(name: string): string {
+    let res = name;
+    if (res.length === 0) {
+      return res;
+    }
+    res = res[0].toUpperCase() + res.slice(1);
+    return res;
+  }
+
+  private getPropertyFromJsDocNodes(tags: ts.JSDocTag[], name: string): ts.JSDocTagInfo | undefined {
+    const target = tags.find((tagNode) => ts.unescapeLeadingUnderscores(tagNode.tagName.escapedText) === name);
+    if (target) {
+      return {
+        name: ts.unescapeLeadingUnderscores(target.tagName.escapedText),
+        text: target.comment,
+      };
+    }
+    return undefined;
+  }
+
+  private getCommentFromJsDocNodes(tags: ts.JSDocTag[]): string | undefined {
+    const commentTag = this.getPropertyFromJsDocNodes(tags, COMMENT);
+    if (commentTag && commentTag.text) {
+      return commentTag.text;
+    }
+    return undefined;
   }
 }

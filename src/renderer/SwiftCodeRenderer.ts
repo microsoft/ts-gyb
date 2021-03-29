@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { Field, Method, Module, ValueTypeKindFlag } from '../types';
+import { Method, Module, ValueTypeKindFlag } from '../types';
 import { RendererConfig } from './RenderConfig';
-import { InternalDataStructure } from './InternalDataStructure';
+import { CodableProtocol, InternalDataStructure } from './InternalDataStructure';
 import { GenericCodeRenderer } from './GenericCodeRenderer';
 import { TypeTransformer } from './CustomTypeCollector';
 import { SourceLike } from './SourceLike';
@@ -20,6 +20,7 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
   }
 
   private modulesSourceLines: Record<ModuleName, SourceLike[]> = {};
+
   private interfaceSourceLines: SourceLike[] = [];
 
   public toSourceCode(): SourceLike[] {
@@ -49,8 +50,19 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
     return result;
   }
 
-  private updateTemplateWithParams(template: string, params: {[k: string]: string}): string {
-    return template.replace(/%%([a-zA-Z_$][a-zA-Z_$0-9]*)%%/g, (match: string, paramName: string): string => params[paramName] || 'undefined');
+  protected getCustomInterfaceContentWithTemplate(): string {
+    let content = this.interfaceSourceLines.join('\n');
+    const { customInterfaceFileHeaderTemplate } = this.rendererConfig;
+    if (customInterfaceFileHeaderTemplate) {
+      content = customInterfaceFileHeaderTemplate + content;
+    }
+    return content;
+  }
+
+  private updateTemplateWithParams(template: string, params: { [k: string]: string }): string {
+    return template.replace(/%%([a-zA-Z_$][a-zA-Z_$0-9]*)%%/g, (match: string, paramName: string): string =>
+      typeof params[paramName] === 'string' ? params[paramName] : 'undefined'
+    );
   }
 
   private getParameterSource(method: Method): string[] {
@@ -68,6 +80,8 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
         return parameterType.kind.members.map(
           (field) => `${field.name}: ${this.typeTransformer.transformType(field.type)}`
         );
+      default:
+        return [];
     }
   }
 
@@ -83,28 +97,32 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
     switch (parameterType.kind.flag) {
       case ValueTypeKindFlag.basicType:
       case ValueTypeKindFlag.arrayType:
-          this.emitLine(2 + baseIndent, `let args = ${parameter.name}`);
+        this.emitLine(2 + baseIndent, `let args = ${parameter.name}`);
         break;
-      case ValueTypeKindFlag.customType:
+      case ValueTypeKindFlag.customType: {
         const argSource = new InternalDataStructure(
           this.rendererConfig,
           'Args',
           this.typeTransformer,
-          parameterType.kind.members
+          parameterType.kind.members,
+          CodableProtocol.encodable
         ).toSourceCode();
         this.emitLines(2 + baseIndent, argSource);
 
         this.emitLine(2 + baseIndent, `let args = Args(`);
         parameterType.kind.members.forEach((param, index, arr) => {
           const isLast = index === arr.length - 1;
-          this.emitLine(4 + baseIndent, `${param.name}: ${param.name}${isLast ? '': ','}`);
+          this.emitLine(4 + baseIndent, `${param.name}: ${param.name}${isLast ? '' : ','}`);
         });
         this.emitLine(2 + baseIndent, `)`);
+        break;
+      }
+      default:
         break;
     }
   }
 
-  private renderCustomInterface() {
+  private renderCustomInterface(): void {
     const { baseIndent } = this.rendererConfig;
 
     if (this.rendererConfig.customInterfaceFileName) {
@@ -123,7 +141,9 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
       module.methods.forEach((method) => {
         // Methods should have only one parameter which is basic type or object
         if (method.parameters.length > 1) {
-          throw new Error("The exported API can only have one parameter, if multiple parameters are needed, use an object");
+          throw new Error(
+            'The exported API can only have one parameter, if multiple parameters are needed, use an object'
+          );
         }
         const hasParam = method.parameters.length === 1;
 
@@ -142,6 +162,14 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
         const parameterSourceStatement = parameterSource.join(', ');
 
         const modifier = this.rendererConfig.makeFunctionPublic ? 'public ' : '';
+
+        if (method.comment !== undefined && method.comment.length !== 0) {
+          const comments = method.comment.split('\n');
+          comments.forEach((comment) => {
+            this.emitLine(0 + baseIndent, `/// ${comment}`);
+          });
+        }
+
         this.emitLine(0 + baseIndent, `${modifier}func ${source}(${parameterSourceStatement}`);
 
         this.emitCurlyBracketBegin(baseIndent);
@@ -175,7 +203,10 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
 
     const { customInterfaceFileName } = this.rendererConfig;
     if (customInterfaceFileName && this.interfaceSourceLines.length > 0) {
-      fs.writeFileSync(path.join(this.outputPath, customInterfaceFileName), this.interfaceSourceLines.join('\n'));
+      fs.writeFileSync(
+        path.join(this.outputPath, customInterfaceFileName),
+        this.getCustomInterfaceContentWithTemplate()
+      );
     }
     console.log('Generated api has been printed successfully');
   }

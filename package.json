@@ -1,6 +1,6 @@
 {
   "name": "@olm/ts-codegen",
-  "version": "0.1.2",
+  "version": "0.1.11",
   "description": "Generate Native API based on TS interface",
   "scripts": {
     "build": "gulp build",

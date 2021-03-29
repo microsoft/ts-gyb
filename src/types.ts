@@ -7,6 +7,7 @@ export interface Method {
   name: string;
   parameters: Field[];
   returnType: ValueType | null;
+  comment?: string;
 }
 
 export interface Field {
@@ -15,7 +16,7 @@ export interface Field {
 }
 
 export interface ValueType {
-  kind: ArrayTypeKind | CustomTypeKind | BasicTypeKind;
+  kind: ArrayTypeKind | CustomTypeKind | BasicTypeKind | EnumKind;
   nullable: boolean;
 }
 
@@ -23,6 +24,7 @@ export enum ValueTypeKindFlag {
   basicType = 'basicType',
   customType = 'customType',
   arrayType = 'arrayType',
+  enumType = 'enumType',
 }
 
 interface ValueTypeKind {
@@ -39,6 +41,20 @@ export interface CustomTypeKind extends ValueTypeKind {
   isTypeLiteral?: boolean;
   name: string;
   members: Field[];
+  isAnyKeyDictionary?: boolean;
+}
+
+export enum EnumSubType {
+  string = 'string',
+  number = 'number',
+}
+
+export interface EnumKind extends ValueTypeKind {
+  flag: ValueTypeKindFlag.enumType;
+  name: string;
+  subType: EnumSubType;
+  keys: string[];
+  values: (string | number)[];
 }
 
 export interface BasicTypeKind extends ValueTypeKind {
