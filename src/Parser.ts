@@ -10,14 +10,13 @@ import {
   ArrayTypeKind,
   BasicTypeKind,
   ValueTypeKindFlag,
-  EnumTypeKind,
+  EnumKind,
   EnumSubType,
 } from './types';
 
 // Defined tags
 const SHOULD_EXPORT = 'shouldExport';
 const COMMENT = 'comment';
-
 
 export class Parser {
   program: ts.Program;
@@ -73,7 +72,7 @@ export class Parser {
       if (!ts.isPropertySignature(methodNode)) {
         return;
       }
-      
+
       const method = this.methodFromMethodNode(methodNode);
       if (method) {
         methods.push(method);
@@ -105,7 +104,11 @@ export class Parser {
     const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
 
     let parameters: Field[] = [];
-    const fields = this.fieldsFromFunctionTypeNodeForParameters(methodType, this.capitalizeFirstLetter(methodName), true);
+    const fields = this.fieldsFromFunctionTypeNodeForParameters(
+      methodType,
+      this.capitalizeFirstLetter(methodName),
+      true
+    );
     if (fields !== null) {
       parameters = fields;
     }
@@ -123,7 +126,7 @@ export class Parser {
       name: methodName,
       parameters,
       returnType: returnValueType,
-      comment: nativeComment
+      comment: nativeComment,
     };
   };
 
@@ -264,8 +267,10 @@ export class Parser {
     return null;
   };
 
-
-  private indexFieldFromMembersParent = (type: {members: ts.NodeArray<ts.TypeElement>}, literalTypeDescription: string): Field | null => {
+  private indexFieldFromMembersParent = (
+    type: { members: ts.NodeArray<ts.TypeElement> },
+    literalTypeDescription: string
+  ): Field | null => {
     if (type.members && type.members.length !== 1) {
       // Only support interface with one index signature, like { [key: string]: string }
       return null;
@@ -274,18 +279,21 @@ export class Parser {
     const typeElement = type.members[0];
     if (ts.isIndexSignatureDeclaration(typeElement)) {
       const name = typeElement.parameters[0].name.getText();
-      const valueType = this.valueTypeFromNode(typeElement, `${literalTypeDescription}IndexMember${this.getNameWithCapitalFirstLetter(name)}`)
-      
+      const valueType = this.valueTypeFromNode(
+        typeElement,
+        `${literalTypeDescription}IndexMember${this.getNameWithCapitalFirstLetter(name)}`
+      );
+
       if (valueType !== null && name) {
         return {
           name,
           type: valueType,
-        }
+        };
       }
     }
-    
-    return null
-  }
+
+    return null;
+  };
 
   private basicTypeKindFromTypeNode = (node: ts.TypeNode): BasicTypeKind | null => {
     if (node.kind === ts.SyntaxKind.StringKeyword) {
@@ -310,12 +318,12 @@ export class Parser {
     return null;
   };
 
-  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | EnumTypeKind | null => {
+  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | EnumKind | null => {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
 
-    const referenceType =  this.checker.getTypeFromTypeNode(node);
+    const referenceType = this.checker.getTypeFromTypeNode(node);
     const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(referenceType);
     if (members.length !== 0) {
       return {
@@ -328,13 +336,15 @@ export class Parser {
 
     const enumTypeKind = this.enumTypeKindFromType(referenceType);
     if (enumTypeKind) {
-      return enumTypeKind
+      return enumTypeKind;
     }
 
     return null;
   };
 
-  private getInterfaceMembersAndNameFromType(type: ts.Type): {name: string, members: Field[], isAnyKeyDictionary: boolean} {
+  private getInterfaceMembersAndNameFromType(
+    type: ts.Type
+  ): { name: string; members: Field[]; isAnyKeyDictionary: boolean } {
     const result = {
       name: '',
       members: [] as Field[],
@@ -345,28 +355,28 @@ export class Parser {
       return result;
     }
 
-    const declNode = declarations[0];
-    if (!ts.isInterfaceDeclaration(declNode)) {
+    const interfaceDeclaration = declarations[0];
+    if (!ts.isInterfaceDeclaration(interfaceDeclaration)) {
       return result;
     }
 
-    result.name = declNode.name.getText();
+    result.name = interfaceDeclaration.name.getText();
 
-    const indexField = this.indexFieldFromMembersParent(declNode, `${result.name}`);
+    const indexField = this.indexFieldFromMembersParent(interfaceDeclaration, `${result.name}`);
     if (indexField) {
       result.members = [indexField];
       result.isAnyKeyDictionary = true;
     } else {
-      result.members = declNode.members
-      .map((item, index) =>
-        this.fieldFromTypeElement(
-          item,
-          `${result.name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`
+      result.members = interfaceDeclaration.members
+        .map((item, index) =>
+          this.fieldFromTypeElement(
+            item,
+            `${result.name}Members${this.getNameWithCapitalFirstLetter(item.name?.getText()) || index}`
+          )
         )
-      )
-      .filter((field): field is Field => field !== null);
+        .filter((field): field is Field => field !== null);
 
-      const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(declNode);
+      const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(interfaceDeclaration);
       if (membersInExtendingInterface.length) {
         result.members.push(...membersInExtendingInterface);
       }
@@ -386,29 +396,32 @@ export class Parser {
 
     return extendHeritageClause.types.flatMap((extendingInterface): Field[] => {
       const type = this.checker.getTypeAtLocation(extendingInterface);
-      const {members, isAnyKeyDictionary} = this.getInterfaceMembersAndNameFromType(type);
+      const { members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(type);
       return isAnyKeyDictionary ? [] : members;
-    })
+    });
   }
 
-  private enumTypeKindFromType(type: ts.Type): EnumTypeKind | null {
+  private enumTypeKindFromType(type: ts.Type): EnumKind | null {
     const declarations = type.symbol.getDeclarations();
     if (declarations === undefined || declarations.length !== 1) {
       return null;
     }
 
-    const declNode = declarations[0];
-    if (!ts.isEnumDeclaration(declNode)) {
+    const enumDeclaration = declarations[0];
+    if (!ts.isEnumDeclaration(enumDeclaration)) {
       return null;
     }
 
-    const name = declNode.name.getText();
+    const name = enumDeclaration.name.getText();
     let enumSubType: EnumSubType = EnumSubType.string;
     const keys: string[] = [];
     const values: (string | number)[] = [];
     let hasMultipleSubType = false;
 
-    declNode.members.forEach((enumMember, index) => {
+    enumDeclaration.members.forEach((enumMember, index) => {
+      if (hasMultipleSubType) {
+        return;
+      }
       const key = enumMember.name.getText();
       let value: string | number = key;
       const subType = ((): EnumSubType => {
@@ -417,7 +430,8 @@ export class Parser {
           if (ts.isStringLiteral(valueInitializer)) {
             value = valueInitializer.text;
             return EnumSubType.string;
-          } else if (ts.isNumericLiteral(valueInitializer)) {
+          }
+          if (ts.isNumericLiteral(valueInitializer)) {
             value = Number(valueInitializer.text);
             return EnumSubType.number;
           }
@@ -434,13 +448,17 @@ export class Parser {
       values.push(value);
     });
 
+    if (hasMultipleSubType) {
+      throw new Error("Enum doesn't support multiple sub types");
+    }
+
     return {
       flag: ValueTypeKindFlag.enumType,
       name,
       subType: enumSubType,
       keys,
       values,
-    }
+    };
   }
 
   private literalTypeKindFromTypeNode = (node: ts.TypeNode, literalTypeDescription: string): CustomTypeKind | null => {
@@ -448,7 +466,7 @@ export class Parser {
       return null;
     }
 
-    const indexField =  this.indexFieldFromMembersParent(node, literalTypeDescription);
+    const indexField = this.indexFieldFromMembersParent(node, literalTypeDescription);
     if (indexField) {
       return {
         flag: ValueTypeKindFlag.customType,
@@ -456,7 +474,7 @@ export class Parser {
         isTypeLiteral: true,
         members: [indexField],
         isAnyKeyDictionary: true,
-      }
+      };
     }
 
     const fields = this.fieldsFromLiteralTypeNode(node, literalTypeDescription);
@@ -565,7 +583,7 @@ export class Parser {
       return res;
     }
     res = res[0].toUpperCase() + res.slice(1);
-    return res
+    return res;
   }
 
   private getPropertyFromJsDocNodes(tags: ts.JSDocTag[], name: string): ts.JSDocTagInfo | undefined {
@@ -573,10 +591,10 @@ export class Parser {
     if (target) {
       return {
         name: ts.unescapeLeadingUnderscores(target.tagName.escapedText),
-        text: target.comment
-      }
+        text: target.comment,
+      };
     }
-    return;
+    return undefined;
   }
 
   private getCommentFromJsDocNodes(tags: ts.JSDocTag[]): string | undefined {
@@ -584,7 +602,6 @@ export class Parser {
     if (commentTag && commentTag.text) {
       return commentTag.text;
     }
-
-    return;
+    return undefined;
   }
 }

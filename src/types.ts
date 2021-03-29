@@ -16,7 +16,7 @@ export interface Field {
 }
 
 export interface ValueType {
-  kind: ArrayTypeKind | CustomTypeKind | BasicTypeKind | EnumTypeKind;
+  kind: ArrayTypeKind | CustomTypeKind | BasicTypeKind | EnumKind;
   nullable: boolean;
 }
 
@@ -49,7 +49,7 @@ export enum EnumSubType {
   number = 'number',
 }
 
-export interface EnumTypeKind extends ValueTypeKind {
+export interface EnumKind extends ValueTypeKind {
   flag: ValueTypeKindFlag.enumType;
   name: string;
   subType: EnumSubType;

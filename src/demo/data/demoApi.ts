@@ -38,7 +38,7 @@ interface DictionaryWithAnyKey {
  */
 export interface IHtmlApi {
   /**
-   * @comment 
+   * @comment
    * Set Mention class names
    * used to map id to class names
    */

@@ -4,9 +4,9 @@ import { RendererConfig } from './RenderConfig';
 import { TypeTransformer } from './CustomTypeCollector';
 
 export enum CodableProtocol {
- codable = 'Codable',
- encodable = 'Encodable',
- decodable = 'Decodable'
+  codable = 'Codable',
+  encodable = 'Encodable',
+  decodable = 'Decodable',
 }
 
 export class InternalDataStructure extends GenericCodeRenderer {
@@ -17,7 +17,7 @@ export class InternalDataStructure extends GenericCodeRenderer {
     private fields: Field[],
     private codable: CodableProtocol,
     private isPublic = false,
-    private isVar = false,
+    private isVar = false
   ) {
     super(rendererConfig);
   }
@@ -26,7 +26,10 @@ export class InternalDataStructure extends GenericCodeRenderer {
     const modifier = this.isPublic ? 'public ' : '';
     this.emitLine(0, `${modifier}struct ${this.predefinedName}: ${this.codable} {`);
     this.fields.forEach((field) => {
-      this.emitLine(2, `${modifier}${this.isVar ? 'var' : 'let'} ${field.name}: ${this.typeTransformer.transformType(field.type)}`);
+      this.emitLine(
+        2,
+        `${modifier}${this.isVar ? 'var' : 'let'} ${field.name}: ${this.typeTransformer.transformType(field.type)}`
+      );
     });
 
     // Add init method for public struct
@@ -38,7 +41,9 @@ export class InternalDataStructure extends GenericCodeRenderer {
       // Separate parameters to multiple lines if it's too long
       if (parameterString.length > 300) {
         this.emitLine(2, `public init(`);
-        parameters.forEach((parameter, index, arr) => this.emitLine(4, `${parameter}${index === arr.length - 1 ? '' : ','}`));
+        parameters.forEach((parameter, index, arr) =>
+          this.emitLine(4, `${parameter}${index === arr.length - 1 ? '' : ','}`)
+        );
         this.emitLine(2, `) {`);
       } else {
         this.emitLine(2, `public init(${parameterString}) {`);

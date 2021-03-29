@@ -60,9 +60,8 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
   }
 
   private updateTemplateWithParams(template: string, params: { [k: string]: string }): string {
-    return template.replace(
-      /%%([a-zA-Z_$][a-zA-Z_$0-9]*)%%/g,
-      (match: string, paramName: string): string => typeof params[paramName] === 'string' ? params[paramName] : 'undefined'
+    return template.replace(/%%([a-zA-Z_$][a-zA-Z_$0-9]*)%%/g, (match: string, paramName: string): string =>
+      typeof params[paramName] === 'string' ? params[paramName] : 'undefined'
     );
   }
 
@@ -166,7 +165,7 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
 
         if (method.comment !== undefined && method.comment.length !== 0) {
           const comments = method.comment.split('\n');
-          comments.forEach(comment => {
+          comments.forEach((comment) => {
             this.emitLine(0 + baseIndent, `/// ${comment}`);
           });
         }
@@ -204,7 +203,10 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
 
     const { customInterfaceFileName } = this.rendererConfig;
     if (customInterfaceFileName && this.interfaceSourceLines.length > 0) {
-      fs.writeFileSync(path.join(this.outputPath, customInterfaceFileName), this.getCustomInterfaceContentWithTemplate());
+      fs.writeFileSync(
+        path.join(this.outputPath, customInterfaceFileName),
+        this.getCustomInterfaceContentWithTemplate()
+      );
     }
     console.log('Generated api has been printed successfully');
   }

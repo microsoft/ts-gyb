@@ -1,4 +1,4 @@
-import { CustomTypeKind, ValueType, Field, ArrayTypeKind, BasicTypeKind, ValueTypeKindFlag, EnumTypeKind } from '../types';
+import { CustomTypeKind, ValueType, Field, ArrayTypeKind, BasicTypeKind, ValueTypeKindFlag, EnumKind } from '../types';
 import { SourceLike } from './SourceLike';
 import { RendererConfig } from './RenderConfig';
 import { CodableProtocol, InternalDataStructure } from './InternalDataStructure';
@@ -10,7 +10,8 @@ export interface TypeTransformer {
 }
 export class CustomTypeCollector implements TypeTransformer {
   private customTypes: Record<string, CustomTypeKind> = {};
-  private enumTypes: Record<string, EnumTypeKind> = {};
+
+  private enumTypes: Record<string, EnumKind> = {};
 
   constructor(protected rendererConfig: RendererConfig) {}
 
@@ -18,7 +19,7 @@ export class CustomTypeCollector implements TypeTransformer {
     this.customTypes[customType.name] = customType;
   }
 
-  public emitEnumType(enumType: EnumTypeKind): void {
+  public emitEnumType(enumType: EnumKind): void {
     this.enumTypes[enumType.name] = enumType;
   }
 
@@ -115,19 +116,22 @@ export class CustomTypeCollector implements TypeTransformer {
     return kind.flag === ValueTypeKindFlag.arrayType;
   }
 
-  private isEnumTypeKind(kind: ValueType['kind']): kind is EnumTypeKind {
+  private isEnumTypeKind(kind: ValueType['kind']): kind is EnumKind {
     return kind.flag === ValueTypeKindFlag.enumType;
   }
+
   private replacePrefix(originalName: string): string {
     let result = originalName;
-    const { tsCustomTypePrefixToBeRemoved, customInterfacePrefixToBeAdded} = this.rendererConfig;
+    const { tsCustomTypePrefixToBeRemoved, customInterfacePrefixToBeAdded } = this.rendererConfig;
     if (tsCustomTypePrefixToBeRemoved) {
       const findIndex = originalName.indexOf(tsCustomTypePrefixToBeRemoved);
 
-      if (findIndex === 0
-        && originalName.length > tsCustomTypePrefixToBeRemoved.length
-        && this.isUpperCase(originalName[tsCustomTypePrefixToBeRemoved.length])) {
-          result = originalName.slice(tsCustomTypePrefixToBeRemoved.length);
+      if (
+        findIndex === 0 &&
+        originalName.length > tsCustomTypePrefixToBeRemoved.length &&
+        this.isUpperCase(originalName[tsCustomTypePrefixToBeRemoved.length])
+      ) {
+        result = originalName.slice(tsCustomTypePrefixToBeRemoved.length);
       }
     }
 
@@ -138,7 +142,7 @@ export class CustomTypeCollector implements TypeTransformer {
     return result;
   }
 
-  private isUpperCase(ch: string){
-    return ch >= 'A' && ch <= 'Z'
+  private isUpperCase(ch: string): boolean {
+    return ch >= 'A' && ch <= 'Z';
   }
 }
