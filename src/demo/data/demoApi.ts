@@ -1,4 +1,6 @@
 type int = number & { _?: undefined };
+type str = string;
+type AliasSize = BaseSize;
 interface BaseSize {
   width: number;
   height: number;
@@ -47,9 +49,10 @@ export interface IHtmlApi {
   setMentionClassNames: (args: { [id: string]: string[] }) => void;
   getHeight: () => number;
   getHeightWithBottomAnchor: (sta: string[]) => number;
-  getHTML: (args: { title: string }) => string;
+  getHTML: (args: { title: string }) => str;
   requestRenderingResult: () => void;
   getSize: () => FullSize;
+  getAliasSize: () => AliasSize;
   testDictionaryWithAnyKey: (args: DictionaryWithAnyKey) => void;
 }
 

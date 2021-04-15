@@ -329,6 +329,15 @@ export class Parser {
       return this.getAliasType(referenceType.aliasSymbol);
     }
 
+    // Basic type alias
+    if (!referenceType.symbol) {
+      const typeNode = this.checker.typeToTypeNode(referenceType);
+      if (typeNode != null) {
+        return this.basicTypeKindFromTypeNode(typeNode)
+      }
+      return null;
+    }
+
     const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(referenceType);
     if (members.length !== 0) {
       return {
