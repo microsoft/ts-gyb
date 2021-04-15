@@ -1,3 +1,4 @@
+type int = number & { _?: undefined };
 interface BaseSize {
   width: number;
   height: number;
@@ -24,6 +25,7 @@ enum DefaultEnum {
 
 interface FullSize extends BaseSize, CustomSize {
   size: number;
+  count: int;
   stringEnum: StringEnum;
   numEnum: NumEnum;
   defEnum: DefaultEnum;

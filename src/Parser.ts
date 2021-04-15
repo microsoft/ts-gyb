@@ -318,12 +318,17 @@ export class Parser {
     return null;
   };
 
-  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | EnumKind | null => {
+  private referenceTypeKindFromTypeNode = (node: ts.TypeNode): CustomTypeKind | EnumKind | BasicTypeKind | null => {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
 
     const referenceType = this.checker.getTypeFromTypeNode(node);
+
+    if (referenceType.aliasSymbol) {
+      return this.getAliasType(referenceType.aliasSymbol);
+    }
+
     const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(referenceType);
     if (members.length !== 0) {
       return {
@@ -341,6 +346,16 @@ export class Parser {
 
     return null;
   };
+
+  private getAliasType(symbol: ts.Symbol): BasicTypeKind | null {
+    if (symbol.name === BasicTypeValue.int) {
+      return {
+        flag: ValueTypeKindFlag.basicType,
+        value: BasicTypeValue.int
+      }
+    }
+    return null;
+  }
 
   private getInterfaceMembersAndNameFromType(
     type: ts.Type
