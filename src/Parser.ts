@@ -17,6 +17,8 @@ import {
 // Defined tags
 const SHOULD_EXPORT = 'shouldExport';
 const COMMENT = 'comment';
+const TYPE_PREFIX = 'CodeGen_';
+const INT_TYPE = `${TYPE_PREFIX}Int`
 
 export class Parser {
   program: ts.Program;
@@ -357,7 +359,7 @@ export class Parser {
   };
 
   private getAliasType(symbol: ts.Symbol): BasicTypeKind | null {
-    if (symbol.name === BasicTypeValue.int) {
+    if (symbol.name === INT_TYPE) {
       return {
         flag: ValueTypeKindFlag.basicType,
         value: BasicTypeValue.int

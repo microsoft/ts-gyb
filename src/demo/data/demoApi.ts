@@ -1,4 +1,4 @@
-type int = number & { _?: undefined };
+type CodeGen_Int = number & { _?: undefined };
 type str = string;
 type AliasSize = BaseSize;
 interface BaseSize {
@@ -27,7 +27,7 @@ enum DefaultEnum {
 
 interface FullSize extends BaseSize, CustomSize {
   size: number;
-  count: int;
+  count: CodeGen_Int;
   stringEnum: StringEnum;
   numEnum: NumEnum;
   defEnum: DefaultEnum;
