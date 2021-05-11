@@ -333,7 +333,7 @@ export class Parser {
     // Basic type alias
     if (!referenceType.symbol) {
       const typeNode = this.checker.typeToTypeNode(referenceType);
-      if (typeNode != null) {
+      if (typeNode) {
         return this.basicTypeKindFromTypeNode(typeNode);
       }
       return null;
