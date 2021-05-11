@@ -13,12 +13,11 @@ import {
   EnumKind,
   EnumSubType,
 } from './types';
+import { INT_TYPE_NAME } from '@olm/ts-codegen-basic-type';
 
 // Defined tags
 const SHOULD_EXPORT = 'shouldExport';
 const COMMENT = 'comment';
-const TYPE_PREFIX = 'CodeGen_';
-const INT_TYPE = `${TYPE_PREFIX}Int`
 
 export class Parser {
   program: ts.Program;
@@ -335,7 +334,7 @@ export class Parser {
     if (!referenceType.symbol) {
       const typeNode = this.checker.typeToTypeNode(referenceType);
       if (typeNode != null) {
-        return this.basicTypeKindFromTypeNode(typeNode)
+        return this.basicTypeKindFromTypeNode(typeNode);
       }
       return null;
     }
@@ -359,11 +358,11 @@ export class Parser {
   };
 
   private getAliasType(symbol: ts.Symbol): BasicTypeKind | null {
-    if (symbol.name === INT_TYPE) {
+    if (symbol.name === INT_TYPE_NAME) {
       return {
         flag: ValueTypeKindFlag.basicType,
-        value: BasicTypeValue.int
-      }
+        value: BasicTypeValue.int,
+      };
     }
     return null;
   }

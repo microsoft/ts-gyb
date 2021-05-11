@@ -1,0 +1,16 @@
+{
+  "name": "@olm/ts-codegen-basic-type",
+  "version": "0.0.1",
+  "description": "Definition of some general basic types for ts-codegen to parse.",
+  "main": "dist/types.js",
+  "types": "dist/types.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "author": "",
+  "license": "private"
+}

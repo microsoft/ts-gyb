@@ -1,4 +1,5 @@
-type CodeGen_Int = number & { _?: undefined };
+import { CodeGen_Int } from "@olm/ts-codegen-basic-type"
+
 type str = string;
 type AliasSize = BaseSize;
 interface BaseSize {
