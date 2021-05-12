@@ -66,4 +66,5 @@ export enum BasicTypeValue {
   string = 'string',
   number = 'number',
   boolean = 'boolean',
+  int = 'int',
 }

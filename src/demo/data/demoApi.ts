@@ -1,3 +1,7 @@
+import { CodeGen_Int } from "@olm/ts-codegen-basic-type"
+
+type str = string;
+type AliasSize = BaseSize;
 interface BaseSize {
   width: number;
   height: number;
@@ -24,6 +28,7 @@ enum DefaultEnum {
 
 interface FullSize extends BaseSize, CustomSize {
   size: number;
+  count: CodeGen_Int;
   stringEnum: StringEnum;
   numEnum: NumEnum;
   defEnum: DefaultEnum;
@@ -45,9 +50,10 @@ export interface IHtmlApi {
   setMentionClassNames: (args: { [id: string]: string[] }) => void;
   getHeight: () => number;
   getHeightWithBottomAnchor: (sta: string[]) => number;
-  getHTML: (args: { title: string }) => string;
+  getHTML: (args: { title: string }) => str;
   requestRenderingResult: () => void;
   getSize: () => FullSize;
+  getAliasSize: () => AliasSize;
   testDictionaryWithAnyKey: (args: DictionaryWithAnyKey) => void;
 }
 
