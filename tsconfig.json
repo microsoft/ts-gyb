@@ -13,6 +13,12 @@
     "noImplicitAny": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@olm/ts-codegen-basic-type": [
+        "src/basic-types/types.ts"
+      ]
+    },
+    "baseUrl": ""
   }
 }

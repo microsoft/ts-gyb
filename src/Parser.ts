@@ -1,5 +1,7 @@
 import ts from 'typescript';
 import { glob } from 'glob';
+// eslint-disable-next-line import/no-unresolved
+import { INT_TYPE_NAME } from '@olm/ts-codegen-basic-type';
 import {
   Module,
   Method,
@@ -13,7 +15,6 @@ import {
   EnumKind,
   EnumSubType,
 } from './types';
-import { INT_TYPE_NAME } from '@olm/ts-codegen-basic-type';
 
 // Defined tags
 const SHOULD_EXPORT = 'shouldExport';
@@ -212,7 +213,7 @@ export class Parser {
       .map((item) =>
         this.fieldFromParameter(
           item,
-          `${literalTypeDescription}Parameters${this.getNameWithCapitalFirstLetter(item.name.getText())}`
+          `${literalTypeDescription}Parameters${this.getNameWithCapitalFirstLetter(item.name.getText()) || ''}`
         )
       )
       .filter((field): field is Field => field !== null);
@@ -282,7 +283,7 @@ export class Parser {
       const name = typeElement.parameters[0].name.getText();
       const valueType = this.valueTypeFromNode(
         typeElement,
-        `${literalTypeDescription}IndexMember${this.getNameWithCapitalFirstLetter(name)}`
+        `${literalTypeDescription}IndexMember${this.getNameWithCapitalFirstLetter(name) || ''}`
       );
 
       if (valueType !== null && name) {
@@ -337,9 +338,9 @@ export class Parser {
     if (!referenceType.symbol) {
       const typeNode = this.checker.typeToTypeNode(referenceType);
       if (typeNode) {
-        const BasicTypeKind = this.basicTypeKindFromTypeNode(typeNode);
-        if (BasicTypeKind) {
-          return BasicTypeKind;
+        const basicTypeKind = this.basicTypeKindFromTypeNode(typeNode);
+        if (basicTypeKind) {
+          return basicTypeKind;
         }
       }
     }
