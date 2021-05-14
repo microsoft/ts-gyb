@@ -373,9 +373,11 @@ export class Parser {
     return null;
   }
 
-  private getInterfaceMembersAndNameFromType(
-    type: ts.Type
-  ): { name: string; members: Field[]; isAnyKeyDictionary: boolean } {
+  private getInterfaceMembersAndNameFromType(type: ts.Type): {
+    name: string;
+    members: Field[];
+    isAnyKeyDictionary: boolean;
+  } {
     const result = {
       name: '',
       members: [] as Field[],

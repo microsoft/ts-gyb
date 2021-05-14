@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 // eslint-disable-next-line import/no-unresolved
-import { CodeGen_Int } from "@olm/ts-codegen-basic-type";
+import { CodeGen_Int } from '@olm/ts-codegen-basic-type';
 
 type str = string;
 type AliasSize = BaseSize;
