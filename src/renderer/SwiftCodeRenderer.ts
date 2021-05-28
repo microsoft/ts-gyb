@@ -66,6 +66,12 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
   }
 
   private getParameterSource(method: Method): string[] {
+    if (method.parameters.length > 1) {
+      return method.parameters.map(
+        (field) => `${field.name}: ${this.typeTransformer.transformType(field.type)}`
+      );
+    }
+
     const hasParam = method.parameters.length === 1;
     if (!hasParam) {
       return [];
@@ -75,51 +81,36 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
     switch (parameterType.kind.flag) {
       case ValueTypeKindFlag.basicType:
       case ValueTypeKindFlag.arrayType:
-        return [`${parameter.name}: ${this.typeTransformer.transformType(parameter.type)}`];
+      case ValueTypeKindFlag.enumType:
       case ValueTypeKindFlag.customType:
-        return parameterType.kind.members.map(
-          (field) => `${field.name}: ${this.typeTransformer.transformType(field.type)}`
-        );
+        return [`${parameter.name}: ${this.typeTransformer.transformType(parameter.type)}`];
       default:
         return [];
     }
   }
 
   private emitArgsDeclarationAndInstantiation(method: Method): void {
-    const hasParam = method.parameters.length === 1;
+    const hasParam = method.parameters.length >= 1;
     if (!hasParam) {
       return;
     }
 
-    const parameter = method.parameters[0];
-    const parameterType = parameter.type;
     const { baseIndent } = this.rendererConfig;
-    switch (parameterType.kind.flag) {
-      case ValueTypeKindFlag.basicType:
-      case ValueTypeKindFlag.arrayType:
-        this.emitLine(2 + baseIndent, `let args = ${parameter.name}`);
-        break;
-      case ValueTypeKindFlag.customType: {
-        const argSource = new InternalDataStructure(
-          this.rendererConfig,
-          'Args',
-          this.typeTransformer,
-          parameterType.kind.members,
-          CodableProtocol.encodable
-        ).toSourceCode();
-        this.emitLines(2 + baseIndent, argSource);
+    const argSource = new InternalDataStructure(
+      this.rendererConfig,
+      'Args',
+      this.typeTransformer,
+      method.parameters,
+      CodableProtocol.encodable
+    ).toSourceCode();
+    this.emitLines(2 + baseIndent, argSource);
 
-        this.emitLine(2 + baseIndent, `let args = Args(`);
-        parameterType.kind.members.forEach((param, index, arr) => {
-          const isLast = index === arr.length - 1;
-          this.emitLine(4 + baseIndent, `${param.name}: ${param.name}${isLast ? '' : ','}`);
-        });
-        this.emitLine(2 + baseIndent, `)`);
-        break;
-      }
-      default:
-        break;
-    }
+    this.emitLine(2 + baseIndent, `let args = Args(`);
+    method.parameters.forEach((param, index, arr) => {
+      const isLast = index === arr.length - 1;
+      this.emitLine(4 + baseIndent, `${param.name}: ${param.name}${isLast ? '' : ','}`);
+    });
+    this.emitLine(2 + baseIndent, `)`);
   }
 
   private renderCustomInterface(): void {
@@ -139,13 +130,7 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
       this.currentSourceLines = [] as SourceLike[];
       this.namespaces.push(module.name);
       module.methods.forEach((method) => {
-        // Methods should have only one parameter which is basic type or object
-        if (method.parameters.length > 1) {
-          throw new Error(
-            'The exported API can only have one parameter, if multiple parameters are needed, use an object'
-          );
-        }
-        const hasParam = method.parameters.length === 1;
+        const hasParam = method.parameters.length >= 1;
 
         const source = `${method.name}`;
         const parameterSource = this.getParameterSource(method);

@@ -189,13 +189,28 @@ export class Parser {
 
     const parameterDeclaration = parameterNodes[0];
 
-    if (parameterDeclaration.type === undefined || !ts.isTypeLiteralNode(parameterDeclaration.type)) {
+    if (parameterDeclaration.type === undefined) {
       return [];
     }
 
-    return parameterDeclaration.type.members
-      .map(member => this.fieldFromTypeElement(member, `${literalTypeDescription}Parameters${this.getNameWithCapitalFirstLetter(member.name?.getText()) ?? ''}`))
-      .filter((field): field is Field => field !== null);
+    if (ts.isTypeLiteralNode(parameterDeclaration.type)) {
+      return parameterDeclaration.type.members
+        .map(member => this.fieldFromTypeElement(member, `${literalTypeDescription}Parameters${this.getNameWithCapitalFirstLetter(member.name?.getText()) ?? ''}`))
+        .filter((field): field is Field => field !== null);
+    }
+
+    // TODO: move this elsewhere
+    if (ts.isTypeReferenceNode(parameterDeclaration.type)) {
+      const referenceType = this.checker.getTypeFromTypeNode(parameterDeclaration.type);
+      const interfaceType = this.getInterfaceMembersAndNameFromType(referenceType);
+      if (!interfaceType) {
+        return [];
+      }
+
+      return interfaceType.members;
+    }
+
+    return [];
   }
 
   private fieldsFromLiteralTypeNode = (type: ts.TypeNode, literalTypeDescription: string): Field[] | null => {
