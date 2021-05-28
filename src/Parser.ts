@@ -213,7 +213,7 @@ export class Parser {
       .filter((field): field is Field => field !== null);
   };
 
-  private fieldFromTypeElement = (node: ts.TypeElement, literalTypeDescription = ''): Field | null => {
+  private fieldFromTypeElement = (node: ts.TypeElement, literalTypeDescription: string): Field | null => {
     if (!ts.isPropertySignature(node) || node.type === undefined) {
       return null;
     }
