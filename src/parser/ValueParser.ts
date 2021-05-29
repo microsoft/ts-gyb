@@ -1,4 +1,5 @@
 import ts from 'typescript';
+// eslint-disable-next-line import/no-unresolved
 import { INT_TYPE_NAME } from '@olm/ts-codegen-basic-type';
 import { capitalize } from '../utils';
 import {
