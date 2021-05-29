@@ -49,23 +49,23 @@ export interface IHtmlApi {
    * Set Mention class names
    * used to map id to class names
    */
-  setMentionClassNames: (args: { [id: string]: string[] }) => void;
-  getHeight: () => number;
-  getHeightWithBottomAnchor: (sta: string[]) => number;
-  getHTML: (args: { title: string }) => str;
-  requestRenderingResult: () => void;
-  getSize: () => FullSize;
-  getAliasSize: () => AliasSize;
-  testDictionaryWithAnyKey: (args: DictionaryWithAnyKey) => void;
+  setMentionClassNames({ idToClassNames }: {idToClassNames: { [id: string]: string[] }}): void;
+  getHeight(): number;
+  getHeightWithBottomAnchor({ sta }: { sta: string[] }): number;
+  getHTML({ title }: { title: string }): str;
+  requestRenderingResult(): void;
+  getSize(): FullSize;
+  getAliasSize(): AliasSize;
+  testDictionaryWithAnyKey({ dict }: { dict: DictionaryWithAnyKey }): void;
 }
 
 /**
  * @shouldExport true
  */
 export interface IImageOptionApi {
-  hideElementWithID: (ID: string) => void;
-  restoreElementVisibilityWithID: (ID: string) => void;
-  getSourceOfImageWithID: (ID: string) => string | null;
-  getImageDataList: () => string;
-  getContentBoundsOfElementWithID: (ID: string) => string | null;
+  hideElementWithID({ id }: { id: string }): void;
+  restoreElementVisibilityWithID({ id }: { id: string }): void;
+  getSourceOfImageWithID({ id }: { id: string }): string | null;
+  getImageDataList(): string;
+  getContentBoundsOfElementWithID({ id }: { id: string }): string | null;
 }

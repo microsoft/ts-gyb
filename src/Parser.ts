@@ -71,11 +71,7 @@ export class Parser {
 
     const methods: Method[] = [];
     node.members.forEach((methodNode) => {
-      if (!ts.isPropertySignature(methodNode)) {
-        return;
-      }
-
-      const method = this.methodFromMethodNode(methodNode);
+      const method = this.methodFromNode(methodNode);
       if (method) {
         methods.push(method);
       }
@@ -91,50 +87,37 @@ export class Parser {
     };
   };
 
-  private methodFromMethodNode = (methodNode: ts.PropertySignature): Method | null => {
-    const methodType = methodNode.type;
-    const methodName = methodNode.name.getText();
-    if (!methodType) {
+  private methodFromNode(node: ts.Node): Method | null {
+    if (!ts.isMethodSignature(node)) {
       return null;
     }
 
-    if (!ts.isFunctionTypeNode(methodType)) {
-      return null;
-    }
+    const methodName = node.name.getText();
 
-    const jsDocTags = ts.getJSDocTags(methodNode) as ts.JSDocTag[];
-    const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
+    const parameters = this.fieldsFromParameters(node.parameters, this.capitalizeFirstLetter(methodName));
 
-    let parameters: Field[] = [];
-    const fields = this.fieldsFromFunctionTypeNodeForParameters(
-      methodType,
-      this.capitalizeFirstLetter(methodName),
-      true
-    );
-    if (fields !== null) {
-      parameters = fields;
-    }
-
-    let returnValueType: ValueType | null = null;
-
-    if (methodType.type !== undefined) {
-      const valueType = this.valueTypeFromNode(methodType, `${this.capitalizeFirstLetter(methodName)}Return`);
+    let returnType: ValueType | null = null;
+    if (node.type !== undefined) {
+      const valueType = this.valueTypeFromNode(node, `${this.capitalizeFirstLetter(methodName)}Return`);
       if (valueType !== null) {
-        returnValueType = valueType;
+        returnType = valueType;
       }
     }
+
+    const jsDocTags = ts.getJSDocTags(node) as ts.JSDocTag[];
+    const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
 
     return {
       name: methodName,
       parameters,
-      returnType: returnValueType,
+      returnType,
       comment: nativeComment,
     };
-  };
+  }
 
   private valueTypeFromNode = (
     node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken },
-    literalTypeDescription: string
+    literalTypeDescription: string,
   ): ValueType | null => {
     if (node.type === undefined) {
       return null;
@@ -196,42 +179,39 @@ export class Parser {
     return null;
   };
 
-  private fieldsFromFunctionTypeNodeForParameters = (
-    node: ts.FunctionTypeNode,
-    literalTypeDescription: string,
-    oneParameterRestriction: boolean
-  ): Field[] | null => {
-    if (!node.parameters || !node.parameters.length) {
-      return null;
+  private fieldsFromParameters(parameterNodes: ts.NodeArray<ts.ParameterDeclaration>, literalTypeDescription: string): Field[] {
+    if (parameterNodes.length === 0) {
+      return [];
     }
-
-    if (oneParameterRestriction && node.parameters.length > 1) {
+    if (parameterNodes.length !== 1) {
       throw new Error('The exported API can only have one parameter, if multiple parameters are needed, use an object');
     }
 
-    return node.parameters
-      .map((item) =>
-        this.fieldFromParameter(
-          item,
-          `${literalTypeDescription}Parameters${this.getNameWithCapitalFirstLetter(item.name.getText()) || ''}`
-        )
-      )
-      .filter((field): field is Field => field !== null);
-  };
+    const parameterDeclaration = parameterNodes[0];
 
-  private fieldFromParameter = (node: ts.ParameterDeclaration, literalTypeDescription: string): Field | null => {
-    const name = node.name.getText();
-
-    const valueType = this.valueTypeFromNode(node, literalTypeDescription);
-    if (valueType !== null) {
-      return {
-        name,
-        type: valueType,
-      };
+    if (parameterDeclaration.type === undefined) {
+      return [];
     }
 
-    return null;
-  };
+    if (ts.isTypeLiteralNode(parameterDeclaration.type)) {
+      return parameterDeclaration.type.members
+        .map(member => this.fieldFromTypeElement(member, `${literalTypeDescription}Parameters${this.getNameWithCapitalFirstLetter(member.name?.getText()) ?? ''}`))
+        .filter((field): field is Field => field !== null);
+    }
+
+    // TODO: move this elsewhere
+    if (ts.isTypeReferenceNode(parameterDeclaration.type)) {
+      const referenceType = this.checker.getTypeFromTypeNode(parameterDeclaration.type);
+      const interfaceType = this.getInterfaceMembersAndNameFromType(referenceType);
+      if (!interfaceType) {
+        return [];
+      }
+
+      return interfaceType.members;
+    }
+
+    return [];
+  }
 
   private fieldsFromLiteralTypeNode = (type: ts.TypeNode, literalTypeDescription: string): Field[] | null => {
     if (!ts.isTypeLiteralNode(type)) {
