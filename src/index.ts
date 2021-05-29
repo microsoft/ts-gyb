@@ -2,7 +2,7 @@
 
 import yargs from 'yargs';
 import fs from 'fs';
-import { Parser } from './Parser';
+import { Parser } from './parser/Parser';
 import { RendererConfig } from './renderer/RenderConfig';
 import { CustomTypeCollector } from './renderer/CustomTypeCollector';
 import { SwiftCodeRenderer } from './renderer/SwiftCodeRenderer';
