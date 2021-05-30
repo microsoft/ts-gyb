@@ -13,6 +13,9 @@ import {
   EnumSubType,
   NonEmptyType,
   isOptionalType,
+  DictionaryType,
+  DictionaryKeyType,
+  isCustomType,
 } from '../types';
 import { extractUnionTypeNode } from './utils';
 
@@ -32,16 +35,19 @@ export class ValueParser {
   }
 
   parseFunctionParameterType(typeNode: ts.TypeNode): Field[] {
-    const typeLiteralFields = this.parseTypeLiteralNode(typeNode);
-    if (typeLiteralFields !== null) {
-      return typeLiteralFields;
+    const typeLiteralType = this.parseTypeLiteralNode(typeNode);
+    if (typeLiteralType !== null && isCustomType(typeLiteralType)) {
+      return typeLiteralType.members;
     }
 
     if (ts.isTypeReferenceNode(typeNode)) {
       const referenceType = this.checker.getTypeFromTypeNode(typeNode);
-      const interfaceType = this.getInterfaceMembersAndNameFromType(referenceType);
-      if (!interfaceType) {
+      const interfaceType = this.parseInterfaceType(referenceType);
+      if (interfaceType === null) {
         return [];
+      }
+      if (!isCustomType(interfaceType)) {
+        throw Error('Diciontary is not supported as parameters');
       }
 
       return interfaceType.members;
@@ -50,14 +56,28 @@ export class ValueParser {
     throw Error('Not supported parameter type');
   }
 
-  private parseTypeLiteralNode(typeNode: ts.TypeNode): Field[] | null {
+  private parseTypeLiteralNode(typeNode: ts.TypeNode): CustomType | DictionaryType | null {
     if (!ts.isTypeLiteralNode(typeNode)) {
       return null;
     }
 
-    return typeNode.members
+    const indexField = this.indexFieldFromMembersParent(typeNode);
+    if (indexField) {
+      return {
+        flag: ValueTypeKindFlag.dictionaryType,
+        keyType: DictionaryKeyType.string,
+        valueType: indexField.type,
+      };
+    }
+
+    const fields = typeNode.members
       .map(member => this.fieldFromTypeElement(member))
       .filter((field): field is Field => field !== null);
+
+    return {
+      flag: ValueTypeKindFlag.customType,
+      members: fields,
+    };
   }
 
   private valueTypeFromNode(
@@ -109,14 +129,14 @@ export class ValueParser {
       return typeKind;
     }
 
-    let customTypeKind = this.referenceTypeKindFromTypeNode(typeNode);
+    const customTypeKind = this.referenceTypeKindFromTypeNode(typeNode);
     if (customTypeKind !== null) {
       return customTypeKind;
     }
 
-    customTypeKind = this.literalTypeKindFromTypeNode(typeNode);
-    if (customTypeKind !== null) {
-      return customTypeKind;
+    const typeLiteralType = this.parseTypeLiteralNode(typeNode);
+    if (typeLiteralType !== null) {
+      return typeLiteralType;
     }
 
     const arrayTypeKind = this.arrayTypeKindFromTypeNode(typeNode);
@@ -150,7 +170,7 @@ export class ValueParser {
     return null;
   }
 
-  private referenceTypeKindFromTypeNode(node: ts.TypeNode): CustomType | EnumType | BasicType | null {
+  private referenceTypeKindFromTypeNode(node: ts.TypeNode): CustomType | DictionaryType | EnumType | BasicType | null {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
@@ -175,44 +195,14 @@ export class ValueParser {
       }
     }
 
-    const { name, members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(referenceType);
-    if (members.length !== 0) {
-      return {
-        flag: ValueTypeKindFlag.customType,
-        name,
-        members,
-        isAnyKeyDictionary,
-      };
+    const interfaceType = this.parseInterfaceType(referenceType);
+    if (interfaceType !== null) {
+      return interfaceType;
     }
 
     const enumTypeKind = this.enumTypeKindFromType(referenceType);
     if (enumTypeKind) {
       return enumTypeKind;
-    }
-
-    return null;
-  }
-
-  private literalTypeKindFromTypeNode(node: ts.TypeNode): CustomType | null {
-    if (!ts.isTypeLiteralNode(node)) {
-      return null;
-    }
-
-    const indexField = this.indexFieldFromMembersParent(node);
-    if (indexField) {
-      return {
-        flag: ValueTypeKindFlag.customType,
-        members: [indexField],
-        isAnyKeyDictionary: true,
-      };
-    }
-
-    const fields = this.parseTypeLiteralNode(node);
-    if (fields) {
-      return {
-        flag: ValueTypeKindFlag.customType,
-        members: fields,
-      };
     }
 
     return null;
@@ -244,44 +234,42 @@ export class ValueParser {
     return null;
   }
 
-  private getInterfaceMembersAndNameFromType(type: ts.Type): {
-    name: string;
-    members: Field[];
-    isAnyKeyDictionary: boolean;
-  } {
-    const result = {
-      name: '',
-      members: [] as Field[],
-      isAnyKeyDictionary: false,
-    };
+  private parseInterfaceType(type: ts.Type): CustomType | DictionaryType | null {
     const declarations = type.symbol.getDeclarations();
     if (declarations === undefined || declarations.length !== 1) {
-      return result;
+      return null;
     }
 
     const interfaceDeclaration = declarations[0];
     if (!ts.isInterfaceDeclaration(interfaceDeclaration)) {
-      return result;
+      return null;
     }
-
-    result.name = interfaceDeclaration.name.getText();
 
     const indexField = this.indexFieldFromMembersParent(interfaceDeclaration);
     if (indexField) {
-      result.members = [indexField];
-      result.isAnyKeyDictionary = true;
-    } else {
-      result.members = interfaceDeclaration.members
-        .map(item => this.fieldFromTypeElement(item))
-        .filter((field): field is Field => field !== null);
-
-      const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(interfaceDeclaration);
-      if (membersInExtendingInterface.length) {
-        result.members.push(...membersInExtendingInterface);
-      }
+      return {
+        flag: ValueTypeKindFlag.dictionaryType,
+        keyType: DictionaryKeyType.string,
+        valueType: indexField.type,
+      };
     }
 
-    return result;
+    const name = interfaceDeclaration.name.getText();
+
+    const members = interfaceDeclaration.members
+      .map(item => this.fieldFromTypeElement(item))
+      .filter((field): field is Field => field !== null);
+
+    const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(interfaceDeclaration);
+    if (membersInExtendingInterface.length) {
+      members.push(...membersInExtendingInterface);
+    }
+
+    return {
+      flag: ValueTypeKindFlag.customType,
+      name,
+      members,
+    };
   }
 
   private enumTypeKindFromType(type: ts.Type): EnumType | null {
@@ -395,8 +383,16 @@ export class ValueParser {
 
     return extendHeritageClause.types.flatMap((extendingInterface): Field[] => {
       const type = this.checker.getTypeAtLocation(extendingInterface);
-      const { members, isAnyKeyDictionary } = this.getInterfaceMembersAndNameFromType(type);
-      return isAnyKeyDictionary ? [] : members;
+      const interfaceType = this.parseInterfaceType(type);
+
+      if (interfaceType === null) {
+        return [];
+      }
+      if (!isCustomType(interfaceType)) {
+        throw Error('Invalid extended type');
+      }
+
+      return interfaceType.members;
     });
   }
 }

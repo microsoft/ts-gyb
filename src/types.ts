@@ -43,7 +43,7 @@ export enum DictionaryKeyType {
 
 export interface DictionaryType extends ValueTypeKind {
   flag: ValueTypeKindFlag.dictionaryType;
-  keyType: DictionaryType;
+  keyType: DictionaryKeyType;
   valueType: ValueType;
 }
 
@@ -86,4 +86,8 @@ export enum BasicTypeValue {
 
 export function isOptionalType(valueType: ValueType): valueType is OptionalType {
   return valueType.flag === ValueTypeKindFlag.optionalType;
+}
+
+export function isCustomType(valueType: ValueType): valueType is CustomType {
+  return valueType.flag === ValueTypeKindFlag.customType;
 }
