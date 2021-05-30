@@ -6,10 +6,7 @@ import {
   Field,
 } from '../types';
 import { ValueParser } from './ValueParser';
-
-// Defined tags
-const SHOULD_EXPORT = 'shouldExport';
-const COMMENT = 'comment';
+import { shouldExportSymbol } from './utils';
 
 export class Parser {
   private program: ts.Program;
@@ -48,10 +45,9 @@ export class Parser {
       return null;
     }
 
-    const { symbol } = this.checker.getTypeAtLocation(node);
-    const jsDocTags = symbol.getJsDocTags();
+    const symbol = this.checker.getSymbolAtLocation(node.name);
 
-    if (!this.shouldExportInJsDocTags(jsDocTags)) {
+    if (symbol && !shouldExportSymbol(symbol)) {
       return null;
     }
 
@@ -65,9 +61,12 @@ export class Parser {
       .map(methodNode => this.methodFromNode(methodNode))
       .filter((method): method is Method => method !== null);
 
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+
     return {
       name: interfaceName,
       methods,
+      documentation,
     };
   }
 
@@ -82,14 +81,14 @@ export class Parser {
 
     const returnType = this.valueParser.parseFunctionReturnType(node);
 
-    const jsDocTags = ts.getJSDocTags(node) as ts.JSDocTag[];
-    const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
     return {
       name: methodName,
       parameters,
       returnType,
-      comment: nativeComment,
+      documentation,
     };
   }
 
@@ -108,28 +107,5 @@ export class Parser {
     }
 
     return this.valueParser.parseFunctionParameterType(parameterDeclaration.type);
-  }
-
-  private shouldExportInJsDocTags(tags: ts.JSDocTagInfo[]): boolean {
-    return !!tags.find((tag) => tag.name === SHOULD_EXPORT && tag.text === 'true');
-  }
-
-  private getPropertyFromJsDocNodes(tags: ts.JSDocTag[], name: string): ts.JSDocTagInfo | undefined {
-    const target = tags.find((tagNode) => ts.unescapeLeadingUnderscores(tagNode.tagName.escapedText) === name);
-    if (target) {
-      return {
-        name: ts.unescapeLeadingUnderscores(target.tagName.escapedText),
-        text: target.comment,
-      };
-    }
-    return undefined;
-  }
-
-  private getCommentFromJsDocNodes(tags: ts.JSDocTag[]): string | undefined {
-    const commentTag = this.getPropertyFromJsDocNodes(tags, COMMENT);
-    if (commentTag && commentTag.text) {
-      return commentTag.text;
-    }
-    return undefined;
   }
 }

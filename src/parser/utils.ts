@@ -1,5 +1,13 @@
 import ts from 'typescript';
 
+// Defined tags
+const SHOULD_EXPORT = 'shouldExport';
+
+export function shouldExportSymbol(symbol: ts.Symbol): boolean {
+  const tags = symbol.getJsDocTags();
+  return !!tags.find(tag => tag.name === SHOULD_EXPORT && ts.displayPartsToString(tag.text) === 'true');
+}
+
 export function extractUnionTypeNode(
   node: ts.UnionTypeNode,
 ): { typeNode: ts.TypeNode, nullable: boolean } {
@@ -9,10 +17,6 @@ export function extractUnionTypeNode(
   node.types.forEach(typeNode => {
     if (isUndefinedOrNull(typeNode)) {
       nullable = true;
-      return;
-    }
-
-    if (isBrandLiteralTypeNode(typeNode)) {
       return;
     }
 
@@ -43,20 +47,4 @@ function isUndefinedOrNull(node: ts.TypeNode): boolean {
     return true;
   }
   return false;
-}
-
-function isBrandLiteralTypeNode(node: ts.TypeNode): boolean {
-  if (!ts.isTypeLiteralNode(node)) {
-    return false;
-  }
-  if (node.members.length !== 1) {
-    return false;
-  }
-
-  const brandName = node.members[0].name?.getText();
-  if (!brandName) {
-    return false;
-  }
-
-  return brandName === '_brand' || brandName.startsWith('_') && brandName.endsWith('Brand');
 }

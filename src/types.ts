@@ -1,13 +1,14 @@
 export interface Module {
   name: string;
   methods: Method[];
+  documentation: string;
 }
 
 export interface Method {
   name: string;
   parameters: Field[];
   returnType: ValueType | null;
-  comment?: string;
+  documentation: string;
 }
 
 export interface Field {

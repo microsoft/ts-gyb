@@ -2,7 +2,7 @@
 // eslint-disable-next-line import/no-unresolved
 import { CodeGen_Int } from '@olm/ts-codegen-basic-type';
 
-type str = string | { _strBrand: never };
+type str = string;
 type AliasSize = BaseSize;
 interface BaseSize {
   width: number;
@@ -41,11 +41,12 @@ interface DictionaryWithAnyKey {
 }
 
 /**
+ * Documentation for module
  * @shouldExport true
  */
 export interface IHtmlApi {
   /**
-   * @comment
+   * This is a documentation
    * Set Mention class names
    * used to map id to class names
    */

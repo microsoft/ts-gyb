@@ -177,12 +177,15 @@ export class ValueParser {
       return aliasType;
     }
 
-    const referenceType = this.checker.getTypeFromTypeNode(node);
+    let symbol = this.checker.getSymbolAtLocation(node.typeName);
 
-    const symbol = referenceType.aliasSymbol ?? referenceType.symbol;
     if (!symbol) {
       // https://stackoverflow.com/questions/64745962/use-typescript-compiler-api-to-get-the-type-alias-declaration-node-from-a-type-r
       throw Error('Interned type. Please brand type');
+    }
+
+    if (symbol.flags & ts.SymbolFlags.Alias) {
+      symbol = this.checker.getAliasedSymbol(symbol);
     }
 
     const declarations = symbol.getDeclarations();
