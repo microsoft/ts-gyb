@@ -54,8 +54,7 @@ export interface ArrayType extends ValueTypeKind {
 
 export interface CustomType extends ValueTypeKind {
   flag: ValueTypeKindFlag.customType;
-  isTypeLiteral?: boolean;
-  name: string;
+  name?: string;
   members: Field[];
   isAnyKeyDictionary?: boolean;
 }

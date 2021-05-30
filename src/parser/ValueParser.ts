@@ -1,7 +1,6 @@
 import ts from 'typescript';
 // eslint-disable-next-line import/no-unresolved
 import { INT_TYPE_NAME } from '@olm/ts-codegen-basic-type';
-import { capitalize } from '../utils';
 import {
   Field,
   ValueType,
@@ -24,17 +23,16 @@ export class ValueParser {
 
   parseFunctionReturnType(
     methodSignature: ts.MethodSignature,
-    literalTypeDescription: string,
   ): ValueType | null {
     if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
       return null;
     }
 
-    return this.valueTypeFromNode(methodSignature, literalTypeDescription);
+    return this.valueTypeFromNode(methodSignature);
   }
 
-  parseFunctionParameterType(typeNode: ts.TypeNode, literalTypeDescription: string): Field[] {
-    const typeLiteralFields = this.parseTypeLiteralNode(typeNode, literalTypeDescription);
+  parseFunctionParameterType(typeNode: ts.TypeNode): Field[] {
+    const typeLiteralFields = this.parseTypeLiteralNode(typeNode);
     if (typeLiteralFields !== null) {
       return typeLiteralFields;
     }
@@ -52,31 +50,25 @@ export class ValueParser {
     throw Error('Not supported parameter type');
   }
 
-  private parseTypeLiteralNode(typeNode: ts.TypeNode, literalTypeDescription: string): Field[] | null {
+  private parseTypeLiteralNode(typeNode: ts.TypeNode): Field[] | null {
     if (!ts.isTypeLiteralNode(typeNode)) {
       return null;
     }
 
     return typeNode.members
-      .map((member, index) =>
-        this.fieldFromTypeElement(
-          member,
-          `${literalTypeDescription}Members${member.name ? capitalize(member.name.getText()) : index}`
-        )
-      )
+      .map(member => this.fieldFromTypeElement(member))
       .filter((field): field is Field => field !== null);
   }
 
   private valueTypeFromNode(
     node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken },
-    literalTypeDescription: string,
   ): ValueType {
     if (node.type === undefined) {
       throw Error('Invalid type');
     }
 
     const nullable = node.questionToken !== undefined;
-    const valueType = this.valueTypeFromTypeNode(node.type, literalTypeDescription);
+    const valueType = this.valueTypeFromTypeNode(node.type);
 
     if (nullable && !isOptionalType(valueType)) {
       return {
@@ -90,15 +82,14 @@ export class ValueParser {
 
   private valueTypeFromTypeNode(
     typeNode: ts.TypeNode,
-    literalTypeDescription: string
   ): ValueType {
     const unionTypeInfo = extractUnionTypeNode(typeNode);
 
     if (unionTypeInfo === null) {
-      return this.nonEmptyTypeFromTypeNode(typeNode, literalTypeDescription);
+      return this.nonEmptyTypeFromTypeNode(typeNode);
     }
 
-    const valueType = this.nonEmptyTypeFromTypeNode(unionTypeInfo.typeNode, literalTypeDescription);
+    const valueType = this.nonEmptyTypeFromTypeNode(unionTypeInfo.typeNode);
     
     if (!unionTypeInfo.nullable) {
       return valueType;
@@ -112,7 +103,6 @@ export class ValueParser {
 
   private nonEmptyTypeFromTypeNode(
     typeNode: ts.TypeNode,
-    literalTypeDescription: string
   ): NonEmptyType {
     const typeKind = this.basicTypeKindFromTypeNode(typeNode);
     if (typeKind !== null) {
@@ -124,12 +114,12 @@ export class ValueParser {
       return customTypeKind;
     }
 
-    customTypeKind = this.literalTypeKindFromTypeNode(typeNode, literalTypeDescription);
+    customTypeKind = this.literalTypeKindFromTypeNode(typeNode);
     if (customTypeKind !== null) {
       return customTypeKind;
     }
 
-    const arrayTypeKind = this.arrayTypeKindFromTypeNode(typeNode, `${literalTypeDescription}Array`);
+    const arrayTypeKind = this.arrayTypeKindFromTypeNode(typeNode);
     if (arrayTypeKind !== null) {
       return arrayTypeKind;
     }
@@ -203,28 +193,24 @@ export class ValueParser {
     return null;
   }
 
-  private literalTypeKindFromTypeNode(node: ts.TypeNode, literalTypeDescription: string): CustomType | null {
+  private literalTypeKindFromTypeNode(node: ts.TypeNode): CustomType | null {
     if (!ts.isTypeLiteralNode(node)) {
       return null;
     }
 
-    const indexField = this.indexFieldFromMembersParent(node, literalTypeDescription);
+    const indexField = this.indexFieldFromMembersParent(node);
     if (indexField) {
       return {
         flag: ValueTypeKindFlag.customType,
-        name: `${literalTypeDescription}Type`,
-        isTypeLiteral: true,
         members: [indexField],
         isAnyKeyDictionary: true,
       };
     }
 
-    const fields = this.parseTypeLiteralNode(node, literalTypeDescription);
+    const fields = this.parseTypeLiteralNode(node);
     if (fields) {
       return {
         flag: ValueTypeKindFlag.customType,
-        name: `${literalTypeDescription}Type`,
-        isTypeLiteral: true,
         members: fields,
       };
     }
@@ -232,12 +218,12 @@ export class ValueParser {
     return null;
   }
 
-  private arrayTypeKindFromTypeNode(node: ts.TypeNode, literalTypeDescription: string): ArrayType | null {
+  private arrayTypeKindFromTypeNode(node: ts.TypeNode): ArrayType | null {
     if (!ts.isArrayTypeNode(node)) {
       return null;
     }
 
-    const elementType = this.valueTypeFromTypeNode(node.elementType, `${literalTypeDescription}Element`);
+    const elementType = this.valueTypeFromTypeNode(node.elementType);
     if (elementType) {
       return {
         flag: ValueTypeKindFlag.arrayType,
@@ -280,18 +266,13 @@ export class ValueParser {
 
     result.name = interfaceDeclaration.name.getText();
 
-    const indexField = this.indexFieldFromMembersParent(interfaceDeclaration, `${result.name}`);
+    const indexField = this.indexFieldFromMembersParent(interfaceDeclaration);
     if (indexField) {
       result.members = [indexField];
       result.isAnyKeyDictionary = true;
     } else {
       result.members = interfaceDeclaration.members
-        .map((item, index) =>
-          this.fieldFromTypeElement(
-            item,
-            `${result.name}Members${item.name ? capitalize(item.name.getText()) : index}`
-          )
-        )
+        .map(item => this.fieldFromTypeElement(item))
         .filter((field): field is Field => field !== null);
 
       const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(interfaceDeclaration);
@@ -365,7 +346,6 @@ export class ValueParser {
 
   private indexFieldFromMembersParent(
     type: { members: ts.NodeArray<ts.TypeElement> },
-    literalTypeDescription: string
   ): Field | null {
     if (type.members && type.members.length !== 1) {
       // Only support interface with one index signature, like { [key: string]: string }
@@ -377,7 +357,6 @@ export class ValueParser {
       const name = typeElement.parameters[0].name.getText();
       const valueType = this.valueTypeFromNode(
         typeElement,
-        `${literalTypeDescription}IndexMember${capitalize(name)}`
       );
 
       if (valueType !== null && name) {
@@ -391,25 +370,18 @@ export class ValueParser {
     return null;
   }
 
-  private fieldFromTypeElement(node: ts.TypeElement, literalTypeDescription: string): Field | null {
-    if (!ts.isPropertySignature(node) || node.type === undefined) {
+  private fieldFromTypeElement(node: ts.TypeElement): Field | null {
+    if (!ts.isPropertySignature(node)) {
       return null;
     }
 
-    let name = node.name.getText();
-    if (!name || name === '__type') {
-      name = `${literalTypeDescription}Type`;
-    }
+    const name = node.name.getText();
+    const valueType = this.valueTypeFromNode(node);
 
-    const valueType = this.valueTypeFromNode(node, literalTypeDescription);
-    if (valueType !== null) {
-      return {
-        name,
-        type: valueType,
-      };
-    }
-
-    return null;
+    return {
+      name,
+      type: valueType,
+    };
   }
 
   private getExtendingMembersFromInterfaceDeclaration(node: ts.InterfaceDeclaration): Field[] {

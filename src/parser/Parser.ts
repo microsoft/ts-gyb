@@ -6,7 +6,6 @@ import {
   Field,
 } from '../types';
 import { ValueParser } from './ValueParser';
-import { capitalize } from '../utils';
 
 // Defined tags
 const SHOULD_EXPORT = 'shouldExport';
@@ -79,9 +78,9 @@ export class Parser {
 
     const methodName = node.name.getText();
 
-    const parameters = this.fieldsFromParameters(node.parameters, capitalize(methodName));
+    const parameters = this.fieldsFromParameters(node.parameters);
 
-    const returnType = this.valueParser.parseFunctionReturnType(node, `${capitalize(methodName)}Return`);
+    const returnType = this.valueParser.parseFunctionReturnType(node);
 
     const jsDocTags = ts.getJSDocTags(node) as ts.JSDocTag[];
     const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
@@ -94,7 +93,7 @@ export class Parser {
     };
   }
 
-  private fieldsFromParameters(parameterNodes: ts.NodeArray<ts.ParameterDeclaration>, literalTypeDescription: string): Field[] {
+  private fieldsFromParameters(parameterNodes: ts.NodeArray<ts.ParameterDeclaration>): Field[] {
     if (parameterNodes.length === 0) {
       return [];
     }
@@ -108,7 +107,7 @@ export class Parser {
       return [];
     }
 
-    return this.valueParser.parseFunctionParameterType(parameterDeclaration.type, literalTypeDescription);
+    return this.valueParser.parseFunctionParameterType(parameterDeclaration.type);
   }
 
   private shouldExportInJsDocTags(tags: ts.JSDocTagInfo[]): boolean {
