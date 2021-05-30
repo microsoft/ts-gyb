@@ -6,33 +6,53 @@ import {
   Field,
   ValueType,
   BasicTypeValue,
-  CustomTypeKind,
-  ArrayTypeKind,
-  BasicTypeKind,
+  CustomType,
+  ArrayType,
+  BasicType,
   ValueTypeKindFlag,
-  EnumKind,
+  EnumType,
   EnumSubType,
+  NonEmptyType,
+  isOptionalType,
 } from '../types';
+import { extractUnionTypeNode } from './utils';
 
 export class ValueParser {
   constructor(
     private checker: ts.TypeChecker,
   ) {}
 
-  valueTypeFromNode(
-    node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken },
+  parseFunctionReturnType(
+    methodSignature: ts.MethodSignature,
     literalTypeDescription: string,
   ): ValueType | null {
-    if (node.type === undefined) {
+    if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
       return null;
     }
 
-    const nullable = node.questionToken !== undefined;
-
-    return this.valueTypeFromTypeNode(node.type, nullable, literalTypeDescription);
+    return this.valueTypeFromNode(methodSignature, literalTypeDescription);
   }
 
-  parseTypeLiteralNode(typeNode: ts.TypeNode, literalTypeDescription: string): Field[] | null {
+  parseFunctionParameterType(typeNode: ts.TypeNode, literalTypeDescription: string): Field[] {
+    const typeLiteralFields = this.parseTypeLiteralNode(typeNode, literalTypeDescription);
+    if (typeLiteralFields !== null) {
+      return typeLiteralFields;
+    }
+
+    if (ts.isTypeReferenceNode(typeNode)) {
+      const referenceType = this.checker.getTypeFromTypeNode(typeNode);
+      const interfaceType = this.getInterfaceMembersAndNameFromType(referenceType);
+      if (!interfaceType) {
+        return [];
+      }
+
+      return interfaceType.members;
+    }
+
+    throw Error('Not supported parameter type');
+  }
+
+  private parseTypeLiteralNode(typeNode: ts.TypeNode, literalTypeDescription: string): Field[] | null {
     if (!ts.isTypeLiteralNode(typeNode)) {
       return null;
     }
@@ -47,96 +67,77 @@ export class ValueParser {
       .filter((field): field is Field => field !== null);
   }
 
-  parseInterfaceReferenceTypeNode(typeNode: ts.TypeNode): Field[] | null {
-    if (!ts.isTypeReferenceNode(typeNode)) {
-      return null;
+  private valueTypeFromNode(
+    node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken },
+    literalTypeDescription: string,
+  ): ValueType {
+    if (node.type === undefined) {
+      throw Error('Invalid type');
     }
 
-    const referenceType = this.checker.getTypeFromTypeNode(typeNode);
-    const interfaceType = this.getInterfaceMembersAndNameFromType(referenceType);
-    if (!interfaceType) {
-      return [];
+    const nullable = node.questionToken !== undefined;
+    const valueType = this.valueTypeFromTypeNode(node.type, literalTypeDescription);
+
+    if (nullable && !isOptionalType(valueType)) {
+      return {
+        flag: ValueTypeKindFlag.optionalType,
+        type: valueType,
+      };
     }
 
-    return interfaceType.members;
+    return valueType;
   }
 
   private valueTypeFromTypeNode(
     typeNode: ts.TypeNode,
-    nullable: boolean,
     literalTypeDescription: string
-  ): ValueType | null {
-    if (ts.isUnionTypeNode(typeNode)) {
-      return this.extractUnionTypeNode(typeNode, literalTypeDescription, nullable);
+  ): ValueType {
+    const unionTypeInfo = extractUnionTypeNode(typeNode);
+
+    if (unionTypeInfo === null) {
+      return this.nonEmptyTypeFromTypeNode(typeNode, literalTypeDescription);
     }
 
+    const valueType = this.nonEmptyTypeFromTypeNode(unionTypeInfo.typeNode, literalTypeDescription);
+    
+    if (!unionTypeInfo.nullable) {
+      return valueType;
+    }
+
+    return {
+      flag: ValueTypeKindFlag.optionalType,
+      type: valueType,
+    };
+  }
+
+  private nonEmptyTypeFromTypeNode(
+    typeNode: ts.TypeNode,
+    literalTypeDescription: string
+  ): NonEmptyType {
     const typeKind = this.basicTypeKindFromTypeNode(typeNode);
     if (typeKind !== null) {
-      return {
-        kind: typeKind,
-        nullable,
-      };
+      return typeKind;
     }
 
     let customTypeKind = this.referenceTypeKindFromTypeNode(typeNode);
     if (customTypeKind !== null) {
-      return {
-        kind: customTypeKind,
-        nullable,
-      };
+      return customTypeKind;
     }
 
     customTypeKind = this.literalTypeKindFromTypeNode(typeNode, literalTypeDescription);
     if (customTypeKind !== null) {
-      return {
-        kind: customTypeKind,
-        nullable,
-      };
+      return customTypeKind;
     }
 
     const arrayTypeKind = this.arrayTypeKindFromTypeNode(typeNode, `${literalTypeDescription}Array`);
     if (arrayTypeKind !== null) {
-      return {
-        kind: arrayTypeKind,
-        nullable,
-      };
+      return arrayTypeKind;
     }
 
-    return null;
+    throw Error('invalid type');
   }
 
-  private extractUnionTypeNode(
-    node: ts.Node,
-    literalTypeDescription: string,
-    nullable: boolean
-  ): ValueType | null {
-    if (!ts.isUnionTypeNode(node)) {
-      return null;
-    }
-
-    let isNullable = nullable;
-    let kind: ValueType['kind'] | undefined;
-
-    node.types.forEach((typeNode) => {
-      if (!isNullable && this.isUndefinedOrNull(typeNode)) {
-        isNullable = true;
-      }
-      if (!kind && !this.isUndefinedOrNull(typeNode)) {
-        kind = this.valueTypeFromTypeNode(typeNode, false, literalTypeDescription)?.kind;
-      }
-    });
-
-    if (!kind) {
-      return null;
-    }
-
-    return {
-      kind,
-      nullable: isNullable,
-    };
-  }
-
-  private basicTypeKindFromTypeNode(node: ts.TypeNode): BasicTypeKind | null {
+  private basicTypeKindFromTypeNode(node: ts.TypeNode): BasicType | null {
     if (node.kind === ts.SyntaxKind.StringKeyword) {
       return {
         flag: ValueTypeKindFlag.basicType,
@@ -159,7 +160,7 @@ export class ValueParser {
     return null;
   }
 
-  private referenceTypeKindFromTypeNode(node: ts.TypeNode): CustomTypeKind | EnumKind | BasicTypeKind | null {
+  private referenceTypeKindFromTypeNode(node: ts.TypeNode): CustomType | EnumType | BasicType | null {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
@@ -202,7 +203,7 @@ export class ValueParser {
     return null;
   }
 
-  private literalTypeKindFromTypeNode(node: ts.TypeNode, literalTypeDescription: string): CustomTypeKind | null {
+  private literalTypeKindFromTypeNode(node: ts.TypeNode, literalTypeDescription: string): CustomType | null {
     if (!ts.isTypeLiteralNode(node)) {
       return null;
     }
@@ -231,12 +232,12 @@ export class ValueParser {
     return null;
   }
 
-  private arrayTypeKindFromTypeNode(node: ts.TypeNode, literalTypeDescription: string): ArrayTypeKind | null {
+  private arrayTypeKindFromTypeNode(node: ts.TypeNode, literalTypeDescription: string): ArrayType | null {
     if (!ts.isArrayTypeNode(node)) {
       return null;
     }
 
-    const elementType = this.valueTypeFromTypeNode(node.elementType, false, `${literalTypeDescription}Element`);
+    const elementType = this.valueTypeFromTypeNode(node.elementType, `${literalTypeDescription}Element`);
     if (elementType) {
       return {
         flag: ValueTypeKindFlag.arrayType,
@@ -247,17 +248,7 @@ export class ValueParser {
     return null;
   }
 
-  private isUndefinedOrNull(node: ts.TypeNode): boolean {
-    if (node.kind === ts.SyntaxKind.UndefinedKeyword) {
-      return true;
-    }
-    if (node.kind === ts.SyntaxKind.NullKeyword) {
-      return true;
-    }
-    return false;
-  }
-
-  private getAliasType(symbol: ts.Symbol): BasicTypeKind | null {
+  private getAliasType(symbol: ts.Symbol): BasicType | null {
     if (symbol.name === INT_TYPE_NAME) {
       return {
         flag: ValueTypeKindFlag.basicType,
@@ -312,7 +303,7 @@ export class ValueParser {
     return result;
   }
 
-  private enumTypeKindFromType(type: ts.Type): EnumKind | null {
+  private enumTypeKindFromType(type: ts.Type): EnumType | null {
     const declarations = type.symbol.getDeclarations();
     if (declarations === undefined || declarations.length !== 1) {
       return null;

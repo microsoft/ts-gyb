@@ -15,28 +15,44 @@ export interface Field {
   type: ValueType;
 }
 
-export interface ValueType {
-  kind: ArrayTypeKind | CustomTypeKind | BasicTypeKind | EnumKind;
-  nullable: boolean;
-}
+export type ValueType = NonEmptyType | OptionalType;
+export type NonEmptyType = BasicType | CustomType | EnumType | ArrayType | DictionaryType;
 
 export enum ValueTypeKindFlag {
   basicType = 'basicType',
   customType = 'customType',
-  arrayType = 'arrayType',
   enumType = 'enumType',
+  arrayType = 'arrayType',
+  dictionaryType = 'dictionaryType',
+  optionalType = 'optionalType',
 }
 
 interface ValueTypeKind {
   flag: ValueTypeKindFlag;
 }
 
-export interface ArrayTypeKind extends ValueTypeKind {
+export interface OptionalType extends ValueTypeKind {
+  flag: ValueTypeKindFlag.optionalType;
+  type: NonEmptyType;
+}
+
+export enum DictionaryKeyType {
+  string = 'string',
+  number = 'number',
+}
+
+export interface DictionaryType extends ValueTypeKind {
+  flag: ValueTypeKindFlag.dictionaryType;
+  keyType: DictionaryType;
+  valueType: ValueType;
+}
+
+export interface ArrayType extends ValueTypeKind {
   flag: ValueTypeKindFlag.arrayType;
   elementType: ValueType;
 }
 
-export interface CustomTypeKind extends ValueTypeKind {
+export interface CustomType extends ValueTypeKind {
   flag: ValueTypeKindFlag.customType;
   isTypeLiteral?: boolean;
   name: string;
@@ -49,7 +65,7 @@ export enum EnumSubType {
   number = 'number',
 }
 
-export interface EnumKind extends ValueTypeKind {
+export interface EnumType extends ValueTypeKind {
   flag: ValueTypeKindFlag.enumType;
   name: string;
   subType: EnumSubType;
@@ -57,7 +73,7 @@ export interface EnumKind extends ValueTypeKind {
   values: (string | number)[];
 }
 
-export interface BasicTypeKind extends ValueTypeKind {
+export interface BasicType extends ValueTypeKind {
   flag: ValueTypeKindFlag.basicType;
   value: BasicTypeValue;
 }
@@ -67,4 +83,8 @@ export enum BasicTypeValue {
   number = 'number',
   boolean = 'boolean',
   int = 'int',
+}
+
+export function isOptionalType(valueType: ValueType): valueType is OptionalType {
+  return valueType.flag === ValueTypeKindFlag.optionalType;
 }

@@ -81,7 +81,7 @@ export class Parser {
 
     const parameters = this.fieldsFromParameters(node.parameters, capitalize(methodName));
 
-    const returnType = this.valueParser.valueTypeFromNode(node, `${capitalize(methodName)}Return`);
+    const returnType = this.valueParser.parseFunctionReturnType(node, `${capitalize(methodName)}Return`);
 
     const jsDocTags = ts.getJSDocTags(node) as ts.JSDocTag[];
     const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
@@ -108,17 +108,7 @@ export class Parser {
       return [];
     }
 
-    const typeLiteralFields = this.valueParser.parseTypeLiteralNode(parameterDeclaration.type, literalTypeDescription);
-    if (typeLiteralFields !== null) {
-      return typeLiteralFields;
-    }
-
-    const interfaceFeilds = this.valueParser.parseInterfaceReferenceTypeNode(parameterDeclaration.type);
-    if (interfaceFeilds !== null) {
-      return interfaceFeilds;
-    }
-
-    throw Error('Not supported parameter type');
+    return this.valueParser.parseFunctionParameterType(parameterDeclaration.type, literalTypeDescription);
   }
 
   private shouldExportInJsDocTags(tags: ts.JSDocTagInfo[]): boolean {
