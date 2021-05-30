@@ -40,17 +40,9 @@ export class ValueParser {
       return typeLiteralType.members;
     }
 
-    if (ts.isTypeReferenceNode(typeNode)) {
-      const referenceType = this.checker.getTypeFromTypeNode(typeNode);
-      const interfaceType = this.parseInterfaceType(referenceType);
-      if (interfaceType === null) {
-        return [];
-      }
-      if (!isCustomType(interfaceType)) {
-        throw Error('Diciontary is not supported as parameters');
-      }
-
-      return interfaceType.members;
+    const referenceType = this.parseReferenceTypeNode(typeNode);
+    if (referenceType !== null && isCustomType(referenceType)) {
+      return referenceType.members;
     }
 
     throw Error('Not supported parameter type');
@@ -129,7 +121,7 @@ export class ValueParser {
       return typeKind;
     }
 
-    const customTypeKind = this.referenceTypeKindFromTypeNode(typeNode);
+    const customTypeKind = this.parseReferenceTypeNode(typeNode);
     if (customTypeKind !== null) {
       return customTypeKind;
     }
@@ -170,7 +162,7 @@ export class ValueParser {
     return null;
   }
 
-  private referenceTypeKindFromTypeNode(node: ts.TypeNode): CustomType | DictionaryType | EnumType | BasicType | null {
+  private parseReferenceTypeNode(node: ts.TypeNode): CustomType | DictionaryType | EnumType | BasicType | null {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
@@ -201,7 +193,7 @@ export class ValueParser {
     }
 
     const enumTypeKind = this.enumTypeKindFromType(referenceType);
-    if (enumTypeKind) {
+    if (enumTypeKind !== null) {
       return enumTypeKind;
     }
 
