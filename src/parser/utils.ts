@@ -1,18 +1,18 @@
 import ts from 'typescript';
 
 export function extractUnionTypeNode(
-  node: ts.Node,
-): { typeNode: ts.TypeNode, nullable: boolean } | null {
-  if (!ts.isUnionTypeNode(node)) {
-    return null;
-  }
-
+  node: ts.UnionTypeNode,
+): { typeNode: ts.TypeNode, nullable: boolean } {
   let nullable = false;
   let wrappedTypeNode: ts.TypeNode | undefined;
 
   node.types.forEach(typeNode => {
     if (isUndefinedOrNull(typeNode)) {
       nullable = true;
+      return;
+    }
+
+    if (isBrandLiteralTypeNode(typeNode)) {
       return;
     }
 
@@ -33,6 +33,9 @@ export function extractUnionTypeNode(
 }
 
 function isUndefinedOrNull(node: ts.TypeNode): boolean {
+  if (ts.isLiteralTypeNode(node)) {
+    return node.literal.kind === ts.SyntaxKind.NullKeyword;
+  }
   if (node.kind === ts.SyntaxKind.UndefinedKeyword) {
     return true;
   }
@@ -42,3 +45,18 @@ function isUndefinedOrNull(node: ts.TypeNode): boolean {
   return false;
 }
 
+function isBrandLiteralTypeNode(node: ts.TypeNode): boolean {
+  if (!ts.isTypeLiteralNode(node)) {
+    return false;
+  }
+  if (node.members.length !== 1) {
+    return false;
+  }
+
+  const brandName = node.members[0].name?.getText();
+  if (!brandName) {
+    return false;
+  }
+
+  return brandName === '_brand' || brandName.startsWith('_') && brandName.endsWith('Brand');
+}

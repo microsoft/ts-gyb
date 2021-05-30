@@ -2,7 +2,7 @@
 // eslint-disable-next-line import/no-unresolved
 import { CodeGen_Int } from '@olm/ts-codegen-basic-type';
 
-type str = string;
+type str = string | { _strBrand: never };
 type AliasSize = BaseSize;
 interface BaseSize {
   width: number;

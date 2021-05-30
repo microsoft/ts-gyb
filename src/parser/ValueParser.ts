@@ -53,13 +53,9 @@ export class ValueParser {
       return null;
     }
 
-    const indexField = this.indexFieldFromMembersParent(typeNode);
-    if (indexField) {
-      return {
-        flag: ValueTypeKindFlag.dictionaryType,
-        keyType: DictionaryKeyType.string,
-        valueType: indexField.type,
-      };
+    const dictionaryType = this.parseIndexTypeNode(typeNode);
+    if (dictionaryType) {
+      return dictionaryType;
     }
 
     const fields = typeNode.members
@@ -95,22 +91,17 @@ export class ValueParser {
   private valueTypeFromTypeNode(
     typeNode: ts.TypeNode,
   ): ValueType {
-    const unionTypeInfo = extractUnionTypeNode(typeNode);
-
-    if (unionTypeInfo === null) {
-      return this.nonEmptyTypeFromTypeNode(typeNode);
+    const unionType = this.parseUnionTypeNode(typeNode);
+    if (unionType !== null) {
+      return unionType;
     }
 
-    const valueType = this.nonEmptyTypeFromTypeNode(unionTypeInfo.typeNode);
-    
-    if (!unionTypeInfo.nullable) {
-      return valueType;
+    const referenceType = this.parseReferenceTypeNode(typeNode);
+    if (referenceType !== null) {
+      return referenceType;
     }
 
-    return {
-      flag: ValueTypeKindFlag.optionalType,
-      type: valueType,
-    };
+    return this.nonEmptyTypeFromTypeNode(typeNode);
   }
 
   private nonEmptyTypeFromTypeNode(
@@ -119,11 +110,6 @@ export class ValueParser {
     const typeKind = this.basicTypeKindFromTypeNode(typeNode);
     if (typeKind !== null) {
       return typeKind;
-    }
-
-    const customTypeKind = this.parseReferenceTypeNode(typeNode);
-    if (customTypeKind !== null) {
-      return customTypeKind;
     }
 
     const typeLiteralType = this.parseTypeLiteralNode(typeNode);
@@ -137,6 +123,24 @@ export class ValueParser {
     }
 
     throw Error('invalid type');
+  }
+
+  private parseUnionTypeNode(node: ts.TypeNode): ValueType | null {
+    if (!ts.isUnionTypeNode(node)) {
+      return null;
+    }
+
+    const { typeNode, nullable } = extractUnionTypeNode(node);
+    const valueType = this.valueTypeFromTypeNode(typeNode);
+
+    if (!isOptionalType(valueType) && nullable) {
+      return {
+        flag: ValueTypeKindFlag.optionalType,
+        type: valueType,
+      };
+    }
+
+    return valueType;
   }
 
   private basicTypeKindFromTypeNode(node: ts.TypeNode): BasicType | null {
@@ -162,42 +166,42 @@ export class ValueParser {
     return null;
   }
 
-  private parseReferenceTypeNode(node: ts.TypeNode): CustomType | DictionaryType | EnumType | BasicType | null {
+  private parseReferenceTypeNode(node: ts.TypeNode): ValueType | null {
     if (!ts.isTypeReferenceNode(node)) {
       return null;
     }
 
+    const typeName = node.typeName.getText();
+    const aliasType = this.getAliasType(typeName);
+    if (aliasType) {
+      return aliasType;
+    }
+
     const referenceType = this.checker.getTypeFromTypeNode(node);
 
-    if (referenceType.aliasSymbol) {
-      const aliasTypeKind = this.getAliasType(referenceType.aliasSymbol);
-      if (aliasTypeKind) {
-        return aliasTypeKind;
-      }
+    const symbol = referenceType.aliasSymbol ?? referenceType.symbol;
+    if (!symbol) {
+      // https://stackoverflow.com/questions/64745962/use-typescript-compiler-api-to-get-the-type-alias-declaration-node-from-a-type-r
+      throw Error('Interned type. Please brand type');
     }
 
-    // Basic type alias
-    if (!referenceType.symbol) {
-      const typeNode = this.checker.typeToTypeNode(referenceType);
-      if (typeNode) {
-        const basicTypeKind = this.basicTypeKindFromTypeNode(typeNode);
-        if (basicTypeKind) {
-          return basicTypeKind;
-        }
-      }
+    const declarations = symbol.getDeclarations();
+    if (declarations === undefined || declarations.length !== 1) {
+      throw Error('Interned type. Please brand type');
     }
+    const declaration = declarations[0];
 
-    const interfaceType = this.parseInterfaceType(referenceType);
+    const interfaceType = this.parseInterfaceType(declaration);
     if (interfaceType !== null) {
       return interfaceType;
     }
 
-    const enumTypeKind = this.enumTypeKindFromType(referenceType);
+    const enumTypeKind = this.enumTypeKindFromType(declaration);
     if (enumTypeKind !== null) {
       return enumTypeKind;
     }
 
-    return null;
+    return this.valueTypeFromNode(declaration);
   }
 
   private arrayTypeKindFromTypeNode(node: ts.TypeNode): ArrayType | null {
@@ -216,8 +220,8 @@ export class ValueParser {
     return null;
   }
 
-  private getAliasType(symbol: ts.Symbol): BasicType | null {
-    if (symbol.name === INT_TYPE_NAME) {
+  private getAliasType(typeName: string): BasicType | null {
+    if (typeName === INT_TYPE_NAME) {
       return {
         flag: ValueTypeKindFlag.basicType,
         value: BasicTypeValue.int,
@@ -226,33 +230,23 @@ export class ValueParser {
     return null;
   }
 
-  private parseInterfaceType(type: ts.Type): CustomType | DictionaryType | null {
-    const declarations = type.symbol.getDeclarations();
-    if (declarations === undefined || declarations.length !== 1) {
+  private parseInterfaceType(node: ts.Node): CustomType | DictionaryType | null {
+    if (!ts.isInterfaceDeclaration(node)) {
       return null;
     }
 
-    const interfaceDeclaration = declarations[0];
-    if (!ts.isInterfaceDeclaration(interfaceDeclaration)) {
-      return null;
+    const indexType = this.parseIndexTypeNode(node);
+    if (indexType) {
+      return indexType;
     }
 
-    const indexField = this.indexFieldFromMembersParent(interfaceDeclaration);
-    if (indexField) {
-      return {
-        flag: ValueTypeKindFlag.dictionaryType,
-        keyType: DictionaryKeyType.string,
-        valueType: indexField.type,
-      };
-    }
+    const name = node.name.getText();
 
-    const name = interfaceDeclaration.name.getText();
-
-    const members = interfaceDeclaration.members
+    const members = node.members
       .map(item => this.fieldFromTypeElement(item))
       .filter((field): field is Field => field !== null);
 
-    const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(interfaceDeclaration);
+    const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(node);
     if (membersInExtendingInterface.length) {
       members.push(...membersInExtendingInterface);
     }
@@ -264,24 +258,18 @@ export class ValueParser {
     };
   }
 
-  private enumTypeKindFromType(type: ts.Type): EnumType | null {
-    const declarations = type.symbol.getDeclarations();
-    if (declarations === undefined || declarations.length !== 1) {
+  private enumTypeKindFromType(node: ts.Node): EnumType | null {
+    if (!ts.isEnumDeclaration(node)) {
       return null;
     }
 
-    const enumDeclaration = declarations[0];
-    if (!ts.isEnumDeclaration(enumDeclaration)) {
-      return null;
-    }
-
-    const name = enumDeclaration.name.getText();
+    const name = node.name.getText();
     let enumSubType: EnumSubType = EnumSubType.string;
     const keys: string[] = [];
     const values: (string | number)[] = [];
     let hasMultipleSubType = false;
 
-    enumDeclaration.members.forEach((enumMember, index) => {
+    node.members.forEach((enumMember, index) => {
       if (hasMultipleSubType) {
         return;
       }
@@ -324,30 +312,26 @@ export class ValueParser {
     };
   }
 
-  private indexFieldFromMembersParent(
+  private parseIndexTypeNode(
     type: { members: ts.NodeArray<ts.TypeElement> },
-  ): Field | null {
+  ): DictionaryType | null {
     if (type.members && type.members.length !== 1) {
       // Only support interface with one index signature, like { [key: string]: string }
       return null;
     }
 
     const typeElement = type.members[0];
-    if (ts.isIndexSignatureDeclaration(typeElement)) {
-      const name = typeElement.parameters[0].name.getText();
-      const valueType = this.valueTypeFromNode(
-        typeElement,
-      );
-
-      if (valueType !== null && name) {
-        return {
-          name,
-          type: valueType,
-        };
-      }
+    if (!ts.isIndexSignatureDeclaration(typeElement)) {
+      return null;
     }
 
-    return null;
+    const valueType = this.valueTypeFromNode(typeElement);
+
+    return {
+      flag: ValueTypeKindFlag.dictionaryType,
+      keyType: DictionaryKeyType.string,
+      valueType,
+    };
   }
 
   private fieldFromTypeElement(node: ts.TypeElement): Field | null {
@@ -375,7 +359,12 @@ export class ValueParser {
 
     return extendHeritageClause.types.flatMap((extendingInterface): Field[] => {
       const type = this.checker.getTypeAtLocation(extendingInterface);
-      const interfaceType = this.parseInterfaceType(type);
+      const declarations = type.symbol.getDeclarations();
+      if (declarations === undefined || declarations.length !== 1) {
+        throw Error('Invalid decration');
+      }
+      const declaration = declarations[0];
+      const interfaceType = this.parseInterfaceType(declaration);
 
       if (interfaceType === null) {
         return [];
