@@ -1,4 +1,4 @@
-import { Parser } from '../Parser';
+import { Parser } from '../parser/Parser';
 import { RendererConfig, DefaultSwiftRendererConfig } from '../renderer/RenderConfig';
 import { CustomTypeCollector } from '../renderer/CustomTypeCollector';
 import { DemoCodeRenderer } from './demoCodeRenderer';
