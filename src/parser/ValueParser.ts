@@ -178,10 +178,8 @@ export class ValueParser {
     }
 
     let symbol = this.checker.getSymbolAtLocation(node.typeName);
-
     if (!symbol) {
-      // https://stackoverflow.com/questions/64745962/use-typescript-compiler-api-to-get-the-type-alias-declaration-node-from-a-type-r
-      throw Error('Interned type. Please brand type');
+      throw Error('Invalid reference type');
     }
 
     if (symbol.flags & ts.SymbolFlags.Alias) {
@@ -190,7 +188,7 @@ export class ValueParser {
 
     const declarations = symbol.getDeclarations();
     if (declarations === undefined || declarations.length !== 1) {
-      throw Error('Interned type. Please brand type');
+      throw Error('Invalid declaration');
     }
     const declaration = declarations[0];
 
