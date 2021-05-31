@@ -1,9 +1,9 @@
 /* eslint-disable max-classes-per-file */
 
-import { BasicTypeValue, DictionaryKeyType, Field, isArraryType, isBasicType, isCustomType, isDictionaryType, isEnumType, isOptionalType, Method, Module, ValueType } from '../types';
+import { BasicTypeValue, DictionaryKeyType, isArraryType, isBasicType, isCustomType, isDictionaryType, isEnumType, isOptionalType, Method, Module, ValueType } from '../types';
 
 export interface MethodView {
-  readonly name: string;
+  readonly methodName: string;
   readonly parametersDeclaration: string;
   readonly parameters: { name: string, type: string }[];
 }
@@ -13,7 +13,7 @@ export class SwiftMethodView implements MethodView {
     private method: Method,
   ) {}
 
-  get name(): string {
+  get methodName(): string {
     return this.method.name;
   }
 
@@ -84,7 +84,7 @@ export class SwiftMethodView implements MethodView {
 
 export interface ModuleView {
   readonly fileName: string;
-  readonly name: string;
+  readonly moduleName: string;
   readonly methods: MethodView[];
 }
 
@@ -97,7 +97,7 @@ export class SwiftModuleView implements ModuleView {
     return `${this.module.name}.swift`;
   }
 
-  get name(): string {
+  get moduleName(): string {
     return this.module.name;
   }
 
