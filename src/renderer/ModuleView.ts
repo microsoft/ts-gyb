@@ -104,6 +104,7 @@ export interface ModuleView {
   readonly fileName: string;
   readonly moduleName: string;
   readonly methods: MethodView[];
+  readonly customTags: Record<string, string>;
 }
 
 export class SwiftModuleView implements ModuleView {
@@ -121,5 +122,9 @@ export class SwiftModuleView implements ModuleView {
 
   get methods(): MethodView[] {
     return this.module.methods.map(method => new SwiftMethodView(method));
+  }
+
+  get customTags(): Record<string, string> {
+    return this.module.customTags;
   }
 }

@@ -31,9 +31,8 @@ public class {{moduleName}} {
       {{name}}: {{name}}{{^last}},{{/last}}
       {{/parameters}}
     )
-
     {{/parameters.length}}
-    jsExecutor.execute(with: "{{moduleName}}", feature: "{{methodName}}", args: {{#parameters.length}}args{{/parameters.length}}{{^parameters}}nil{{/parameters}}, completion: completion)
+    jsExecutor.execute(with: "{{customTags.invokePath}}", feature: "{{methodName}}", args: {{#parameters.length}}args{{/parameters.length}}{{^parameters}}nil{{/parameters}}, completion: completion)
   }
   {{/methods}}
 }

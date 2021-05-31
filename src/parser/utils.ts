@@ -4,20 +4,29 @@ import ts from 'typescript';
 const SHOULD_EXPORT = 'shouldExport';
 const OVERRIDE_MODULE_NAME = 'overrideModuleName';
 
-export function shouldExportSymbol(symbol: ts.Symbol): boolean {
-  const tags = symbol.getJsDocTags();
-  return !!tags.find(tag => tag.name === SHOULD_EXPORT && ts.displayPartsToString(tag.text) === 'true');
-}
+export function parseJsDocTags(symbol: ts.Symbol): { shouldExport: boolean, overrideName: string | null, customTags: Record<string, string> } {
+  let shouldExport = false;
+  let overrideName: string | null = null;
+  const customTags: Record<string, string> = {};
 
-export function overriddenModuleName(symbol: ts.Symbol): string | null {
   const tags = symbol.getJsDocTags();
-  const overrideNameTag = tags.find(tag => tag.name === OVERRIDE_MODULE_NAME);
+  tags.forEach(tag => {
+    const value = ts.displayPartsToString(tag.text);
 
-  if (overrideNameTag === undefined) { 
-    return null;
-  }
-  
-  return ts.displayPartsToString(overrideNameTag.text);
+    if (tag.name === SHOULD_EXPORT) {
+      shouldExport = value === 'true';
+      return;
+    }
+
+    if (tag.name === OVERRIDE_MODULE_NAME) {
+      overrideName = value;
+      return;
+    }
+
+    customTags[tag.name] = value;
+  });
+
+  return { shouldExport, overrideName, customTags };
 }
 
 export function extractUnionTypeNode(

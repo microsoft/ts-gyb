@@ -6,7 +6,7 @@ import {
   Field,
 } from '../types';
 import { ValueParser } from './ValueParser';
-import { overriddenModuleName, shouldExportSymbol } from './utils';
+import { parseJsDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
 
 export class Parser {
@@ -54,11 +54,13 @@ export class Parser {
       throw Error('Invalid module node');
     }
 
-    if (!shouldExportSymbol(symbol)) {
+    const jsDocTagsResult = parseJsDocTags(symbol);
+
+    if (!jsDocTagsResult.shouldExport) {
       return null;
     }
 
-    const interfaceName = overriddenModuleName(symbol) ?? node.name.text;
+    const interfaceName = jsDocTagsResult.overrideName ?? node.name.text;
 
     const methods: Method[] = node.members
       .map(methodNode => this.methodFromNode(methodNode))
@@ -70,6 +72,7 @@ export class Parser {
       name: interfaceName,
       methods,
       documentation,
+      customTags: jsDocTagsResult.customTags,
     };
   }
 

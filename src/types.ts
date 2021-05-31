@@ -2,6 +2,7 @@ export interface Module {
   name: string;
   methods: Method[];
   documentation: string;
+  customTags: Record<string, string>;
 }
 
 export interface Method {
