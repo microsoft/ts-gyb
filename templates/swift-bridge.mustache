@@ -1,0 +1,32 @@
+//
+//  Copyright 2013-2018 Microsoft Inc.
+//
+
+// Don't modify this file manually, it's auto generated.
+
+public class Bridge{{name}} {
+  let jsExecutor: BridgeJSExecutor
+
+  init(jsExecutor: BridgeJSExecutor) {
+    self.jsExecutor = jsExecutor
+  }
+  {{#methods}}
+
+  public func {{name}}({{parametersDeclaration}}) {
+    {{#parameters.length}}
+    struct Args: Encodable {
+      {{#parameters}}
+      var {{name}}: {{type}}
+      {{/parameters}}
+    }
+    {{/parameters.length}}
+    {{#parameters.length}}
+    let args = Args(
+      {{#parameters}}
+      {{name}}: {{type}}
+      {{/parameters}}
+    )
+    {{/parameters.length}}
+  }
+  {{/methods}}
+}
