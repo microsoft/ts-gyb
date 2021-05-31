@@ -266,8 +266,7 @@ export class ValueParser {
 
     const name = node.name.getText();
     let enumSubType: EnumSubType = EnumSubType.string;
-    const keys: string[] = [];
-    const values: (string | number)[] = [];
+    const members: Record<string, string | number> = {};
     let hasMultipleSubType = false;
 
     node.members.forEach((enumMember, index) => {
@@ -296,8 +295,7 @@ export class ValueParser {
       }
 
       enumSubType = subType;
-      keys.push(key);
-      values.push(value);
+      members[key] = value;
     });
 
     if (hasMultipleSubType) {
@@ -308,8 +306,7 @@ export class ValueParser {
       flag: ValueTypeKindFlag.enumType,
       name,
       subType: enumSubType,
-      keys,
-      values,
+      members,
     };
   }
 
