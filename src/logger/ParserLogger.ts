@@ -10,12 +10,20 @@ export class ParserLogger {
     private checker: ts.TypeChecker,
   ) {}
 
-  logSkippedNode(node: ts.Node, nodeDescription: string, guide: string): void {
+  warn(message: string): void {
+    console.warn(warnMessage(message));
+  }
+
+  warnSkippedNode(node: ts.Node, reason: string, guide: string): void {
+    this.warn(`Skipped "${node.getText()}" at ${this.getFileNameAndLine(node)} because ${reason}. ${guide}.`);
+  }
+
+  private getFileNameAndLine(node: ts.Node): string {
     const { line } = ts.getLineAndCharacterOfPosition(
       node.getSourceFile(),
       node.pos
     );
 
-    console.warn(warnMessage(`Skipped ${nodeDescription} "${node.getText()}" at ${node.getSourceFile().fileName}:${line + 1}. ${guide}.`));
+    return `${node.getSourceFile().fileName}:${line + 1}`;
   }
 }

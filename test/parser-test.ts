@@ -1,33 +1,105 @@
+import { describe, it } from 'mocha';
 import sinon from 'sinon';
-import { beforeEach, describe, it } from 'mocha';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import sinonChai from 'sinon-chai';
 import { withTempParser } from './utils';
 import { warnMessage } from '../src/logger/ParserLogger';
 
-describe('Parser', () => {
-  let stubWarn: sinon.SinonStub;
-  beforeEach(() => {
-    stubWarn = sinon.stub(console, 'warn');
-  });
+chai.use(sinonChai);
 
-  describe('#methodFromNode()', () => {
-    it('Unsupported method definition', () => {
-      const sourceCode = `
+describe('Parser', () => {
+  it('shouldExport symbol', () => {
+    const exportedTrueSourceCode = `
       /**
       * @shouldExport true
       */
-      interface MockedModule {
+      interface ExportTrueInterface {}
+
+      /**
+      * @shouldExport false
+      */
+      interface ExportFalseInterface {}
+
+      interface NoExportInterface {}
+      `;
+    withTempParser(exportedTrueSourceCode, parser => {
+      const modules = parser.parse();
+      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', methods: [], documentation: ''}]);
+    });
+  });
+
+  it('Module and method documentation', () => {
+    const sourceCode = `
+      /**
+      * This is an example documentation for the module
+      * @shouldExport true
+      */
+      interface MockedInterface {
+        /**
+        * This is an example documentation for the method
+        */
+        mockedMethod(): void;
+      }
+      `;
+
+    withTempParser(sourceCode, parser => {
+      const modules = parser.parse();
+      expect(modules).to.deep.equal([{
+        name: 'MockedInterface', 
+        methods: [{
+          name: 'mockedMethod',
+          parameters: [],
+          returnType: null,
+          documentation: 'This is an example documentation for the method',
+        }], 
+        documentation: 'This is an example documentation for the module'
+      }]);
+    });
+  });
+
+  it('Unsupported method definition', () => {
+    const sourceCode = `
+      /**
+      * @shouldExport true
+      */
+      interface MockedInterface {
         invalidProperty: string;
       }
       `;
 
-      withTempParser(sourceCode, (parser, filePath) => {
-        parser.parse();
-        const expectedWarning = warnMessage(`Skipped unsupported method definition "invalidProperty: string;" at ${filePath}:5. Please define only methods.`);
+    withTempParser(sourceCode, (parser, filePath) => {
+      const stubWarn = sinon.stub(console, 'warn');
 
-        expect(stubWarn.calledOnce).to.be.true;
-        expect(stubWarn.calledWith(expectedWarning)).to.be.true;
-      });
+      const modules = parser.parse();
+      expect(modules).to.deep.equal([{name: 'MockedInterface', methods: [], documentation: ''}]);
+
+      const expectedWarning = warnMessage(`Skipped "invalidProperty: string;" at ${filePath}:5 because it is not valid method signature. Please define only methods.`);
+      expect(stubWarn).to.have.been.calledWith(expectedWarning);
+
+      stubWarn.restore();
+    });
+  });
+
+  it('Multiple parameters', () => {
+    const sourceCode = `
+      /**
+      * @shouldExport true
+      */
+      interface MockedInterface {
+        multipleParamsMethod(foo: string, bar: number);
+      }
+      `;
+
+    withTempParser(sourceCode, (parser, filePath) => {
+      const stubWarn = sinon.stub(console, 'warn');
+
+      const modules = parser.parse();
+      expect(modules).to.deep.equal([{name: 'MockedInterface', methods: [], documentation: ''}]);
+
+      const expectedWarning = warnMessage(`Skipped "multipleParamsMethod(foo: string, bar: number);" at ${filePath}:5 because it has multiple parameters. Methods should only have one property. Please use destructuring object for multiple parameters.`);
+      expect(stubWarn).to.have.been.calledWith(expectedWarning);
+
+      stubWarn.restore();
     });
   });
 });
