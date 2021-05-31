@@ -19,7 +19,7 @@ export interface Field {
 export type ValueType = NonEmptyType | OptionalType;
 export type NonEmptyType = BasicType | CustomType | EnumType | ArrayType | DictionaryType;
 
-export enum ValueTypeKindFlag {
+export enum ValueTypeKind {
   basicType = 'basicType',
   customType = 'customType',
   enumType = 'enumType',
@@ -28,8 +28,8 @@ export enum ValueTypeKindFlag {
   optionalType = 'optionalType',
 }
 
-interface ValueTypeKind {
-  flag: ValueTypeKindFlag;
+interface BaseValueType {
+  kind: ValueTypeKind;
 }
 
 export enum BasicTypeValue {
@@ -39,13 +39,13 @@ export enum BasicTypeValue {
   int = 'int',
 }
 
-export interface BasicType extends ValueTypeKind {
-  flag: ValueTypeKindFlag.basicType;
+export interface BasicType extends BaseValueType {
+  kind: ValueTypeKind.basicType;
   value: BasicTypeValue;
 }
 
-export interface CustomType extends ValueTypeKind {
-  flag: ValueTypeKindFlag.customType;
+export interface CustomType extends BaseValueType {
+  kind: ValueTypeKind.customType;
   name?: string;
   members: Field[];
 }
@@ -55,15 +55,15 @@ export enum EnumSubType {
   number = 'number',
 }
 
-export interface EnumType extends ValueTypeKind {
-  flag: ValueTypeKindFlag.enumType;
+export interface EnumType extends BaseValueType {
+  kind: ValueTypeKind.enumType;
   name: string;
   subType: EnumSubType;
   members: Record<string, string | number>;
 }
 
-export interface ArrayType extends ValueTypeKind {
-  flag: ValueTypeKindFlag.arrayType;
+export interface ArrayType extends BaseValueType {
+  kind: ValueTypeKind.arrayType;
   elementType: ValueType;
 }
 
@@ -72,37 +72,37 @@ export enum DictionaryKeyType {
   number = 'number',
 }
 
-export interface DictionaryType extends ValueTypeKind {
-  flag: ValueTypeKindFlag.dictionaryType;
+export interface DictionaryType extends BaseValueType {
+  kind: ValueTypeKind.dictionaryType;
   keyType: DictionaryKeyType;
   valueType: ValueType;
 }
 
-export interface OptionalType extends ValueTypeKind {
-  flag: ValueTypeKindFlag.optionalType;
-  type: NonEmptyType;
+export interface OptionalType extends BaseValueType {
+  kind: ValueTypeKind.optionalType;
+  wrappedType: NonEmptyType;
 }
 
 export function isBasicType(valueType: ValueType): valueType is BasicType {
-  return valueType.flag === ValueTypeKindFlag.basicType;
+  return valueType.kind === ValueTypeKind.basicType;
 }
 
 export function isCustomType(valueType: ValueType): valueType is CustomType {
-  return valueType.flag === ValueTypeKindFlag.customType;
+  return valueType.kind === ValueTypeKind.customType;
 }
 
 export function isEnumType(valueType: ValueType): valueType is EnumType {
-  return valueType.flag === ValueTypeKindFlag.enumType;
+  return valueType.kind === ValueTypeKind.enumType;
 }
 
 export function isArraryType(valueType: ValueType): valueType is ArrayType {
-  return valueType.flag === ValueTypeKindFlag.arrayType;
+  return valueType.kind === ValueTypeKind.arrayType;
 }
 
 export function isDictionaryType(valueType: ValueType): valueType is DictionaryType {
-  return valueType.flag === ValueTypeKindFlag.dictionaryType;
+  return valueType.kind === ValueTypeKind.dictionaryType;
 }
 
 export function isOptionalType(valueType: ValueType): valueType is OptionalType {
-  return valueType.flag === ValueTypeKindFlag.optionalType;
+  return valueType.kind === ValueTypeKind.optionalType;
 }

@@ -55,7 +55,7 @@ export class NamedTypeParser {
     }
 
     if (isOptionalType(valueType)) {
-      this.recursiveParse(valueType.type, resultTypeMap);
+      this.recursiveParse(valueType.wrappedType, resultTypeMap);
     }
   }
 }

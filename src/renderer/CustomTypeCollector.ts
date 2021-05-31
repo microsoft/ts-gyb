@@ -1,4 +1,4 @@
-import { CustomTypeKind, ValueType, Field, ArrayTypeKind, BasicTypeKind, ValueTypeKindFlag, EnumKind } from '../types';
+import { CustomTypeKind, ValueType, Field, ArrayTypeKind, BasicTypeKind, ValueTypeKind, EnumKind } from '../types';
 import { SourceLike } from './SourceLike';
 import { RendererConfig } from './RenderConfig';
 import { CodableProtocol, InternalDataStructure } from './InternalDataStructure';
@@ -105,19 +105,19 @@ export class CustomTypeCollector implements TypeTransformer {
   }
 
   private isBasicTypeKind(kind: ValueType['kind']): kind is BasicTypeKind {
-    return kind.flag === ValueTypeKindFlag.basicType;
+    return kind.flag === ValueTypeKind.basicType;
   }
 
   private isCustomTypeKind(kind: ValueType['kind']): kind is CustomTypeKind {
-    return kind.flag === ValueTypeKindFlag.customType;
+    return kind.flag === ValueTypeKind.customType;
   }
 
   private isArrayTypeKind(kind: ValueType['kind']): kind is ArrayTypeKind {
-    return kind.flag === ValueTypeKindFlag.arrayType;
+    return kind.flag === ValueTypeKind.arrayType;
   }
 
   private isEnumTypeKind(kind: ValueType['kind']): kind is EnumKind {
-    return kind.flag === ValueTypeKindFlag.enumType;
+    return kind.flag === ValueTypeKind.enumType;
   }
 
   private replacePrefix(originalName: string): string {

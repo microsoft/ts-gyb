@@ -8,7 +8,7 @@ import {
   CustomType,
   ArrayType,
   BasicType,
-  ValueTypeKindFlag,
+  ValueTypeKind,
   EnumType,
   EnumSubType,
   NonEmptyType,
@@ -63,7 +63,7 @@ export class ValueParser {
       .filter((field): field is Field => field !== null);
 
     return {
-      flag: ValueTypeKindFlag.customType,
+      kind: ValueTypeKind.customType,
       members: fields,
     };
   }
@@ -80,8 +80,8 @@ export class ValueParser {
 
     if (nullable && !isOptionalType(valueType)) {
       return {
-        flag: ValueTypeKindFlag.optionalType,
-        type: valueType,
+        kind: ValueTypeKind.optionalType,
+        wrappedType: valueType,
       };
     }
 
@@ -135,8 +135,8 @@ export class ValueParser {
 
     if (!isOptionalType(valueType) && nullable) {
       return {
-        flag: ValueTypeKindFlag.optionalType,
-        type: valueType,
+        kind: ValueTypeKind.optionalType,
+        wrappedType: valueType,
       };
     }
 
@@ -146,19 +146,19 @@ export class ValueParser {
   private basicTypeKindFromTypeNode(node: ts.TypeNode): BasicType | null {
     if (node.kind === ts.SyntaxKind.StringKeyword) {
       return {
-        flag: ValueTypeKindFlag.basicType,
+        kind: ValueTypeKind.basicType,
         value: BasicTypeValue.string,
       };
     }
     if (node.kind === ts.SyntaxKind.NumberKeyword) {
       return {
-        flag: ValueTypeKindFlag.basicType,
+        kind: ValueTypeKind.basicType,
         value: BasicTypeValue.number,
       };
     }
     if (node.kind === ts.SyntaxKind.BooleanKeyword) {
       return {
-        flag: ValueTypeKindFlag.basicType,
+        kind: ValueTypeKind.basicType,
         value: BasicTypeValue.boolean,
       };
     }
@@ -213,7 +213,7 @@ export class ValueParser {
     const elementType = this.valueTypeFromTypeNode(node.elementType);
     if (elementType) {
       return {
-        flag: ValueTypeKindFlag.arrayType,
+        kind: ValueTypeKind.arrayType,
         elementType,
       };
     }
@@ -224,7 +224,7 @@ export class ValueParser {
   private getAliasType(typeName: string): BasicType | null {
     if (typeName === INT_TYPE_NAME) {
       return {
-        flag: ValueTypeKindFlag.basicType,
+        kind: ValueTypeKind.basicType,
         value: BasicTypeValue.int,
       };
     }
@@ -253,7 +253,7 @@ export class ValueParser {
     }
 
     return {
-      flag: ValueTypeKindFlag.customType,
+      kind: ValueTypeKind.customType,
       name,
       members,
     };
@@ -303,7 +303,7 @@ export class ValueParser {
     }
 
     return {
-      flag: ValueTypeKindFlag.enumType,
+      kind: ValueTypeKind.enumType,
       name,
       subType: enumSubType,
       members,
@@ -326,7 +326,7 @@ export class ValueParser {
     const valueType = this.valueTypeFromNode(typeElement);
 
     return {
-      flag: ValueTypeKindFlag.dictionaryType,
+      kind: ValueTypeKind.dictionaryType,
       keyType: DictionaryKeyType.string,
       valueType,
     };
