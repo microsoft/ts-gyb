@@ -7,6 +7,7 @@ import {
 } from '../types';
 import { ValueParser } from './ValueParser';
 import { shouldExportSymbol } from './utils';
+import { ParserLogger } from '../logger/ParserLogger';
 
 export class Parser {
   private program: ts.Program;
@@ -14,6 +15,8 @@ export class Parser {
   private checker: ts.TypeChecker;
 
   private valueParser: ValueParser;
+
+  private logger: ParserLogger;
 
   constructor(globPatterns: string[]) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
@@ -23,6 +26,7 @@ export class Parser {
     });
     this.checker = this.program.getTypeChecker();
     this.valueParser = new ValueParser(this.checker);
+    this.logger = new ParserLogger(this.checker);
   }
 
   parse(): Module[] {
@@ -51,10 +55,6 @@ export class Parser {
       return null;
     }
 
-    if (node.name === undefined) {
-      return null;
-    }
-
     const interfaceName = node.name.text;
 
     const methods: Method[] = node.members
@@ -72,6 +72,7 @@ export class Parser {
 
   private methodFromNode(node: ts.Node): Method | null {
     if (!ts.isMethodSignature(node)) {
+      this.logger.logSkippedNode(node, 'unsupported method definition', 'Please define only methods');
       return null;
     }
 
