@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Method, Module, ValueTypeKindFlag } from '../types';
+import { Method, Module, ValueTypeKind } from '../types';
 import { RendererConfig } from './RenderConfig';
 import { CodableProtocol, InternalDataStructure } from './InternalDataStructure';
 import { GenericCodeRenderer } from './GenericCodeRenderer';
@@ -79,10 +79,10 @@ export class SwiftCodeRenderer extends GenericCodeRenderer {
     const parameter = method.parameters[0];
     const parameterType = parameter.type;
     switch (parameterType.kind.flag) {
-      case ValueTypeKindFlag.basicType:
-      case ValueTypeKindFlag.arrayType:
-      case ValueTypeKindFlag.enumType:
-      case ValueTypeKindFlag.customType:
+      case ValueTypeKind.basicType:
+      case ValueTypeKind.arrayType:
+      case ValueTypeKind.enumType:
+      case ValueTypeKind.customType:
         return [`${parameter.name}: ${this.typeTransformer.transformType(parameter.type)}`];
       default:
         return [];

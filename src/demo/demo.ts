@@ -2,6 +2,7 @@ import { Parser } from '../parser/Parser';
 import { RendererConfig, DefaultSwiftRendererConfig } from '../renderer/RenderConfig';
 import { CustomTypeCollector } from '../renderer/CustomTypeCollector';
 import { DemoCodeRenderer } from './demoCodeRenderer';
+import { NamedTypeParser } from '../parser/NamedTypeParser';
 
 function run(): void {
   const config = new DefaultSwiftRendererConfig();
@@ -14,6 +15,9 @@ function run(): void {
   const rendererConfig = config as RendererConfig;
   const typeTransformer = new CustomTypeCollector(rendererConfig);
   const renderer = new DemoCodeRenderer(rendererConfig, typeTransformer);
+  const namedTypeParser = new NamedTypeParser();
+  const namedTypes = namedTypeParser.parse(apiModules);
+  console.log(JSON.stringify(namedTypes, null, 4));
 
   renderer.print();
 
