@@ -2,10 +2,22 @@ import ts from 'typescript';
 
 // Defined tags
 const SHOULD_EXPORT = 'shouldExport';
+const OVERRIDE_MODULE_NAME = 'overrideModuleName';
 
 export function shouldExportSymbol(symbol: ts.Symbol): boolean {
   const tags = symbol.getJsDocTags();
   return !!tags.find(tag => tag.name === SHOULD_EXPORT && ts.displayPartsToString(tag.text) === 'true');
+}
+
+export function overriddenModuleName(symbol: ts.Symbol): string | null {
+  const tags = symbol.getJsDocTags();
+  const overrideNameTag = tags.find(tag => tag.name === OVERRIDE_MODULE_NAME);
+
+  if (overrideNameTag === undefined) { 
+    return null;
+  }
+  
+  return ts.displayPartsToString(overrideNameTag.text);
 }
 
 export function extractUnionTypeNode(

@@ -6,7 +6,7 @@ import {
   Field,
 } from '../types';
 import { ValueParser } from './ValueParser';
-import { shouldExportSymbol } from './utils';
+import { overriddenModuleName, shouldExportSymbol } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
 
 export class Parser {
@@ -50,12 +50,15 @@ export class Parser {
     }
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
+    if (symbol === undefined) {
+      throw Error('Invalid module node');
+    }
 
-    if (symbol && !shouldExportSymbol(symbol)) {
+    if (!shouldExportSymbol(symbol)) {
       return null;
     }
 
-    const interfaceName = node.name.text;
+    const interfaceName = overriddenModuleName(symbol) ?? node.name.text;
 
     const methods: Method[] = node.members
       .map(methodNode => this.methodFromNode(methodNode))

@@ -5,7 +5,9 @@ import { BasicTypeValue, DictionaryKeyType, isArraryType, isBasicType, isCustomT
 export interface MethodView {
   readonly methodName: string;
   readonly parametersDeclaration: string;
-  readonly parameters: { name: string, type: string }[];
+  readonly parameters: { name: string, type: string, last: boolean }[];
+  readonly returnType: string | null;
+  readonly documentationLines: string[];
 }
 
 export class SwiftMethodView implements MethodView {
@@ -21,8 +23,24 @@ export class SwiftMethodView implements MethodView {
     return this.parameters.map(parameter =>  `${parameter.name}: ${parameter.type}`).join(', ');
   }
 
-  get parameters(): { name: string, type: string }[] {
-    return this.method.parameters.map(parameter => ({ name: parameter.name, type: this.getTypeName(parameter.type) }));
+  get parameters(): { name: string, type: string, last: boolean }[] {
+    return this.method.parameters.map((parameter, index) => ({ name: parameter.name, type: this.getTypeName(parameter.type), last: index === this.method.parameters.length - 1 }));
+  }
+
+  get returnType(): string | null {
+    if (this.method.returnType === null) {
+      return null;
+    }
+
+    return this.getTypeName(this.method.returnType);
+  }
+
+  get documentationLines(): string[] {
+    if (this.method.documentation.length === 0) {
+      return [];
+    }
+
+    return this.method.documentation.split('\n');
   }
 
   private getTypeName(valueType: ValueType): string {

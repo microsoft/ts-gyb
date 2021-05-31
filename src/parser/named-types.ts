@@ -2,18 +2,14 @@ import { CustomType, EnumType, isArraryType, isCustomType, isDictionaryType, isE
 
 export type NamedType = CustomType | EnumType;
 
-export function transformModuleAndTypeName(modules: Module[], searchValue: string | RegExp, replaceValue: string): void {
-  modules.forEach(module => {
-    module.name = module.name.replace(searchValue, replaceValue);
-  });
-
+export function dropIPrefixInCustomTypes(modules: Module[]): void {
   fetchRootTypes(modules).forEach(valueType => {
     recursiveVisitNamedType(valueType, namedType => {
-      if (namedType.name === undefined) {
-        throw Error("Named type doesn't have name");
+      if (!isCustomType(namedType)) {
+        return;
       }
 
-      namedType.name = namedType.name.replace(searchValue, replaceValue);
+      namedType.name = namedType.name?.replace(/^I/, '');
     });
   });
 }

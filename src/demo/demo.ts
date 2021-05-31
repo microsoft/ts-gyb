@@ -1,12 +1,12 @@
 import { Parser } from '../parser/Parser';
-import { fetchNamedTypes, transformModuleAndTypeName } from '../parser/named-types';
+import { dropIPrefixInCustomTypes, fetchNamedTypes } from '../parser/named-types';
 import { SwiftModuleView } from '../renderer/ModuleView';
 import { CodeTemplateRenderer } from '../renderer/CodeTemplateRenderer';
 
 function run(): void {
   const parser = new Parser(['src/demo/data/demoApi.ts']);
   const apiModules = parser.parse();
-  transformModuleAndTypeName(apiModules, /^I/, '');
+  dropIPrefixInCustomTypes(apiModules);
   console.log(JSON.stringify(apiModules, null, 4));
 
   const namedTypes = fetchNamedTypes(apiModules);
