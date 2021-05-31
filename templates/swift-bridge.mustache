@@ -7,7 +7,7 @@
 import CoreGraphics
 
 public class {{moduleName}} {
-  let jsExecutor: BridgeJSExecutor
+  {{^customTags.noPrivateDispatcher}}private {{/customTags.noPrivateDispatcher}}let jsExecutor: BridgeJSExecutor
 
   init(jsExecutor: BridgeJSExecutor) {
     self.jsExecutor = jsExecutor

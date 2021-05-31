@@ -4,10 +4,12 @@ import ts from 'typescript';
 const SHOULD_EXPORT = 'shouldExport';
 const OVERRIDE_MODULE_NAME = 'overrideModuleName';
 
-export function parseJsDocTags(symbol: ts.Symbol): { shouldExport: boolean, overrideName: string | null, customTags: Record<string, string> } {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function parseJsDocTags(symbol: ts.Symbol): { shouldExport: boolean, overrideName: string | null, customTags: Record<string, any> } {
   let shouldExport = false;
   let overrideName: string | null = null;
-  const customTags: Record<string, string> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const customTags: Record<string, any> = {};
 
   const tags = symbol.getJsDocTags();
   tags.forEach(tag => {
@@ -23,7 +25,12 @@ export function parseJsDocTags(symbol: ts.Symbol): { shouldExport: boolean, over
       return;
     }
 
-    customTags[tag.name] = value;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      customTags[tag.name] = JSON.parse(value);
+    } catch {
+      customTags[tag.name] = value;
+    }
   });
 
   return { shouldExport, overrideName, customTags };
