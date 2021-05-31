@@ -41,11 +41,12 @@ interface DictionaryWithAnyKey {
 }
 
 /**
+ * Documentation for module
  * @shouldExport true
  */
 export interface IHtmlApi {
   /**
-   * @comment
+   * This is a documentation
    * Set Mention class names
    * used to map id to class names
    */
