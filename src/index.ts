@@ -20,13 +20,21 @@ const args = program
       demandOption: true,
       describe: 'The path of output file',
     },
+    dropInterfaceIPrefix: {
+      type: 'boolean',
+      default: false,
+      describe: 'Drop "I" prefix for all interfaces',
+    }
   })
   .help().argv;
 
 function run(): void {
   const parser = new Parser([args.path]);
   const apiModules = parser.parse();
-  dropIPrefixInCustomTypes(apiModules);
+  
+  if (args.dropInterfaceIPrefix) {
+    dropIPrefixInCustomTypes(apiModules);
+  }
   console.log(JSON.stringify(apiModules, null, 4));
 
   const namedTypes = fetchNamedTypes(apiModules);
