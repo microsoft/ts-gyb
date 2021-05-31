@@ -74,5 +74,13 @@ module.exports = {
     "no-underscore-dangle": ["error", { "enforceInMethodNames": true, "allowAfterThis": true }],
     "no-useless-constructor": "off",
     "no-empty-function": ["error", {"allow": ["constructors"]}],
-  }
+  },
+  "overrides": [
+    {
+      "files": ["test/**/*.ts"],
+      "rules": {
+        "no-unused-expressions": "off"
+      }
+    }
+  ],
 };

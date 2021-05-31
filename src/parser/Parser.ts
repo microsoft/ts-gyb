@@ -7,6 +7,7 @@ import {
 } from '../types';
 import { ValueParser } from './ValueParser';
 import { shouldExportSymbol } from './utils';
+import { ParserLogger } from '../logger/ParserLogger';
 
 export class Parser {
   private program: ts.Program;
@@ -14,6 +15,8 @@ export class Parser {
   private checker: ts.TypeChecker;
 
   private valueParser: ValueParser;
+
+  private logger: ParserLogger;
 
   constructor(globPatterns: string[]) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
@@ -23,6 +26,7 @@ export class Parser {
     });
     this.checker = this.program.getTypeChecker();
     this.valueParser = new ValueParser(this.checker);
+    this.logger = new ParserLogger(this.checker);
   }
 
   parse(): Module[] {
@@ -51,10 +55,6 @@ export class Parser {
       return null;
     }
 
-    if (node.name === undefined) {
-      return null;
-    }
-
     const interfaceName = node.name.text;
 
     const methods: Method[] = node.members
@@ -72,36 +72,42 @@ export class Parser {
 
   private methodFromNode(node: ts.Node): Method | null {
     if (!ts.isMethodSignature(node)) {
+      this.logger.warnSkippedNode(node, 'it is not valid method signature', 'Please define only methods');
       return null;
     }
 
     const methodName = node.name.getText();
 
-    const parameters = this.fieldsFromParameters(node.parameters);
+    try {
+      const parameters = this.fieldsFromParameters(node);
+      const returnType = this.valueParser.parseFunctionReturnType(node);
 
-    const returnType = this.valueParser.parseFunctionReturnType(node);
+      const symbol = this.checker.getSymbolAtLocation(node.name);
+      const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
-    const symbol = this.checker.getSymbolAtLocation(node.name);
-    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
-
-    return {
-      name: methodName,
-      parameters,
-      returnType,
-      documentation,
-    };
+      return {
+        name: methodName,
+        parameters,
+        returnType,
+        documentation,
+      };
+    } catch {
+      return null;
+    }
   }
 
-  private fieldsFromParameters(parameterNodes: ts.NodeArray<ts.ParameterDeclaration>): Field[] {
+  private fieldsFromParameters(methodSignature: ts.MethodSignature): Field[] {
+    const parameterNodes = methodSignature.parameters;
+
     if (parameterNodes.length === 0) {
       return [];
     }
-    if (parameterNodes.length !== 1) {
-      throw new Error('The exported API can only have one parameter, if multiple parameters are needed, use an object');
+    if (parameterNodes.length > 1) {
+      this.logger.warnSkippedNode(methodSignature, 'it has multiple parameters', 'Methods should only have one property. Please use destructuring object for multiple parameters');
+      throw new Error('Multiple parameters is not supported.');
     }
 
     const parameterDeclaration = parameterNodes[0];
-
     if (parameterDeclaration.type === undefined) {
       return [];
     }
