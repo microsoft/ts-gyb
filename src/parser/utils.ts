@@ -8,6 +8,7 @@ const OVERRIDE_MODULE_NAME = 'overrideModuleName';
 export function parseJsDocTags(symbol: ts.Symbol): {
   shouldExport: boolean;
   overrideName: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customTags: Record<string, any>;
 } {
   let shouldExport = false;
