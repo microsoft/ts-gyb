@@ -6,7 +6,7 @@ import Foundation
 
 public protocol {{moduleName}}: EditorNativeModule {
   {{#methods}}
-  func {{methodName}}({{parametersDeclaration}}{{#returnType}}completion: @escaping (Result<{{returnType}}, Error>) -> Void{{/returnType}})
+  func {{methodName}}({{parametersDeclaration}}{{#returnType}}{{#parametersDeclaration.length}}, {{/parametersDeclaration.length}}completion: @escaping (Result<{{returnType}}, Error>) -> Void{{/returnType}})
   {{/methods}}
 }
 
@@ -51,9 +51,9 @@ class {{customTags.bridgeName}}: NativeModuleBridge {
     }
 
     {{/parameters.length}}
-    instance.{{methodName}}({{#parameters}}{{name}}: parameters.{{name}}{{^last}}, {{/last}}{{/parameters}}{{#returnType}}{{#parameters.length}}, {{/parameters.length}}completion: { result in
+    instance.{{methodName}}{{#parameters.length}}({{#parameters}}{{name}}: parameters.{{name}}{{^last}}, {{/last}}{{/parameters}}){{/parameters.length}}{{#returnType}} { result in
       completion(result.toEncodable())
-    }{{/returnType}})
+    }{{/returnType}}
   }
   {{/methods}}
 }

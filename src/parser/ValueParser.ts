@@ -238,6 +238,8 @@ export class ValueParser {
     
     if (isCustomType(valueType) && valueType.name === undefined) {
       valueType.name = typeName;
+    } else if (isOptionalType(valueType) && isCustomType(valueType.wrappedType) && valueType.wrappedType.name === undefined) {
+      valueType.wrappedType.name = typeName;
     }
 
     return valueType;
