@@ -15,16 +15,21 @@ export enum RenderingLanguage {
 }
 
 export class CodeGenerator {
-  private readonly parser: Parser;
+  private modulesMap: Record<string, Module[]> = {};
 
-  private parsedResult: { modules: Module[]; namedTypes: Record<string, NamedType> } | undefined;
+  private namedTypes: Record<string, NamedType> = {};
 
-  constructor(interfacePaths: string[]) {
-    this.parser = new Parser(interfacePaths);
-  }
-
-  parse(dropInterfaceIPrefix: boolean): void {
-    const modules = this.parser.parse();
+  parse({
+    tag,
+    interfacePaths,
+    dropInterfaceIPrefix,
+  }: {
+    tag: string;
+    interfacePaths: string[];
+    dropInterfaceIPrefix: boolean;
+  }): void {
+    const parser = new Parser(interfacePaths);
+    const modules = parser.parse();
 
     if (dropInterfaceIPrefix) {
       dropIPrefixInCustomTypes(modules);
@@ -32,40 +37,53 @@ export class CodeGenerator {
 
     const namedTypes = fetchNamedTypes(modules);
 
-    this.parsedResult = { modules, namedTypes };
+    this.modulesMap[tag] = modules;
+
+    Object.entries(namedTypes).forEach(([typeName, namedType]) => {
+      if (this.namedTypes[typeName] !== undefined) {
+        return;
+      }
+
+      this.namedTypes[typeName] = namedType;
+    });
   }
 
-  print(): void {
-    if (this.parsedResult === undefined) {
-      throw Error('Not parsed. Please run parse first');
+  printModules({ tag }: { tag: string }): void {
+    const modules = this.modulesMap[tag];
+    if (modules === undefined) {
+      throw Error('Modules not parsed. Run parse first.');
     }
 
     console.log('Modules:\n');
-    console.log(this.parsedResult.modules.map((module) => serializeModule(module)).join('\n\n'));
+    console.log(modules.map((module) => serializeModule(module)).join('\n\n'));
+  }
+
+  printNamedTypes(): void {
     console.log('\nNamed types:\n');
     console.log(
-      Object.entries(this.parsedResult.namedTypes)
+      Object.entries(this.namedTypes)
         .map(([typeName, namedType]) => serializeNamedType(typeName, namedType))
         .join('\n\n')
     );
   }
 
   render({
+    tag,
     language,
     outputDirectory,
     moduleTemplatePath,
     namedTypesTemplatePath,
   }: {
+    tag: string;
     language: RenderingLanguage;
     outputDirectory: string;
     moduleTemplatePath: string;
     namedTypesTemplatePath: string;
   }): void {
-    if (this.parsedResult === undefined) {
-      throw Error('Not parsed. Please run parse first');
+    const modules = this.modulesMap[tag];
+    if (modules === undefined) {
+      throw Error('Modules not parsed. Run parse first.');
     }
-
-    const { modules, namedTypes } = this.parsedResult;
 
     modules.forEach((module) => {
       const moduleView = this.getModuleView(language, module);
@@ -74,7 +92,7 @@ export class CodeGenerator {
       this.writeFile(renderedCode, outputDirectory, `${moduleView.moduleName}${this.getFileExtension(language)}`);
     });
 
-    const namedTypesView = this.getNamedTypesView(language, namedTypes);
+    const namedTypesView = this.getNamedTypesView(language, this.namedTypes);
     const renderedCode = renderCode(namedTypesTemplatePath, namedTypesView);
     this.writeFile(renderedCode, outputDirectory, `Generated_CustomInterface${this.getFileExtension(language)}`);
   }

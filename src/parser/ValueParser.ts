@@ -27,10 +27,13 @@ export class ValueParser {
       return null;
     }
 
-    if (methodSignature.type !== undefined && ts.isTypeReferenceNode(methodSignature.type) && methodSignature.type.typeName.getText() === 'Promise') {
+    if (
+      methodSignature.type !== undefined &&
+      ts.isTypeReferenceNode(methodSignature.type) &&
+      methodSignature.type.typeName.getText() === 'Promise'
+    ) {
       if (methodSignature.type.typeArguments === undefined || methodSignature.type.typeArguments.length !== 1) {
         throw Error('Invalid promise');
-
       }
       const wrappedTypeNode = methodSignature.type.typeArguments[0];
 
@@ -149,15 +152,17 @@ export class ValueParser {
         valueType = newValueType;
         return;
       }
-      
+
       if (!isCustomType(valueType) || !isCustomType(newValueType)) {
         throw Error('Do not support multiple union types except for interface or literal type.');
       }
 
-      const existingMemberNames = new Set(valueType.members.map(member => member.name));
+      const existingMemberNames = new Set(valueType.members.map((member) => member.name));
       valueType = {
         kind: ValueTypeKind.customType,
-        members: valueType.members.concat(newValueType.members.filter(member => !existingMemberNames.has(member.name))),
+        members: valueType.members.concat(
+          newValueType.members.filter((member) => !existingMemberNames.has(member.name))
+        ),
       };
     });
 
@@ -235,10 +240,14 @@ export class ValueParser {
     }
 
     const valueType = this.valueTypeFromNode(declaration);
-    
+
     if (isCustomType(valueType) && valueType.name === undefined) {
       valueType.name = typeName;
-    } else if (isOptionalType(valueType) && isCustomType(valueType.wrappedType) && valueType.wrappedType.name === undefined) {
+    } else if (
+      isOptionalType(valueType) &&
+      isCustomType(valueType.wrappedType) &&
+      valueType.wrappedType.name === undefined
+    ) {
       valueType.wrappedType.name = typeName;
     }
 

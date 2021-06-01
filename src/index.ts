@@ -38,10 +38,15 @@ const args = program
   .help().argv;
 
 function run(): void {
-  const generator = new CodeGenerator(args.interfacePaths as string[]);
-  generator.parse(args.dropInterfaceIPrefix);
-  generator.print();
+  const generator = new CodeGenerator();
+  generator.parse({
+    tag: 'APIs',
+    interfacePaths: args.interfacePaths as string[],
+    dropInterfaceIPrefix: args.dropInterfaceIPrefix,
+  });
+  generator.printModules({ tag: 'APIs' });
   generator.render({
+    tag: 'APIs',
     language: RenderingLanguage.Swift,
     outputDirectory: args.outputDirectory,
     moduleTemplatePath: args.moduleTemplatePath,
