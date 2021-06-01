@@ -1,11 +1,21 @@
-import { capitalize } from "../utils";
-import { CustomType, EnumType, isArraryType, isCustomType, isDictionaryType, isEnumType, isOptionalType, Module, ValueType } from "../types";
+import { capitalize } from '../utils';
+import {
+  CustomType,
+  EnumType,
+  isArraryType,
+  isCustomType,
+  isDictionaryType,
+  isEnumType,
+  isOptionalType,
+  Module,
+  ValueType,
+} from '../types';
 
 export type NamedType = CustomType | EnumType;
 
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
-  fetchRootTypes(modules).forEach(valueType => {
-    recursiveVisitNamedType(valueType, namedType => {
+  fetchRootTypes(modules).forEach((valueType) => {
+    recursiveVisitNamedType(valueType, (namedType) => {
       if (!isCustomType(namedType)) {
         return;
       }
@@ -17,8 +27,8 @@ export function dropIPrefixInCustomTypes(modules: Module[]): void {
 
 export function fetchNamedTypes(modules: Module[]): Record<string, NamedType> {
   const typeMap: Record<string, NamedType> = {};
-  
-  fetchRootTypes(modules).forEach(valueType => {
+
+  fetchRootTypes(modules).forEach((valueType) => {
     recursiveVisitNamedType(valueType, (namedType, path) => {
       if (namedType.name === undefined) {
         namedType.name = path;
@@ -37,16 +47,26 @@ export function fetchNamedTypes(modules: Module[]): Record<string, NamedType> {
 
 function fetchRootTypes(modules: Module[]): ValueType[] {
   return modules
-    .flatMap(module => module.methods)
-    .flatMap(method => method.parameters.map(parameter => parameter.type).concat(method.returnType ? [method.returnType] : []));
+    .flatMap((module) => module.methods)
+    .flatMap((method) =>
+      method.parameters.map((parameter) => parameter.type).concat(method.returnType ? [method.returnType] : [])
+    );
 }
 
-function recursiveVisitNamedType(valueType: ValueType, visit: (namedType: NamedType, path: string) => void, path = ''): void {
+function recursiveVisitNamedType(
+  valueType: ValueType,
+  visit: (namedType: NamedType, path: string) => void,
+  path = ''
+): void {
   if (isCustomType(valueType)) {
     visit(valueType, path);
 
-    valueType.members.forEach(member => {
-      recursiveVisitNamedType(member.type, visit, `${path}${valueType.name ?? ''}Members${capitalize(member.name)}Type`);
+    valueType.members.forEach((member) => {
+      recursiveVisitNamedType(
+        member.type,
+        visit,
+        `${path}${valueType.name ?? ''}Members${capitalize(member.name)}Type`
+      );
     });
 
     return;

@@ -6,9 +6,7 @@ export function warnMessage(message: string): string {
 }
 
 export class ParserLogger {
-  constructor(
-    private checker: ts.TypeChecker,
-  ) {}
+  constructor(private checker: ts.TypeChecker) {}
 
   warn(message: string): void {
     console.warn(warnMessage(message));
@@ -19,10 +17,7 @@ export class ParserLogger {
   }
 
   private getFileNameAndLine(node: ts.Node): string {
-    const { line } = ts.getLineAndCharacterOfPosition(
-      node.getSourceFile(),
-      node.pos
-    );
+    const { line } = ts.getLineAndCharacterOfPosition(node.getSourceFile(), node.pos);
 
     return `${node.getSourceFile().fileName}:${line + 1}`;
   }

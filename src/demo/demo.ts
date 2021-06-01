@@ -14,7 +14,7 @@ function run(): void {
   const namedTypes = fetchNamedTypes(apiModules);
   console.log(JSON.stringify(namedTypes, null, 4));
 
-  apiModules.forEach(module => {
+  apiModules.forEach((module) => {
     const moduleView = new SwiftModuleView(module);
     const renderedCode = renderCode('templates/swift-bridge.mustache', moduleView);
 

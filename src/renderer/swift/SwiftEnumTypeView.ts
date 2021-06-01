@@ -1,11 +1,8 @@
-import { EnumSubType, EnumType } from "../../types";
+import { EnumSubType, EnumType } from '../../types';
 import { EnumTypeView } from '../views';
 
 export class SwiftEnumTypeView implements EnumTypeView {
-  constructor(
-    readonly typeName: string,
-    private enumType: EnumType,
-  ) {}
+  constructor(readonly typeName: string, private enumType: EnumType) {}
 
   get valueType(): string {
     switch (this.enumType.subType) {
@@ -18,7 +15,10 @@ export class SwiftEnumTypeView implements EnumTypeView {
     }
   }
 
-  get members(): { key: string, value: string }[] {
-    return Object.entries(this.enumType.members).map(([key, value]) => ({ key, value: typeof value === 'string' ? `"${value}"` : `${value}` }));
+  get members(): { key: string; value: string }[] {
+    return Object.entries(this.enumType.members).map(([key, value]) => ({
+      key,
+      value: typeof value === 'string' ? `"${value}"` : `${value}`,
+    }));
   }
 }

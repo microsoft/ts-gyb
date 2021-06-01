@@ -5,14 +5,18 @@ const SHOULD_EXPORT = 'shouldExport';
 const OVERRIDE_MODULE_NAME = 'overrideModuleName';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function parseJsDocTags(symbol: ts.Symbol): { shouldExport: boolean, overrideName: string | null, customTags: Record<string, any> } {
+export function parseJsDocTags(symbol: ts.Symbol): {
+  shouldExport: boolean;
+  overrideName: string | null;
+  customTags: Record<string, any>;
+} {
   let shouldExport = false;
   let overrideName: string | null = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const customTags: Record<string, any> = {};
 
   const tags = symbol.getJsDocTags();
-  tags.forEach(tag => {
+  tags.forEach((tag) => {
     const value = ts.displayPartsToString(tag.text);
 
     if (tag.name === SHOULD_EXPORT) {
@@ -36,13 +40,11 @@ export function parseJsDocTags(symbol: ts.Symbol): { shouldExport: boolean, over
   return { shouldExport, overrideName, customTags };
 }
 
-export function extractUnionTypeNode(
-  node: ts.UnionTypeNode,
-): { typeNode: ts.TypeNode, nullable: boolean } {
+export function extractUnionTypeNode(node: ts.UnionTypeNode): { typeNode: ts.TypeNode; nullable: boolean } {
   let nullable = false;
   let wrappedTypeNode: ts.TypeNode | undefined;
 
-  node.types.forEach(typeNode => {
+  node.types.forEach((typeNode) => {
     if (isUndefinedOrNull(typeNode)) {
       nullable = true;
       return;

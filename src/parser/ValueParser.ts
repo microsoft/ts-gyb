@@ -20,13 +20,9 @@ import {
 import { extractUnionTypeNode } from './utils';
 
 export class ValueParser {
-  constructor(
-    private checker: ts.TypeChecker,
-  ) {}
+  constructor(private checker: ts.TypeChecker) {}
 
-  parseFunctionReturnType(
-    methodSignature: ts.MethodSignature,
-  ): ValueType | null {
+  parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
     if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
       return null;
     }
@@ -59,7 +55,7 @@ export class ValueParser {
     }
 
     const fields = typeNode.members
-      .map(member => this.fieldFromTypeElement(member))
+      .map((member) => this.fieldFromTypeElement(member))
       .filter((field): field is Field => field !== null);
 
     return {
@@ -68,9 +64,7 @@ export class ValueParser {
     };
   }
 
-  private valueTypeFromNode(
-    node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken },
-  ): ValueType {
+  private valueTypeFromNode(node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }): ValueType {
     if (node.type === undefined) {
       throw Error('Invalid type');
     }
@@ -88,9 +82,7 @@ export class ValueParser {
     return valueType;
   }
 
-  private valueTypeFromTypeNode(
-    typeNode: ts.TypeNode,
-  ): ValueType {
+  private valueTypeFromTypeNode(typeNode: ts.TypeNode): ValueType {
     const unionType = this.parseUnionTypeNode(typeNode);
     if (unionType !== null) {
       return unionType;
@@ -104,9 +96,7 @@ export class ValueParser {
     return this.nonEmptyTypeFromTypeNode(typeNode);
   }
 
-  private nonEmptyTypeFromTypeNode(
-    typeNode: ts.TypeNode,
-  ): NonEmptyType {
+  private nonEmptyTypeFromTypeNode(typeNode: ts.TypeNode): NonEmptyType {
     const typeKind = this.basicTypeKindFromTypeNode(typeNode);
     if (typeKind !== null) {
       return typeKind;
@@ -244,7 +234,7 @@ export class ValueParser {
     const name = node.name.getText();
 
     const members = node.members
-      .map(item => this.fieldFromTypeElement(item))
+      .map((item) => this.fieldFromTypeElement(item))
       .filter((field): field is Field => field !== null);
 
     const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(node);
@@ -310,9 +300,7 @@ export class ValueParser {
     };
   }
 
-  private parseIndexTypeNode(
-    type: { members: ts.NodeArray<ts.TypeElement> },
-  ): DictionaryType | null {
+  private parseIndexTypeNode(type: { members: ts.NodeArray<ts.TypeElement> }): DictionaryType | null {
     if (type.members && type.members.length !== 1) {
       // Only support interface with one index signature, like { [key: string]: string }
       return null;

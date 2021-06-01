@@ -1,4 +1,14 @@
-import { BasicTypeValue, DictionaryKeyType, isArraryType, isBasicType, isCustomType, isDictionaryType, isEnumType, isOptionalType, ValueType } from '../../types';
+import {
+  BasicTypeValue,
+  DictionaryKeyType,
+  isArraryType,
+  isBasicType,
+  isCustomType,
+  isDictionaryType,
+  isEnumType,
+  isOptionalType,
+  ValueType,
+} from '../../types';
 
 export function convertValueType(valueType: ValueType): string {
   if (isBasicType(valueType)) {
@@ -43,7 +53,7 @@ export function convertValueType(valueType: ValueType): string {
         keyType = 'Int';
         break;
       default:
-          throw Error('Type not exists');
+        throw Error('Type not exists');
     }
 
     return `[${keyType}: ${convertValueType(valueType.valueType)}]`;

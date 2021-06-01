@@ -1,7 +1,7 @@
 export interface MethodView {
   readonly methodName: string;
   readonly parametersDeclaration: string;
-  readonly parameters: { name: string, type: string, last: boolean }[];
+  readonly parameters: { name: string; type: string; last: boolean }[];
   readonly returnType: string | null;
   readonly documentationLines: string[];
 }
@@ -20,11 +20,11 @@ export interface NamedTypesView {
 
 export interface CustomTypeView {
   readonly typeName: string;
-  readonly members: { name: string, type: string, last: boolean }[];
+  readonly members: { name: string; type: string; last: boolean }[];
 }
 
 export interface EnumTypeView {
   readonly typeName: string;
   readonly valueType: string;
-  readonly members: { key: string, value: string }[];
+  readonly members: { key: string; value: string }[];
 }

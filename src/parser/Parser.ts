@@ -1,10 +1,6 @@
 import ts from 'typescript';
 import { glob } from 'glob';
-import {
-  Module,
-  Method,
-  Field,
-} from '../types';
+import { Module, Method, Field } from '../types';
 import { ValueParser } from './ValueParser';
 import { parseJsDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
@@ -63,7 +59,7 @@ export class Parser {
     const interfaceName = jsDocTagsResult.overrideName ?? node.name.text;
 
     const methods: Method[] = node.members
-      .map(methodNode => this.methodFromNode(methodNode))
+      .map((methodNode) => this.methodFromNode(methodNode))
       .filter((method): method is Method => method !== null);
 
     const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
@@ -109,7 +105,11 @@ export class Parser {
       return [];
     }
     if (parameterNodes.length > 1) {
-      this.logger.warnSkippedNode(methodSignature, 'it has multiple parameters', 'Methods should only have one property. Please use destructuring object for multiple parameters');
+      this.logger.warnSkippedNode(
+        methodSignature,
+        'it has multiple parameters',
+        'Methods should only have one property. Please use destructuring object for multiple parameters'
+      );
       throw new Error('Multiple parameters is not supported.');
     }
 

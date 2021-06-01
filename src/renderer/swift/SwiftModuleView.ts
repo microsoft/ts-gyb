@@ -3,9 +3,7 @@ import { ModuleView, MethodView } from '../views';
 import { SwiftMethodView } from './SwiftMethodView';
 
 export class SwiftModuleView implements ModuleView {
-  constructor(
-    private module: Module,
-  ) {}
+  constructor(private module: Module) {}
 
   get fileName(): string {
     return `${this.module.name}.swift`;
@@ -16,7 +14,7 @@ export class SwiftModuleView implements ModuleView {
   }
 
   get methods(): MethodView[] {
-    return this.module.methods.map(method => new SwiftMethodView(method));
+    return this.module.methods.map((method) => new SwiftMethodView(method));
   }
 
   get customTags(): Record<string, string> {
