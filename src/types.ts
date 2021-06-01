@@ -2,6 +2,8 @@ export interface Module {
   name: string;
   methods: Method[];
   documentation: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  customTags: Record<string, any>;
 }
 
 export interface Method {

@@ -1,27 +1,18 @@
-#!/usr/bin/env node
-
 import yargs from 'yargs';
-import fs from 'fs';
 import { Parser } from './parser/Parser';
-import { RendererConfig } from './renderer/RenderConfig';
-import { CustomTypeCollector } from './renderer/CustomTypeCollector';
-import { SwiftCodeRenderer } from './renderer/SwiftCodeRenderer';
+import { dropIPrefixInCustomTypes, fetchNamedTypes } from './parser/named-types';
+import { SwiftModuleView } from './renderer/ModuleView';
+import { CodeTemplateRenderer } from './renderer/CodeTemplateRenderer';
 
 const program = yargs(process.argv.slice(2));
 
 const args = program
   .options({
-    config: {
-      alias: 'c',
-      type: 'string',
-      demandOption: true,
-      describe: 'Code-generate config JSON which should implement interface RendererConfig',
-    },
     path: {
       alias: 'p',
       type: 'string',
-      describe: 'The path of api interface which should extend IExportedApi',
       demandOption: true,
+      describe: 'The path of api interface which should extend IExportedApi',
     },
     output: {
       alias: 'o',
@@ -29,25 +20,29 @@ const args = program
       demandOption: true,
       describe: 'The path of output file',
     },
+    dropInterfaceIPrefix: {
+      type: 'boolean',
+      default: false,
+      describe: 'Drop "I" prefix for all interfaces',
+    }
   })
   .help().argv;
 
 function run(): void {
-  const configJson = fs.readFileSync(args.config, { encoding: 'utf8' });
-
-  const config = JSON.parse(configJson) as RendererConfig;
-  console.log('Native Api will be generated with config: \n', JSON.stringify(config, null, 2));
-
   const parser = new Parser([args.path]);
   const apiModules = parser.parse();
-  // console.log(JSON.stringify(result, null, 4))
+  
+  if (args.dropInterfaceIPrefix) {
+    dropIPrefixInCustomTypes(apiModules);
+  }
+  console.log(JSON.stringify(apiModules, null, 4));
 
-  const rendererConfig = config;
-  const typeTransformer = new CustomTypeCollector(rendererConfig);
-  const renderer = new SwiftCodeRenderer(rendererConfig, typeTransformer, apiModules, args.output);
+  const namedTypes = fetchNamedTypes(apiModules);
+  console.log(JSON.stringify(namedTypes, null, 4));
 
-  renderer.print();
-  // console.log(typeTransformer.toSourceLike().join('\n'));
+  const renderer = new CodeTemplateRenderer('templates/swift-bridge.mustache', args.output);
+  const swiftModuleViews = apiModules.map(module => new SwiftModuleView(module));
+  renderer.renderModules(swiftModuleViews);
 }
 
 run();
