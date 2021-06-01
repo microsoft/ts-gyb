@@ -8,6 +8,15 @@ import UIKit
 {{#customTypes}}
 
 public struct {{typeName}}: Codable {
+  {{#members}}
+  public var {{name}}: {{type}}
+  {{/members}}
+
+  public init({{#members}}{{name}}: {{type}}{{^last}}, {{/last}}{{/members}}) {
+    {{#members}}
+    self.{{name}} = {{name}}
+    {{/members}}
+  }
 }
 {{/customTypes}}
 {{#enumTypes}}

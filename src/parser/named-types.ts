@@ -1,3 +1,4 @@
+import { capitalize } from "../utils";
 import { CustomType, EnumType, isArraryType, isCustomType, isDictionaryType, isEnumType, isOptionalType, Module, ValueType } from "../types";
 
 export type NamedType = CustomType | EnumType;
@@ -18,9 +19,13 @@ export function fetchNamedTypes(modules: Module[]): Record<string, NamedType> {
   const typeMap: Record<string, NamedType> = {};
   
   fetchRootTypes(modules).forEach(valueType => {
-    recursiveVisitNamedType(valueType, namedType => {
+    recursiveVisitNamedType(valueType, (namedType, path) => {
       if (namedType.name === undefined) {
-        throw Error("Named type doesn't have name");
+        namedType.name = path;
+      }
+
+      if (typeMap[namedType.name] !== undefined) {
+        return;
       }
 
       typeMap[namedType.name] = namedType;
@@ -36,48 +41,33 @@ function fetchRootTypes(modules: Module[]): ValueType[] {
     .flatMap(method => method.parameters.map(parameter => parameter.type).concat(method.returnType ? [method.returnType] : []));
 }
 
-function recursiveVisitNamedType(valueType: ValueType, visit: (namedType: NamedType) => void, visited = new Set<string>()): void {
+function recursiveVisitNamedType(valueType: ValueType, visit: (namedType: NamedType, path: string) => void, path = ''): void {
   if (isCustomType(valueType)) {
-    if (valueType.name === undefined) {
-      return;
-    }
-
-    if (visited.has(valueType.name)) {
-      return;
-    }
-
-    visit(valueType);
-    visited.add(valueType.name);
+    visit(valueType, path);
 
     valueType.members.forEach(member => {
-      recursiveVisitNamedType(member.type, visit, visited);
+      recursiveVisitNamedType(member.type, visit, `${path}${valueType.name ?? ''}Members${capitalize(member.name)}Type`);
     });
 
     return;
   }
 
   if (isEnumType(valueType)) {
-    if (visited.has(valueType.name)) {
-      return;
-    }
-
-    visit(valueType);
-    visited.add(valueType.name);
-
+    visit(valueType, path);
     return;
   }
 
   if (isArraryType(valueType)) {
-    recursiveVisitNamedType(valueType.elementType, visit, visited);
+    recursiveVisitNamedType(valueType.elementType, visit, `${path}Array`);
     return;
   }
 
   if (isDictionaryType(valueType)) {
-    recursiveVisitNamedType(valueType.valueType, visit, visited);
+    recursiveVisitNamedType(valueType.valueType, visit, `${path}Dictionary`);
     return;
   }
 
   if (isOptionalType(valueType)) {
-    recursiveVisitNamedType(valueType.wrappedType, visit, visited);
+    recursiveVisitNamedType(valueType.wrappedType, visit, `${path}Optional`);
   }
 }

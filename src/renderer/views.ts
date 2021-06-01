@@ -20,6 +20,7 @@ export interface NamedTypesView {
 
 export interface CustomTypeView {
   readonly typeName: string;
+  readonly members: { name: string, type: string, last: boolean }[];
 }
 
 export interface EnumTypeView {
