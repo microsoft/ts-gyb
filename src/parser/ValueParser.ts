@@ -154,9 +154,10 @@ export class ValueParser {
         throw Error('Do not support multiple union types except for interface or literal type.');
       }
 
+      const existingMemberNames = new Set(valueType.members.map(member => member.name));
       valueType = {
         kind: ValueTypeKind.customType,
-        members: valueType.members.concat(newValueType.members),
+        members: valueType.members.concat(newValueType.members.filter(member => !existingMemberNames.has(member.name))),
       };
     });
 
@@ -233,7 +234,13 @@ export class ValueParser {
       return enumTypeKind;
     }
 
-    return this.valueTypeFromNode(declaration);
+    const valueType = this.valueTypeFromNode(declaration);
+    
+    if (isCustomType(valueType) && valueType.name === undefined) {
+      valueType.name = typeName;
+    }
+
+    return valueType;
   }
 
   private arrayTypeKindFromTypeNode(node: ts.TypeNode): ArrayType | null {
