@@ -17,7 +17,7 @@ import {
   DictionaryKeyType,
   isCustomType,
 } from '../types';
-import { extractUnionTypeNode } from './utils';
+import { isUndefinedOrNull } from './utils';
 
 export class ValueParser {
   constructor(private checker: ts.TypeChecker) {}
@@ -134,8 +134,35 @@ export class ValueParser {
       return null;
     }
 
-    const { typeNode, nullable } = extractUnionTypeNode(node);
-    const valueType = this.valueTypeFromTypeNode(typeNode);
+    let nullable = false;
+    let valueType: ValueType | undefined;
+
+    node.types.forEach((typeNode) => {
+      if (isUndefinedOrNull(typeNode)) {
+        nullable = true;
+        return;
+      }
+
+      const newValueType = this.valueTypeFromTypeNode(typeNode);
+
+      if (!valueType) {
+        valueType = newValueType;
+        return;
+      }
+      
+      if (!isCustomType(valueType) || !isCustomType(newValueType)) {
+        throw Error('Do not support multiple union types except for interface or literal type.');
+      }
+
+      valueType = {
+        kind: ValueTypeKind.customType,
+        members: valueType.members.concat(newValueType.members),
+      };
+    });
+
+    if (!valueType) {
+      throw Error('Invald union type');
+    }
 
     if (!isOptionalType(valueType) && nullable) {
       return {
@@ -340,12 +367,17 @@ export class ValueParser {
     }
 
     const name = node.name.getText();
-    const valueType = this.valueTypeFromNode(node);
+    try {
+      const valueType = this.valueTypeFromNode(node);
 
-    return {
-      name,
-      type: valueType,
-    };
+      return {
+        name,
+        type: valueType,
+      };
+    } catch {
+      // workaround value assignment in interface field, like: kind: ValueTypeKind.basicType
+      return null;
+    }
   }
 
   private getExtendingMembersFromInterfaceDeclaration(node: ts.InterfaceDeclaration): Field[] {

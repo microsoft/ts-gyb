@@ -41,33 +41,7 @@ export function parseJsDocTags(symbol: ts.Symbol): {
   return { shouldExport, overrideName, customTags };
 }
 
-export function extractUnionTypeNode(node: ts.UnionTypeNode): { typeNode: ts.TypeNode; nullable: boolean } {
-  let nullable = false;
-  let wrappedTypeNode: ts.TypeNode | undefined;
-
-  node.types.forEach((typeNode) => {
-    if (isUndefinedOrNull(typeNode)) {
-      nullable = true;
-      return;
-    }
-
-    if (wrappedTypeNode) {
-      throw Error('Do not support multiple union types');
-    }
-    wrappedTypeNode = typeNode;
-  });
-
-  if (!wrappedTypeNode) {
-    throw Error('Invald union type');
-  }
-
-  return {
-    typeNode: wrappedTypeNode,
-    nullable,
-  };
-}
-
-function isUndefinedOrNull(node: ts.TypeNode): boolean {
+export function isUndefinedOrNull(node: ts.TypeNode): boolean {
   if (ts.isLiteralTypeNode(node)) {
     return node.literal.kind === ts.SyntaxKind.NullKeyword;
   }

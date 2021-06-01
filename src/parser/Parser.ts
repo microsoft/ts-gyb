@@ -80,22 +80,18 @@ export class Parser {
 
     const methodName = node.name.getText();
 
-    try {
-      const parameters = this.fieldsFromParameters(node);
-      const returnType = this.valueParser.parseFunctionReturnType(node);
+    const parameters = this.fieldsFromParameters(node);
+    const returnType = this.valueParser.parseFunctionReturnType(node);
 
-      const symbol = this.checker.getSymbolAtLocation(node.name);
-      const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
-      return {
-        name: methodName,
-        parameters,
-        returnType,
-        documentation,
-      };
-    } catch {
-      return null;
-    }
+    return {
+      name: methodName,
+      parameters,
+      returnType,
+      documentation,
+    };
   }
 
   private fieldsFromParameters(methodSignature: ts.MethodSignature): Field[] {
