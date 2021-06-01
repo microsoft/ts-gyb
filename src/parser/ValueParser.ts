@@ -27,6 +27,20 @@ export class ValueParser {
       return null;
     }
 
+    if (methodSignature.type !== undefined && ts.isTypeReferenceNode(methodSignature.type) && methodSignature.type.typeName.getText() === 'Promise') {
+      if (methodSignature.type.typeArguments === undefined || methodSignature.type.typeArguments.length !== 1) {
+        throw Error('Invalid promise');
+
+      }
+      const wrappedTypeNode = methodSignature.type.typeArguments[0];
+
+      if (wrappedTypeNode.kind === ts.SyntaxKind.VoidKeyword) {
+        return null;
+      }
+
+      return this.valueTypeFromTypeNode(wrappedTypeNode);
+    }
+
     return this.valueTypeFromNode(methodSignature);
   }
 
