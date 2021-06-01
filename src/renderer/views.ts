@@ -7,7 +7,6 @@ export interface MethodView {
 }
 
 export interface ModuleView {
-  readonly fileName: string;
   readonly moduleName: string;
   readonly methods: MethodView[];
   readonly customTags: Record<string, string>;

@@ -5,10 +5,6 @@ import { SwiftMethodView } from './SwiftMethodView';
 export class SwiftModuleView implements ModuleView {
   constructor(private module: Module) {}
 
-  get fileName(): string {
-    return `${this.module.name}.swift`;
-  }
-
   get moduleName(): string {
     return this.module.name;
   }
