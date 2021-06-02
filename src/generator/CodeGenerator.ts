@@ -29,7 +29,7 @@ export class CodeGenerator {
     tag: string;
     interfacePaths: string[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    defaultCustomTags: Record<string, any>,
+    defaultCustomTags: Record<string, any>;
     dropInterfaceIPrefix: boolean;
   }): void {
     const parser = new Parser(interfacePaths);
@@ -45,7 +45,7 @@ export class CodeGenerator {
   }
 
   parseNamedTypes(): void {
-    this.namedTypes = fetchNamedTypes(Object.values(this.modulesMap).flatMap(modules => modules));
+    this.namedTypes = fetchNamedTypes(Object.values(this.modulesMap).flatMap((modules) => modules));
   }
 
   printModules({ tag }: { tag: string }): void {
@@ -64,11 +64,7 @@ export class CodeGenerator {
     }
 
     console.log('\nShared named types:\n');
-    console.log(
-      this.namedTypes.sharedTypes
-        .map((namedType) => serializeNamedType(namedType))
-        .join('\n\n')
-    );
+    console.log(this.namedTypes.sharedTypes.map((namedType) => serializeNamedType(namedType)).join('\n\n'));
   }
 
   render({
@@ -131,7 +127,10 @@ export class CodeGenerator {
   private getModuleView(language: RenderingLanguage, module: Module, associatedTypes: NamedType[]): ModuleView {
     switch (language) {
       case RenderingLanguage.Swift:
-        return new SwiftModuleView(module, associatedTypes.map((associatedType => this.getNamedTypeView(language, associatedType))));
+        return new SwiftModuleView(
+          module,
+          associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType))
+        );
       default:
         throw Error('Unhandled language');
     }

@@ -30,7 +30,7 @@ const args = program
     defaultCustomTag: {
       type: 'string',
       array: true,
-      coerce: (values: string[]) => values.map(tagString => parseKeyValueText(tagString)),
+      coerce: (values: string[]) => values.map((tagString) => parseKeyValueText(tagString)),
       default: [],
       describe: 'Default values for custom tags',
     },
@@ -47,7 +47,7 @@ function run(): void {
   generator.parse({
     tag: 'APIs',
     interfacePaths: args.interfacePaths,
-    defaultCustomTags: Object.fromEntries(args.defaultCustomTag.map(tag => [tag.key, tag.value])),
+    defaultCustomTags: Object.fromEntries(args.defaultCustomTag.map((tag) => [tag.key, tag.value])),
     dropInterfaceIPrefix: args.dropInterfaceIPrefix,
   });
   generator.parseNamedTypes();

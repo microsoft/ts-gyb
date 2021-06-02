@@ -11,23 +11,25 @@ import {
   EnumType,
 } from '../types';
 
-export type NamedType = CustomType & { name: string } | EnumType;
-export type NamedTypesResult = { associatedTypes: Record<string, NamedType[]>, sharedTypes: NamedType[] };
+export type NamedType = (CustomType & { name: string }) | EnumType;
+export type NamedTypesResult = { associatedTypes: Record<string, NamedType[]>; sharedTypes: NamedType[] };
 
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
-  modules.flatMap(module => fetchRootTypes(module)).forEach((valueType) => {
-    recursiveVisitNamedType(valueType, (namedType) => {
-      if (!isCustomType(namedType)) {
-        return;
-      }
+  modules
+    .flatMap((module) => fetchRootTypes(module))
+    .forEach((valueType) => {
+      recursiveVisitNamedType(valueType, (namedType) => {
+        if (!isCustomType(namedType)) {
+          return;
+        }
 
-      namedType.name = namedType.name?.replace(/^I/, '');
+        namedType.name = namedType.name?.replace(/^I/, '');
+      });
     });
-  });
 }
 
 export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
-  const typeMap: Record<string, { namedType: NamedType, associatedModules: Set<string> }> = {};
+  const typeMap: Record<string, { namedType: NamedType; associatedModules: Set<string> }> = {};
 
   modules.forEach((module) => {
     fetchRootTypes(module).forEach((valueType) => {
@@ -65,10 +67,9 @@ export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
 }
 
 function fetchRootTypes(module: Module): ValueType[] {
-  return module.methods
-    .flatMap((method) =>
-      method.parameters.map((parameter) => parameter.type).concat(method.returnType ? [method.returnType] : [])
-    );
+  return module.methods.flatMap((method) =>
+    method.parameters.map((parameter) => parameter.type).concat(method.returnType ? [method.returnType] : [])
+  );
 }
 
 function recursiveVisitNamedType(

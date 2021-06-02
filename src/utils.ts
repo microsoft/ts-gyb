@@ -7,7 +7,7 @@ export function capitalize(text: string): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function parseKeyValueText(text: string): { key: string, value: any } {
+export function parseKeyValueText(text: string): { key: string; value: any } {
   const index = text.indexOf('=');
   if (index === -1) {
     throw Error('Invalid custom tag');
