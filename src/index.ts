@@ -65,6 +65,10 @@ function run(): void {
   generator.parseNamedTypes();
   generator.printSharedNamedTypes();
 
+  config.moduleGenerationMaps.forEach((_, index) => {
+    generator.printModules(index);
+  });
+
   config.moduleGenerationMaps.forEach((moduleGenerationMap, index) => {
     generator.renderModules({
       index,
