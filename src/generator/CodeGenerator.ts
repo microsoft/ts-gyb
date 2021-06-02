@@ -1,14 +1,15 @@
 import fs from 'fs';
 import path from 'path';
-import { dropIPrefixInCustomTypes, fetchNamedTypes, NamedType } from './parser/named-types';
-import { Parser } from './parser/Parser';
-import { renderCode } from './renderer/renderer';
-import { SwiftCustomTypeView } from './renderer/swift/SwiftCustomTypeView';
-import { SwiftEnumTypeView } from './renderer/swift/SwiftEnumTypeView';
-import { SwiftModuleView } from './renderer/swift/SwiftModuleView';
-import { CustomTypeView, EnumTypeView, ModuleView, NamedTypesView } from './renderer/views';
-import { serializeModule, serializeNamedType } from './serializers';
-import { CustomType, EnumType, isCustomType, Module } from './types';
+import { dropIPrefixInCustomTypes, fetchNamedTypes, NamedType } from './named-types';
+import { Parser } from '../parser/Parser';
+import { renderCode } from '../renderer/renderer';
+import { SwiftCustomTypeView } from '../renderer/swift/SwiftCustomTypeView';
+import { SwiftEnumTypeView } from '../renderer/swift/SwiftEnumTypeView';
+import { SwiftModuleView } from '../renderer/swift/SwiftModuleView';
+import { CustomTypeView, EnumTypeView, ModuleView, NamedTypesView } from '../renderer/views';
+import { serializeModule, serializeNamedType } from '../serializers';
+import { CustomType, EnumType, isCustomType, Module } from '../types';
+import { applyDefaultCustomTags } from './utils';
 
 export enum RenderingLanguage {
   Swift = 'Swift',
@@ -22,14 +23,19 @@ export class CodeGenerator {
   parse({
     tag,
     interfacePaths,
+    defaultCustomTags,
     dropInterfaceIPrefix,
   }: {
     tag: string;
     interfacePaths: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    defaultCustomTags: Record<string, any>,
     dropInterfaceIPrefix: boolean;
   }): void {
     const parser = new Parser(interfacePaths);
     const modules = parser.parse();
+
+    modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));
 
     if (dropInterfaceIPrefix) {
       dropIPrefixInCustomTypes(modules);
@@ -38,14 +44,7 @@ export class CodeGenerator {
     const namedTypes = fetchNamedTypes(modules);
 
     this.modulesMap[tag] = modules;
-
-    Object.entries(namedTypes).forEach(([typeName, namedType]) => {
-      if (this.namedTypes[typeName] !== undefined) {
-        return;
-      }
-
-      this.namedTypes[typeName] = namedType;
-    });
+    this.pushNamedTypes(namedTypes);
   }
 
   printModules({ tag }: { tag: string }): void {
@@ -150,5 +149,15 @@ export class CodeGenerator {
   private writeFile(content: string, outputDirectory: string, fileName: string): void {
     const filePath = path.join(outputDirectory, fileName);
     fs.writeFileSync(filePath, content);
+  }
+
+  private pushNamedTypes(namedTypes: Record<string, NamedType>): void {
+    Object.entries(namedTypes).forEach(([typeName, namedType]) => {
+      if (this.namedTypes[typeName] !== undefined) {
+        return;
+      }
+
+      this.namedTypes[typeName] = namedType;
+    });
   }
 }

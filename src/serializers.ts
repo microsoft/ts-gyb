@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { NamedType } from './parser/named-types';
+import { NamedType } from './generator/named-types';
 import {
   isArraryType,
   isBasicType,

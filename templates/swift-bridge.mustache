@@ -5,7 +5,7 @@
 // Don't modify this file manually, it's auto generated.
 
 public class {{moduleName}} {
-  {{^customTags.noPrivateDispatcher}}private {{/customTags.noPrivateDispatcher}}let jsExecutor: BridgeJSExecutor
+  {{#customTags.privateDispatcher}}private {{/customTags.privateDispatcher}}let jsExecutor: BridgeJSExecutor
 
   init(jsExecutor: BridgeJSExecutor) {
     self.jsExecutor = jsExecutor
