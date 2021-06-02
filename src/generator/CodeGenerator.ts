@@ -55,7 +55,8 @@ export class CodeGenerator {
     }
 
     console.log('Modules:\n');
-    console.log(modules.map((module) => serializeModule(module)).join('\n\n'));
+    console.log(modules.map((module) => serializeModule(module, this.namedTypes?.associatedTypes[module.name] ?? [])).join('\n\n'));
+    console.log();
   }
 
   printSharedNamedTypes(): void {
@@ -63,7 +64,7 @@ export class CodeGenerator {
       throw Error('Named types not parsed. Run parseNamedTypes first.');
     }
 
-    console.log('\nShared named types:\n');
+    console.log('Shared named types:\n');
     console.log(this.namedTypes.sharedTypes.map((namedType) => serializeNamedType(namedType)).join('\n\n'));
   }
 

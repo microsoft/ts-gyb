@@ -18,7 +18,8 @@ const typeColor = chalk.yellow;
 const valueColor = chalk.cyan;
 const documentationColor = chalk.gray;
 
-export function serializeModule(module: Module): string {
+export function serializeModule(module: Module, associatedTypes: NamedType[]): string {
+  const serializedAssociatedTypes = associatedTypes.map((associatedType) => serializeNamedType(associatedType));
   const customTags =
     Object.keys(module.customTags).length > 0 ? `Custom tags: ${JSON.stringify(module.customTags)}\n` : '';
 
@@ -32,7 +33,7 @@ ${module.methods
       .map((line) => `  ${line}`)
       .join('\n')
   )
-  .join('\n')}
+  .join('\n')}${serializedAssociatedTypes.length > 0 ? `\n\n${serializedAssociatedTypes.join('\n').split('\n').map((line) => `  ${line}`).join('\n')}` : ''}
 }`;
 }
 
