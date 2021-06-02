@@ -33,7 +33,15 @@ ${module.methods
       .map((line) => `  ${line}`)
       .join('\n')
   )
-  .join('\n')}${serializedAssociatedTypes.length > 0 ? `\n\n${serializedAssociatedTypes.join('\n').split('\n').map((line) => `  ${line}`).join('\n')}` : ''}
+  .join('\n')}${
+    serializedAssociatedTypes.length > 0
+      ? `\n\n${serializedAssociatedTypes
+          .join('\n')
+          .split('\n')
+          .map((line) => `  ${line}`)
+          .join('\n')}`
+      : ''
+  }
 }`;
 }
 

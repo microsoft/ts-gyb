@@ -55,7 +55,9 @@ export class CodeGenerator {
     }
 
     console.log('Modules:\n');
-    console.log(modules.map((module) => serializeModule(module, this.namedTypes?.associatedTypes[module.name] ?? [])).join('\n\n'));
+    console.log(
+      modules.map((module) => serializeModule(module, this.namedTypes?.associatedTypes[module.name] ?? [])).join('\n\n')
+    );
     console.log();
   }
 
