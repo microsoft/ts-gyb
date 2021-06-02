@@ -21,7 +21,7 @@ export class SwiftEnumTypeView implements EnumTypeView {
 
   get members(): { key: string; value: string }[] {
     return Object.entries(this.enumType.members).map(([key, value]) => ({
-      key,
+      key: key.toLowerCase(),
       value: typeof value === 'string' ? `"${value}"` : `${value}`,
     }));
   }
