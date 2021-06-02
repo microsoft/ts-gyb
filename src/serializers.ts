@@ -36,9 +36,9 @@ ${module.methods
 }`;
 }
 
-export function serializeNamedType(typeName: string, namedType: NamedType): string {
+export function serializeNamedType(namedType: NamedType): string {
   if (isCustomType(namedType)) {
-    return `${keywordColor('Type')} ${typeName} {
+    return `${keywordColor('Type')} ${namedType.name} {
 ${namedType.members
   .map(
     (member) =>
@@ -48,7 +48,7 @@ ${namedType.members
 }`;
   }
 
-  return `${keywordColor('Enum')} ${typeName} {
+  return `${keywordColor('Enum')} ${namedType.name} {
 ${Object.entries(namedType.members)
   .map(([key, value]) => `  ${identifierColor(key)} = ${valueColor(value)}`)
   .join('\n')}

@@ -50,7 +50,9 @@ function run(): void {
     defaultCustomTags: Object.fromEntries(args.defaultCustomTag.map(tag => [tag.key, tag.value])),
     dropInterfaceIPrefix: args.dropInterfaceIPrefix,
   });
+  generator.parseNamedTypes();
   generator.printModules({ tag: 'APIs' });
+  generator.printSharedNamedTypes();
   generator.render({
     tag: 'APIs',
     language: RenderingLanguage.Swift,

@@ -1,0 +1,20 @@
+{{#custom}}
+public struct {{typeName}}: Codable {
+  {{#members}}
+  public var {{name}}: {{type}}
+  {{/members}}
+
+  public init({{#members}}{{name}}: {{type}}{{^last}}, {{/last}}{{/members}}) {
+    {{#members}}
+    self.{{name}} = {{name}}
+    {{/members}}
+  }
+}
+{{/custom}}
+{{#enum}}
+public enum {{typeName}}: {{valueType}}, Codable {
+  {{#members}}
+  case {{key}} = {{{value}}}
+  {{/members}}
+}
+{{/enum}}

@@ -12,10 +12,7 @@ export interface ModuleView {
   readonly customTags: Record<string, string>;
 }
 
-export interface NamedTypesView {
-  readonly customTypes: CustomTypeView[];
-  readonly enumTypes: EnumTypeView[];
-}
+export type NamedTypeView = (CustomTypeView | EnumTypeView) & { custom?: boolean, enum?: boolean };
 
 export interface CustomTypeView {
   readonly typeName: string;
