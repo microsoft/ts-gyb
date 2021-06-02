@@ -28,7 +28,11 @@ export class Parser {
   parse(): Module[] {
     const modules: Module[] = [];
 
-    this.program.getSourceFiles().forEach((sourceFile) => {
+    this.program.getRootFileNames().forEach((fileName) => {
+      const sourceFile = this.program.getSourceFile(fileName);
+      if (sourceFile === undefined) {
+        throw Error('Source file not found');
+      }
       ts.forEachChild(sourceFile, (node) => {
         const module = this.moduleFromNode(node);
         if (module !== null) {

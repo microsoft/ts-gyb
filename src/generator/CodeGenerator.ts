@@ -16,17 +16,15 @@ export enum RenderingLanguage {
 }
 
 export class CodeGenerator {
-  private modulesMap: Record<string, Module[]> = {};
+  private modulesMap: Module[][] = [];
 
   private namedTypes?: NamedTypesResult;
 
   parse({
-    tag,
     interfacePaths,
     defaultCustomTags,
     dropInterfaceIPrefix,
   }: {
-    tag: string;
     interfacePaths: string[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     defaultCustomTags: Record<string, any>;
@@ -41,15 +39,15 @@ export class CodeGenerator {
       dropIPrefixInCustomTypes(modules);
     }
 
-    this.modulesMap[tag] = modules;
+    this.modulesMap.push(modules);
   }
 
   parseNamedTypes(): void {
     this.namedTypes = fetchNamedTypes(Object.values(this.modulesMap).flatMap((modules) => modules));
   }
 
-  printModules({ tag }: { tag: string }): void {
-    const modules = this.modulesMap[tag];
+  printModules(index: number): void {
+    const modules = this.modulesMap[index];
     if (modules === undefined) {
       throw Error('Modules not parsed. Run parse first.');
     }
@@ -70,20 +68,18 @@ export class CodeGenerator {
     console.log(this.namedTypes.sharedTypes.map((namedType) => serializeNamedType(namedType)).join('\n\n'));
   }
 
-  render({
-    tag,
+  renderModules({
+    index,
     language,
     outputDirectory,
     moduleTemplatePath,
-    namedTypesTemplatePath,
   }: {
-    tag: string;
+    index: number;
     language: RenderingLanguage;
     outputDirectory: string;
     moduleTemplatePath: string;
-    namedTypesTemplatePath: string;
   }): void {
-    const modules = this.modulesMap[tag];
+    const modules = this.modulesMap[index];
     if (modules === undefined) {
       throw Error('Modules not parsed. Run parse first.');
     }
@@ -99,10 +95,24 @@ export class CodeGenerator {
 
       this.writeFile(renderedCode, outputDirectory, `${moduleView.moduleName}${this.getFileExtension(language)}`);
     });
+  }
+
+  renderNamedTypes({
+    language,
+    namedTypesTemplatePath,
+    namedTypesOutputPath,
+  }: {
+    language: RenderingLanguage;
+    namedTypesTemplatePath: string;
+    namedTypesOutputPath: string;
+  }): void {
+    if (this.namedTypes === undefined) {
+      throw Error('Named types not parsed. Run parseNamedTypes first.');
+    }
 
     const namedTypesView = this.namedTypes.sharedTypes.map((namedType) => this.getNamedTypeView(language, namedType));
     const renderedCode = renderCode(namedTypesTemplatePath, namedTypesView);
-    this.writeFile(renderedCode, outputDirectory, `Generated_CustomInterface${this.getFileExtension(language)}`);
+    fs.writeFileSync(namedTypesOutputPath, renderedCode);
   }
 
   private getFileExtension(language: RenderingLanguage): string {

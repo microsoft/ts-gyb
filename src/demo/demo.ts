@@ -8,7 +8,7 @@ function run(): void {
     defaultCustomTags: {},
     dropInterfaceIPrefix: true,
   });
-  generator.render({
+  generator.renderModules({
     tag: 'APIs',
     language: RenderingLanguage.Swift,
     outputDirectory: 'generated',
