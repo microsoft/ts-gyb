@@ -9,7 +9,7 @@
     "dev": "gulp dev",
     "debug": "ts-node ./src/index",
     "start:example": "ts-node ./src/demo/demo",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha -r ts-node/register test/**/*.ts",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "prettier:write": "prettier --write \"src/**/*.ts\"",
     "prettier:check": "prettier --check \"src/**/*.ts\"",
@@ -29,10 +29,17 @@
   "author": "",
   "license": "private",
   "devDependencies": {
+    "@types/chai": "^4.2.18",
     "@types/gulp": "^4.0.6",
+    "@types/mocha": "^8.2.2",
+    "@types/mustache": "^4.1.1",
+    "@types/sinon": "^10.0.1",
+    "@types/sinon-chai": "^3.2.5",
+    "@types/uuid": "^8.3.0",
     "@types/yargs": "^15.0.9",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",
+    "chai": "^4.3.4",
     "del": "^5.1.0",
     "eslint": "^7.5.0",
     "eslint-config-airbnb-base": "^14.2.1",
@@ -40,12 +47,18 @@
     "eslint-plugin-import": "^2.22.1",
     "gulp": "^4.0.2",
     "gulp-typescript": "^6.0.0-alpha.1",
+    "mocha": "^8.4.0",
     "prettier": "^2.2.1",
-    "ts-node": "^8.10.2"
+    "sinon": "^11.1.1",
+    "sinon-chai": "^3.7.0",
+    "ts-node": "^8.10.2",
+    "uuid": "^8.3.2"
   },
   "dependencies": {
+    "chalk": "^4.1.1",
     "glob": "^7.1.6",
-    "typescript": "^3.9.7",
+    "mustache": "^4.2.0",
+    "typescript": "^4.3.2",
     "yargs": "^16.1.0"
   }
 }

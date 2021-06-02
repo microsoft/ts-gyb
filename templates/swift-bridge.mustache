@@ -1,0 +1,36 @@
+//
+//  Copyright 2013-2018 Microsoft Inc.
+//
+
+// Don't modify this file manually, it's auto generated.
+
+public class {{moduleName}} {
+  {{#customTags.privateDispatcher}}private {{/customTags.privateDispatcher}}let jsExecutor: BridgeJSExecutor
+
+  init(jsExecutor: BridgeJSExecutor) {
+    self.jsExecutor = jsExecutor
+  }
+  {{#methods}}
+
+  {{#documentationLines}}
+  /// {{{.}}}
+  {{/documentationLines}}
+  public func {{methodName}}({{parametersDeclaration}}{{#parametersDeclaration.length}}, {{/parametersDeclaration.length}}completion: {{#returnType}}@escaping BridgeCompletion<{{returnType}}>{{/returnType}}{{^returnType}}BridgeJSExecutor.Completion? = nil{{/returnType}}) {
+    {{#parameters.length}}
+    struct Args: Encodable {
+      {{#parameters}}
+      let {{name}}: {{type}}
+      {{/parameters}}
+    }
+    {{/parameters.length}}
+    {{#parameters.length}}
+    let args = Args(
+      {{#parameters}}
+      {{name}}: {{name}}{{^last}},{{/last}}
+      {{/parameters}}
+    )
+    {{/parameters.length}}
+    jsExecutor.execute(with: "{{customTags.invokePath}}", feature: "{{methodName}}", args: {{#parameters.length}}args{{/parameters.length}}{{^parameters}}nil{{/parameters}}, completion: completion)
+  }
+  {{/methods}}
+}

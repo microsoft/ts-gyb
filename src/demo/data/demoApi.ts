@@ -41,15 +41,16 @@ interface DictionaryWithAnyKey {
 }
 
 /**
+ * Documentation for module
  * @shouldExport true
  */
 export interface IHtmlApi {
   /**
-   * @comment
+   * This is a documentation
    * Set Mention class names
    * used to map id to class names
    */
-  setMentionClassNames({ idToClassNames }: {idToClassNames: { [id: string]: string[] }}): void;
+  setMentionClassNames({ idToClassNames }: { idToClassNames: { [id: string]: string[] } }): void;
   getHeight(): number;
   getHeightWithBottomAnchor({ sta }: { sta: string[] }): number;
   getHTML({ title }: { title: string }): str;

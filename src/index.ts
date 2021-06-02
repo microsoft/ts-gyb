@@ -1,56 +1,63 @@
-#!/usr/bin/env node
-
 import yargs from 'yargs';
-import fs from 'fs';
-import { Parser } from './parser/Parser';
-import { RendererConfig } from './renderer/RenderConfig';
-import { CustomTypeCollector } from './renderer/CustomTypeCollector';
-import { SwiftCodeRenderer } from './renderer/SwiftCodeRenderer';
+import { CodeGenerator, RenderingLanguage } from './generator/CodeGenerator';
+import { parseKeyValueText } from './utils';
 
 const program = yargs(process.argv.slice(2));
 
 const args = program
   .options({
-    config: {
-      alias: 'c',
+    interfacePaths: {
       type: 'string',
+      array: true,
       demandOption: true,
-      describe: 'Code-generate config JSON which should implement interface RendererConfig',
-    },
-    path: {
-      alias: 'p',
-      type: 'string',
       describe: 'The path of api interface which should extend IExportedApi',
-      demandOption: true,
     },
-    output: {
-      alias: 'o',
+    outputDirectory: {
       type: 'string',
       demandOption: true,
-      describe: 'The path of output file',
+      describe: 'The path of output directory',
+    },
+    moduleTemplatePath: {
+      type: 'string',
+      demandOption: true,
+      describe: 'The path of module template',
+    },
+    namedTypesTemplate: {
+      type: 'string',
+      demandOption: true,
+      describe: 'The path of named types template',
+    },
+    defaultCustomTag: {
+      type: 'string',
+      array: true,
+      coerce: (values: string[]) => values.map(tagString => parseKeyValueText(tagString)),
+      default: [],
+      describe: 'Default values for custom tags',
+    },
+    dropInterfaceIPrefix: {
+      type: 'boolean',
+      default: false,
+      describe: 'Drop "I" prefix for all interfaces',
     },
   })
   .help().argv;
 
 function run(): void {
-  const configJson = fs.readFileSync(args.config, { encoding: 'utf8' });
-
-  const config = JSON.parse(configJson) as RendererConfig;
-  console.log('Native Api will be generated with config: \n', JSON.stringify(config, null, 2));
-
-  const parser = new Parser([args.path]);
-  const apiModules = parser.parse();
-  // console.log(JSON.stringify(result, null, 4))
-
-  const rendererConfig = config;
-  const typeTransformer = new CustomTypeCollector(rendererConfig);
-  const renderer = new SwiftCodeRenderer(rendererConfig, typeTransformer, apiModules, args.output);
-
-  renderer.print();
-  // console.log(typeTransformer.toSourceLike().join('\n'));
+  const generator = new CodeGenerator();
+  generator.parse({
+    tag: 'APIs',
+    interfacePaths: args.interfacePaths,
+    defaultCustomTags: Object.fromEntries(args.defaultCustomTag.map(tag => [tag.key, tag.value])),
+    dropInterfaceIPrefix: args.dropInterfaceIPrefix,
+  });
+  generator.printModules({ tag: 'APIs' });
+  generator.render({
+    tag: 'APIs',
+    language: RenderingLanguage.Swift,
+    outputDirectory: args.outputDirectory,
+    moduleTemplatePath: args.moduleTemplatePath,
+    namedTypesTemplatePath: args.namedTypesTemplate,
+  });
 }
 
 run();
-
-export interface IExportedApi {}
-export type { RendererConfig } from './renderer/RenderConfig';

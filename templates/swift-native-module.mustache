@@ -1,0 +1,59 @@
+//
+//  Copyright (c) Microsoft Corporation. All rights reserved.
+//
+
+import Foundation
+
+public protocol {{moduleName}}: EditorNativeModule {
+  {{#methods}}
+  func {{methodName}}({{parametersDeclaration}}{{#returnType}}{{#parametersDeclaration.length}}, {{/parametersDeclaration.length}}completion: @escaping (Result<{{returnType}}, Error>) -> Void{{/returnType}})
+  {{/methods}}
+}
+
+public extension {{moduleName}} {
+  var moduleBridge: NativeModuleBridge {
+    {{customTags.bridgeName}}(self)
+  }
+}
+
+class {{customTags.bridgeName}}: NativeModuleBridge {
+  static let name = "{{customTags.invokePath}}"
+
+  lazy var methodMap: [String: NativeMethod] = [
+    {{#methods}}
+    "{{methodName}}": {{methodName}},
+    {{/methods}}
+  ]
+
+  private let instance: {{moduleName}}
+  private lazy var decoder = JSONDecoder()
+
+  init(_ instance: {{moduleName}}) {
+    self.instance = instance
+  }
+  {{#methods}}
+
+  private func {{methodName}}(parametersData: Data, completion: @escaping (Result<Encodable?, Error>) -> Void) {
+    {{#parameters.length}}
+    struct Parameters: Decodable {
+      {{#parameters}}
+      var {{name}}: {{type}}
+      {{/parameters}}
+    }
+
+    let parameters: Parameters
+    do {
+      parameters = try decoder.decode(Parameters.self, from: parametersData)
+    }
+    catch {
+      completion(.failure(NativeMethodError.invalidParameters(parametersData)))
+      return
+    }
+
+    {{/parameters.length}}
+    instance.{{methodName}}{{#parameters.length}}({{#parameters}}{{name}}: parameters.{{name}}{{^last}}, {{/last}}{{/parameters}}){{/parameters.length}}{{#returnType}} { result in
+      completion(result.toEncodable())
+    }{{/returnType}}
+  }
+  {{/methods}}
+}

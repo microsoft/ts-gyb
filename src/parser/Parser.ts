@@ -1,16 +1,9 @@
 import ts from 'typescript';
 import { glob } from 'glob';
-import {
-  Module,
-  Method,
-  Field,
-} from '../types';
+import { Module, Method, Field } from '../types';
 import { ValueParser } from './ValueParser';
-import { capitalize } from '../utils';
-
-// Defined tags
-const SHOULD_EXPORT = 'shouldExport';
-const COMMENT = 'comment';
+import { parseJsDocTags } from './utils';
+import { ParserLogger } from '../logger/ParserLogger';
 
 export class Parser {
   private program: ts.Program;
@@ -18,6 +11,8 @@ export class Parser {
   private checker: ts.TypeChecker;
 
   private valueParser: ValueParser;
+
+  private logger: ParserLogger;
 
   constructor(globPatterns: string[]) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
@@ -27,6 +22,7 @@ export class Parser {
     });
     this.checker = this.program.getTypeChecker();
     this.valueParser = new ValueParser(this.checker);
+    this.logger = new ParserLogger(this.checker);
   }
 
   parse(): Module[] {
@@ -49,98 +45,75 @@ export class Parser {
       return null;
     }
 
-    const { symbol } = this.checker.getTypeAtLocation(node);
-    const jsDocTags = symbol.getJsDocTags();
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    if (symbol === undefined) {
+      throw Error('Invalid module node');
+    }
 
-    if (!this.shouldExportInJsDocTags(jsDocTags)) {
+    const jsDocTagsResult = parseJsDocTags(symbol);
+
+    if (!jsDocTagsResult.shouldExport) {
       return null;
     }
 
-    if (node.name === undefined) {
-      return null;
-    }
-
-    const interfaceName = node.name.text;
+    const interfaceName = jsDocTagsResult.overrideName ?? node.name.text;
 
     const methods: Method[] = node.members
-      .map(methodNode => this.methodFromNode(methodNode))
+      .map((methodNode) => this.methodFromNode(methodNode))
       .filter((method): method is Method => method !== null);
+
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
     return {
       name: interfaceName,
       methods,
+      documentation,
+      customTags: jsDocTagsResult.customTags,
     };
   }
 
   private methodFromNode(node: ts.Node): Method | null {
     if (!ts.isMethodSignature(node)) {
+      this.logger.warnSkippedNode(node, 'it is not valid method signature', 'Please define only methods');
       return null;
     }
 
     const methodName = node.name.getText();
 
-    const parameters = this.fieldsFromParameters(node.parameters, capitalize(methodName));
+    const parameters = this.fieldsFromParameters(node);
+    const returnType = this.valueParser.parseFunctionReturnType(node);
 
-    const returnType = this.valueParser.valueTypeFromNode(node, `${capitalize(methodName)}Return`);
-
-    const jsDocTags = ts.getJSDocTags(node) as ts.JSDocTag[];
-    const nativeComment = this.getCommentFromJsDocNodes(jsDocTags);
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
     return {
       name: methodName,
       parameters,
       returnType,
-      comment: nativeComment,
+      documentation,
     };
   }
 
-  private fieldsFromParameters(parameterNodes: ts.NodeArray<ts.ParameterDeclaration>, literalTypeDescription: string): Field[] {
+  private fieldsFromParameters(methodSignature: ts.MethodSignature): Field[] {
+    const parameterNodes = methodSignature.parameters;
+
     if (parameterNodes.length === 0) {
       return [];
     }
-    if (parameterNodes.length !== 1) {
-      throw new Error('The exported API can only have one parameter, if multiple parameters are needed, use an object');
+    if (parameterNodes.length > 1) {
+      this.logger.warnSkippedNode(
+        methodSignature,
+        'it has multiple parameters',
+        'Methods should only have one property. Please use destructuring object for multiple parameters'
+      );
+      throw new Error('Multiple parameters is not supported.');
     }
 
     const parameterDeclaration = parameterNodes[0];
-
     if (parameterDeclaration.type === undefined) {
       return [];
     }
 
-    const typeLiteralFields = this.valueParser.parseTypeLiteralNode(parameterDeclaration.type, literalTypeDescription);
-    if (typeLiteralFields !== null) {
-      return typeLiteralFields;
-    }
-
-    const interfaceFeilds = this.valueParser.parseInterfaceReferenceTypeNode(parameterDeclaration.type);
-    if (interfaceFeilds !== null) {
-      return interfaceFeilds;
-    }
-
-    throw Error('Not supported parameter type');
-  }
-
-  private shouldExportInJsDocTags(tags: ts.JSDocTagInfo[]): boolean {
-    return !!tags.find((tag) => tag.name === SHOULD_EXPORT && tag.text === 'true');
-  }
-
-  private getPropertyFromJsDocNodes(tags: ts.JSDocTag[], name: string): ts.JSDocTagInfo | undefined {
-    const target = tags.find((tagNode) => ts.unescapeLeadingUnderscores(tagNode.tagName.escapedText) === name);
-    if (target) {
-      return {
-        name: ts.unescapeLeadingUnderscores(target.tagName.escapedText),
-        text: target.comment,
-      };
-    }
-    return undefined;
-  }
-
-  private getCommentFromJsDocNodes(tags: ts.JSDocTag[]): string | undefined {
-    const commentTag = this.getPropertyFromJsDocNodes(tags, COMMENT);
-    if (commentTag && commentTag.text) {
-      return commentTag.text;
-    }
-    return undefined;
+    return this.valueParser.parseFunctionParameterType(parameterDeclaration.type);
   }
 }

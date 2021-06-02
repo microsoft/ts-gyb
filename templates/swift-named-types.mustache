@@ -1,0 +1,30 @@
+//
+//  Copyright 2013-2018 Microsoft Inc.
+//
+
+// swiftformat:disable redundantRawValues
+// Don't modify this file manually, it's auto generated.
+
+import UIKit
+{{#customTypes}}
+
+public struct {{typeName}}: Codable {
+  {{#members}}
+  public var {{name}}: {{type}}
+  {{/members}}
+
+  public init({{#members}}{{name}}: {{type}}{{^last}}, {{/last}}{{/members}}) {
+    {{#members}}
+    self.{{name}} = {{name}}
+    {{/members}}
+  }
+}
+{{/customTypes}}
+{{#enumTypes}}
+
+public enum {{typeName}}: {{valueType}}, Codable {
+  {{#members}}
+  case {{key}} = {{{value}}}
+  {{/members}}
+}
+{{/enumTypes}}
