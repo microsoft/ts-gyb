@@ -46,6 +46,7 @@ class {{customTags.bridgeName}}: NativeModuleBridge {
       parameters = try decoder.decode(Parameters.self, from: parametersData)
     }
     catch {
+      logAssertFail("Parameters of {{methodName}} are invalid: \(error)")
       completion(.failure(NativeMethodError.invalidParameters(parametersData)))
       return
     }
