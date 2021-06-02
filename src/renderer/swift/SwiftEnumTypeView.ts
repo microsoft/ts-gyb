@@ -2,7 +2,11 @@ import { EnumSubType, EnumType } from '../../types';
 import { EnumTypeView } from '../views';
 
 export class SwiftEnumTypeView implements EnumTypeView {
-  constructor(readonly typeName: string, private enumType: EnumType) {}
+  constructor(private enumType: EnumType) {}
+
+  get typeName(): string {
+    return this.enumType.name;
+  }
 
   get valueType(): string {
     switch (this.enumType.subType) {

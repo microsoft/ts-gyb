@@ -92,8 +92,10 @@ export class CodeGenerator {
       throw Error('Named types not parsed. Run parseNamedTypes first.');
     }
 
+    const { associatedTypes } = this.namedTypes;
+
     modules.forEach((module) => {
-      const moduleView = this.getModuleView(language, module);
+      const moduleView = this.getModuleView(language, module, associatedTypes[module.name] ?? []);
       const renderedCode = renderCode(moduleTemplatePath, moduleView);
 
       this.writeFile(renderedCode, outputDirectory, `${moduleView.moduleName}${this.getFileExtension(language)}`);
@@ -126,10 +128,10 @@ export class CodeGenerator {
     return namedTypeView;
   }
 
-  private getModuleView(language: RenderingLanguage, module: Module): ModuleView {
+  private getModuleView(language: RenderingLanguage, module: Module, associatedTypes: NamedType[]): ModuleView {
     switch (language) {
       case RenderingLanguage.Swift:
-        return new SwiftModuleView(module);
+        return new SwiftModuleView(module, associatedTypes.map((associatedType => this.getNamedTypeView(language, associatedType))));
       default:
         throw Error('Unhandled language');
     }
@@ -147,7 +149,7 @@ export class CodeGenerator {
   private getEnumTypeView(language: RenderingLanguage, enumType: EnumType): EnumTypeView {
     switch (language) {
       case RenderingLanguage.Swift:
-        return new SwiftEnumTypeView(enumType.name, enumType);
+        return new SwiftEnumTypeView(enumType);
       default:
         throw Error('Unhandled language');
     }

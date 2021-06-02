@@ -1,9 +1,9 @@
 import { Module } from '../../types';
-import { ModuleView, MethodView } from '../views';
+import { ModuleView, MethodView, NamedTypeView } from '../views';
 import { SwiftMethodView } from './SwiftMethodView';
 
 export class SwiftModuleView implements ModuleView {
-  constructor(private module: Module) {}
+  constructor(private readonly module: Module, readonly associatedTypes: NamedTypeView[]) {}
 
   get moduleName(): string {
     return this.module.name;
