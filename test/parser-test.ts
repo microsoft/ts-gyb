@@ -24,7 +24,7 @@ describe('Parser', () => {
       `;
     withTempParser(exportedTrueSourceCode, parser => {
       const modules = parser.parse();
-      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', methods: [], documentation: ''}]);
+      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', methods: [], documentation: '', customTags: {}}]);
     });
   });
 
@@ -52,7 +52,8 @@ describe('Parser', () => {
           returnType: null,
           documentation: 'This is an example documentation for the method',
         }], 
-        documentation: 'This is an example documentation for the module'
+        documentation: 'This is an example documentation for the module',
+        customTags: {},
       }]);
     });
   });
@@ -71,7 +72,7 @@ describe('Parser', () => {
       const stubWarn = sinon.stub(console, 'warn');
 
       const modules = parser.parse();
-      expect(modules).to.deep.equal([{name: 'MockedInterface', methods: [], documentation: ''}]);
+      expect(modules).to.deep.equal([{name: 'MockedInterface', methods: [], documentation: '', customTags: {}}]);
 
       const expectedWarning = warnMessage(`Skipped "invalidProperty: string;" at ${filePath}:5 because it is not valid method signature. Please define only methods.`);
       expect(stubWarn).to.have.been.calledWith(expectedWarning);
@@ -94,7 +95,7 @@ describe('Parser', () => {
       const stubWarn = sinon.stub(console, 'warn');
 
       const modules = parser.parse();
-      expect(modules).to.deep.equal([{name: 'MockedInterface', methods: [], documentation: ''}]);
+      expect(modules).to.deep.equal([{name: 'MockedInterface', methods: [], documentation: '', customTags: {}}]);
 
       const expectedWarning = warnMessage(`Skipped "multipleParamsMethod(foo: string, bar: number);" at ${filePath}:5 because it has multiple parameters. Methods should only have one property. Please use destructuring object for multiple parameters.`);
       expect(stubWarn).to.have.been.calledWith(expectedWarning);

@@ -2,6 +2,8 @@
 //  Copyright (c) Microsoft Corporation. All rights reserved.
 //
 
+// swiftformat:disable redundantRawValues
+
 import Foundation
 
 public protocol {{moduleName}}: EditorNativeModule {
@@ -46,6 +48,7 @@ class {{customTags.bridgeName}}: NativeModuleBridge {
       parameters = try decoder.decode(Parameters.self, from: parametersData)
     }
     catch {
+      logAssertFail("Parameters of {{methodName}} are invalid: \(error)")
       completion(.failure(NativeMethodError.invalidParameters(parametersData)))
       return
     }
@@ -57,3 +60,7 @@ class {{customTags.bridgeName}}: NativeModuleBridge {
   }
   {{/methods}}
 }
+{{#associatedTypes}}
+
+{{> swift-named-type}}
+{{/associatedTypes}}

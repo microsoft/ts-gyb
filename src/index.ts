@@ -2,27 +2,33 @@ import yargs from 'yargs';
 import { CodeGenerator, RenderingLanguage } from './generator/CodeGenerator';
 import { parseKeyValueText } from './utils';
 
+interface Config {
+  moduleGenerationMaps: { interfacePaths: string[]; moduleTemplatePath: string; outputDirectory: string }[];
+  namedTypesTemplatePath: string;
+  namedTypesOutputPath: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  defaultCustomTags?: any;
+  dropInterfaceIPrefix?: boolean;
+}
 const program = yargs(process.argv.slice(2));
 
 const args = program
+  .config()
   .options({
     interfacePaths: {
       type: 'string',
       array: true,
-      demandOption: true,
       describe: 'The path of api interface which should extend IExportedApi',
     },
     outputDirectory: {
       type: 'string',
-      demandOption: true,
       describe: 'The path of output directory',
     },
     moduleTemplatePath: {
       type: 'string',
-      demandOption: true,
       describe: 'The path of module template',
     },
-    namedTypesTemplate: {
+    namedTypesTemplatePath: {
       type: 'string',
       demandOption: true,
       describe: 'The path of named types template',
@@ -30,7 +36,7 @@ const args = program
     defaultCustomTag: {
       type: 'string',
       array: true,
-      coerce: (values: string[]) => values.map(tagString => parseKeyValueText(tagString)),
+      coerce: (values: string[]) => values.map((tagString) => parseKeyValueText(tagString)),
       default: [],
       describe: 'Default values for custom tags',
     },
@@ -43,20 +49,39 @@ const args = program
   .help().argv;
 
 function run(): void {
+  const config = args as unknown as Config;
+
   const generator = new CodeGenerator();
-  generator.parse({
-    tag: 'APIs',
-    interfacePaths: args.interfacePaths,
-    defaultCustomTags: Object.fromEntries(args.defaultCustomTag.map(tag => [tag.key, tag.value])),
-    dropInterfaceIPrefix: args.dropInterfaceIPrefix,
+  config.moduleGenerationMaps.forEach((moduleGenerationMap, index) => {
+    generator.parse({
+      interfacePaths: moduleGenerationMap.interfacePaths,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      defaultCustomTags: config.defaultCustomTags ?? {},
+      dropInterfaceIPrefix: config.dropInterfaceIPrefix ?? false,
+    });
+    generator.printModules(index);
   });
-  generator.printModules({ tag: 'APIs' });
-  generator.render({
-    tag: 'APIs',
+
+  generator.parseNamedTypes();
+  generator.printSharedNamedTypes();
+
+  config.moduleGenerationMaps.forEach((_, index) => {
+    generator.printModules(index);
+  });
+
+  config.moduleGenerationMaps.forEach((moduleGenerationMap, index) => {
+    generator.renderModules({
+      index,
+      language: RenderingLanguage.Swift,
+      outputDirectory: moduleGenerationMap.outputDirectory,
+      moduleTemplatePath: moduleGenerationMap.moduleTemplatePath,
+    });
+  });
+
+  generator.renderNamedTypes({
     language: RenderingLanguage.Swift,
-    outputDirectory: args.outputDirectory,
-    moduleTemplatePath: args.moduleTemplatePath,
-    namedTypesTemplatePath: args.namedTypesTemplate,
+    namedTypesTemplatePath: config.namedTypesTemplatePath,
+    namedTypesOutputPath: config.namedTypesOutputPath,
   });
 }
 

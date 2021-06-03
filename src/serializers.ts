@@ -18,7 +18,8 @@ const typeColor = chalk.yellow;
 const valueColor = chalk.cyan;
 const documentationColor = chalk.gray;
 
-export function serializeModule(module: Module): string {
+export function serializeModule(module: Module, associatedTypes: NamedType[]): string {
+  const serializedAssociatedTypes = associatedTypes.map((associatedType) => serializeNamedType(associatedType));
   const customTags =
     Object.keys(module.customTags).length > 0 ? `Custom tags: ${JSON.stringify(module.customTags)}\n` : '';
 
@@ -32,13 +33,21 @@ ${module.methods
       .map((line) => `  ${line}`)
       .join('\n')
   )
-  .join('\n')}
+  .join('\n')}${
+    serializedAssociatedTypes.length > 0
+      ? `\n\n${serializedAssociatedTypes
+          .join('\n')
+          .split('\n')
+          .map((line) => `  ${line}`)
+          .join('\n')}`
+      : ''
+  }
 }`;
 }
 
-export function serializeNamedType(typeName: string, namedType: NamedType): string {
+export function serializeNamedType(namedType: NamedType): string {
   if (isCustomType(namedType)) {
-    return `${keywordColor('Type')} ${typeName} {
+    return `${keywordColor('Type')} ${namedType.name} {
 ${namedType.members
   .map(
     (member) =>
@@ -48,7 +57,7 @@ ${namedType.members
 }`;
   }
 
-  return `${keywordColor('Enum')} ${typeName} {
+  return `${keywordColor('Enum')} ${namedType.name} {
 ${Object.entries(namedType.members)
   .map(([key, value]) => `  ${identifierColor(key)} = ${valueColor(value)}`)
   .join('\n')}
