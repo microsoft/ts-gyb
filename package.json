@@ -1,12 +1,12 @@
 {
   "name": "@olm/ts-codegen",
-  "version": "0.1.11",
+  "version": "0.2.1",
   "description": "Generate Native API based on TS interface",
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
     "debug": "ts-node ./src/index",
-    "start:example": "ts-node ./src/demo/demo",
+    "start:example": "npm run debug -- --config demo/config.json",
     "test": "mocha -r ts-node/register test/**/*.ts",
     "lint": "eslint ./src --ext .js,.ts",
     "prettier:write": "prettier --write \"src/**/*.ts\"",
@@ -16,7 +16,7 @@
   },
   "main": "dist/index.js",
   "bin": {
-    "ts-codegen": "dist/index.js"
+    "ts-codegen": "bin/ts-codegen"
   },
   "files": [
     "dist/**/*.js",

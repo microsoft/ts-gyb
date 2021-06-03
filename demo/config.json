@@ -1,0 +1,11 @@
+{
+  "moduleGenerationMaps": [{
+    "interfacePaths": ["demo/interfaces.ts"],
+    "moduleTemplatePath": "example-templates/swift-bridge.mustache",
+    "outputDirectory": "demo/generated"
+  }],
+  "namedTypesTemplatePath": "example-templates/swift-named-types.mustache",
+  "namedTypesOutputPath": "demo/generated/SharedTypes.swift",
+  "defaultCustomTags": {},
+  "dropInterfaceIPrefix": true
+}
