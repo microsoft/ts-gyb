@@ -1,11 +1,21 @@
 {
-  "moduleGenerationMaps": [{
-    "interfacePaths": ["demo/interfaces.ts"],
-    "moduleTemplatePath": "example-templates/swift-bridge.mustache",
-    "outputDirectory": "demo/generated"
-  }],
-  "namedTypesTemplatePath": "example-templates/swift-named-types.mustache",
-  "namedTypesOutputPath": "demo/generated/SharedTypes.swift",
-  "defaultCustomTags": {},
-  "dropInterfaceIPrefix": true
+  "parse": {
+    "source": {
+      "API": ["demo/interfaces.ts"]
+    },
+    "defaultCustomTags": {},
+    "dropInterfaceIPrefix": true
+  },
+  "render": {
+    "swift": {
+      "templates": {
+        "API": "example-templates/swift-bridge.mustache"
+      },
+      "outputDirectory": {
+        "API": "demo/generated/swift"
+      },
+      "namedTypesTemplatePath": "example-templates/swift-named-types.mustache",
+      "namedTypesOutputPath": "demo/generated/swift/SharedTypes.swift"
+    }
+  }
 }

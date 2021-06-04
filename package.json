@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "debug": "ts-node ./src/index",
+    "debug": "ts-node ./src/cli/index",
     "start:example": "npm run debug -- --config demo/config.json",
     "test": "mocha -r ts-node/register test/**/*.ts",
     "lint": "eslint ./src --ext .js,.ts",
@@ -14,7 +14,7 @@
     "lint:fix": "npm run lint -- --fix && npm run prettier:write",
     "lint:ci": "npm run lint && npm run prettier:check"
   },
-  "main": "dist/index.js",
+  "main": "dist/cli/index.js",
   "bin": {
     "ts-codegen": "bin/ts-codegen"
   },
