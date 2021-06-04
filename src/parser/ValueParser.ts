@@ -1,6 +1,4 @@
 import ts from 'typescript';
-// eslint-disable-next-line import/no-unresolved
-import { INT_TYPE_NAME } from '@olm/ts-codegen-basic-type';
 import {
   Field,
   ValueType,
@@ -16,11 +14,12 @@ import {
   DictionaryType,
   DictionaryKeyType,
   isCustomType,
+  PredefinedType,
 } from '../types';
 import { isUndefinedOrNull } from './utils';
 
 export class ValueParser {
-  constructor(private checker: ts.TypeChecker) {}
+  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
 
   parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
     if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
@@ -209,9 +208,9 @@ export class ValueParser {
     }
 
     const typeName = node.typeName.getText();
-    const aliasType = this.getAliasType(typeName);
-    if (aliasType) {
-      return aliasType;
+    const predefinedType = this.parsePredefinedType(typeName);
+    if (predefinedType) {
+      return predefinedType;
     }
 
     let symbol = this.checker.getSymbolAtLocation(node.typeName);
@@ -270,11 +269,11 @@ export class ValueParser {
     return null;
   }
 
-  private getAliasType(typeName: string): BasicType | null {
-    if (typeName === INT_TYPE_NAME) {
+  private parsePredefinedType(typeName: string): PredefinedType | null {
+    if (this.predefinedTypes.has(typeName)) {
       return {
-        kind: ValueTypeKind.basicType,
-        value: BasicTypeValue.int,
+        kind: ValueTypeKind.predefinedType,
+        name: typeName,
       };
     }
     return null;

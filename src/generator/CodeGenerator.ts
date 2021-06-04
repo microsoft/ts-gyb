@@ -10,6 +10,7 @@ import { CustomTypeView, EnumTypeView, ModuleView, NamedTypeView } from '../rend
 import { serializeModule, serializeNamedType } from '../serializers';
 import { CustomType, EnumType, isCustomType, Module } from '../types';
 import { applyDefaultCustomTags } from './utils';
+import { SwiftValueTransformer } from '../renderer/swift/SwiftValueTransformer';
 
 export enum RenderingLanguage {
   Swift = 'Swift',
@@ -19,20 +20,22 @@ export class CodeGenerator {
   private modulesMap: Record<string, Module[]> = {};
 
   private namedTypes?: NamedTypesResult;
-
+  
   parse({
     tag,
     interfacePaths,
+    predefinedTypes,
     defaultCustomTags,
     dropInterfaceIPrefix,
   }: {
     tag: string;
     interfacePaths: string[];
+    predefinedTypes: Set<string>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     defaultCustomTags: Record<string, any>;
     dropInterfaceIPrefix: boolean;
   }): void {
-    const parser = new Parser(interfacePaths);
+    const parser = new Parser(interfacePaths, predefinedTypes);
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));
@@ -75,11 +78,13 @@ export class CodeGenerator {
     language,
     outputDirectory,
     moduleTemplatePath,
+    typeNameMap,
   }: {
     tag: string;
     language: RenderingLanguage;
     outputDirectory: string;
     moduleTemplatePath: string;
+    typeNameMap: Record<string, string>;
   }): void {
     const modules = this.modulesMap[tag];
     if (modules === undefined) {
@@ -92,7 +97,7 @@ export class CodeGenerator {
     const { associatedTypes } = this.namedTypes;
 
     modules.forEach((module) => {
-      const moduleView = this.getModuleView(language, module, associatedTypes[module.name] ?? []);
+      const moduleView = this.getModuleView(language, module, associatedTypes[module.name] ?? [], typeNameMap);
       const renderedCode = renderCode(moduleTemplatePath, moduleView);
 
       this.writeFile(renderedCode, outputDirectory, `${moduleView.moduleName}${this.getFileExtension(language)}`);
@@ -103,16 +108,18 @@ export class CodeGenerator {
     language,
     namedTypesTemplatePath,
     namedTypesOutputPath,
+    typeNameMap,
   }: {
     language: RenderingLanguage;
     namedTypesTemplatePath: string;
     namedTypesOutputPath: string;
+    typeNameMap: Record<string, string>;
   }): void {
     if (this.namedTypes === undefined) {
       throw Error('Named types not parsed. Run parseNamedTypes first.');
     }
 
-    const namedTypesView = this.namedTypes.sharedTypes.map((namedType) => this.getNamedTypeView(language, namedType));
+    const namedTypesView = this.namedTypes.sharedTypes.map((namedType) => this.getNamedTypeView(language, namedType, typeNameMap));
     const renderedCode = renderCode(namedTypesTemplatePath, namedTypesView);
     fs.writeFileSync(namedTypesOutputPath, renderedCode);
   }
@@ -126,10 +133,10 @@ export class CodeGenerator {
     }
   }
 
-  private getNamedTypeView(language: RenderingLanguage, namedType: NamedType): NamedTypeView {
+  private getNamedTypeView(language: RenderingLanguage, namedType: NamedType, typeNameMap: Record<string, string>): NamedTypeView {
     let namedTypeView: NamedTypeView;
     if (isCustomType(namedType)) {
-      namedTypeView = this.getCustomTypeView(language, namedType.name, namedType);
+      namedTypeView = this.getCustomTypeView(language, namedType.name, namedType, typeNameMap);
       namedTypeView.custom = true;
     } else {
       namedTypeView = this.getEnumTypeView(language, namedType);
@@ -139,22 +146,23 @@ export class CodeGenerator {
     return namedTypeView;
   }
 
-  private getModuleView(language: RenderingLanguage, module: Module, associatedTypes: NamedType[]): ModuleView {
+  private getModuleView(language: RenderingLanguage, module: Module, associatedTypes: NamedType[], typeNameMap: Record<string, string>): ModuleView {
     switch (language) {
       case RenderingLanguage.Swift:
         return new SwiftModuleView(
           module,
-          associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType))
+          associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
+          new SwiftValueTransformer(typeNameMap),
         );
       default:
         throw Error('Unhandled language');
     }
   }
 
-  private getCustomTypeView(language: RenderingLanguage, typeName: string, customType: CustomType): CustomTypeView {
+  private getCustomTypeView(language: RenderingLanguage, typeName: string, customType: CustomType, typeNameMap: Record<string, string>): CustomTypeView {
     switch (language) {
       case RenderingLanguage.Swift:
-        return new SwiftCustomTypeView(typeName, customType);
+        return new SwiftCustomTypeView(typeName, customType, new SwiftValueTransformer(typeNameMap));
       default:
         throw Error('Unhandled language');
     }

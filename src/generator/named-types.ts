@@ -97,16 +97,16 @@ function recursiveVisitNamedType(
   }
 
   if (isArraryType(valueType)) {
-    recursiveVisitNamedType(valueType.elementType, visit, `${path}Array`);
+    recursiveVisitNamedType(valueType.elementType, visit, `${path}Element`);
     return;
   }
 
   if (isDictionaryType(valueType)) {
-    recursiveVisitNamedType(valueType.valueType, visit, `${path}Dictionary`);
+    recursiveVisitNamedType(valueType.valueType, visit, `${path}Value`);
     return;
   }
 
   if (isOptionalType(valueType)) {
-    recursiveVisitNamedType(valueType.wrappedType, visit, `${path}Optional`);
+    recursiveVisitNamedType(valueType.wrappedType, visit, `${path}`);
   }
 }

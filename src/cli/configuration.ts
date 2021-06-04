@@ -1,5 +1,6 @@
 export interface ParseConfiguration {
   source: Record<string, string[]>;
+  predefinedTypes?: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultCustomTags?: any;
   dropInterfaceIPrefix?: boolean;
@@ -10,6 +11,7 @@ export interface RenderConfiguration {
   outputDirectory: Record<string, string>;
   namedTypesTemplatePath: string;
   namedTypesOutputPath: string;
+  typeNameMap?: Record<string, string>;
 }
 
 export interface Configuration {

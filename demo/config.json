@@ -3,6 +3,9 @@
     "source": {
       "API": ["demo/interfaces.ts"]
     },
+    "predefinedTypes": [
+      "CodeGen_Int"
+    ],
     "defaultCustomTags": {},
     "dropInterfaceIPrefix": true
   },
@@ -15,7 +18,10 @@
         "API": "demo/generated/swift"
       },
       "namedTypesTemplatePath": "example-templates/swift-named-types.mustache",
-      "namedTypesOutputPath": "demo/generated/swift/SharedTypes.swift"
+      "namedTypesOutputPath": "demo/generated/swift/SharedTypes.swift",
+      "typeNameMap": {
+        "CodeGen_Int": "Int"
+      }
     }
   }
 }

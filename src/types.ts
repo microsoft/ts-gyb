@@ -19,7 +19,7 @@ export interface Field {
 }
 
 export type ValueType = NonEmptyType | OptionalType;
-export type NonEmptyType = BasicType | CustomType | EnumType | ArrayType | DictionaryType;
+export type NonEmptyType = BasicType | CustomType | EnumType | ArrayType | DictionaryType | PredefinedType;
 
 export enum ValueTypeKind {
   basicType = 'basicType',
@@ -28,6 +28,7 @@ export enum ValueTypeKind {
   arrayType = 'arrayType',
   dictionaryType = 'dictionaryType',
   optionalType = 'optionalType',
+  predefinedType = 'predefinedType',
 }
 
 interface BaseValueType {
@@ -38,7 +39,6 @@ export enum BasicTypeValue {
   string = 'string',
   number = 'number',
   boolean = 'boolean',
-  int = 'int',
 }
 
 export interface BasicType extends BaseValueType {
@@ -85,6 +85,11 @@ export interface OptionalType extends BaseValueType {
   wrappedType: NonEmptyType;
 }
 
+export interface PredefinedType extends BaseValueType {
+  kind: ValueTypeKind.predefinedType;
+  name: string;
+}
+
 export function isBasicType(valueType: ValueType): valueType is BasicType {
   return valueType.kind === ValueTypeKind.basicType;
 }
@@ -107,4 +112,8 @@ export function isDictionaryType(valueType: ValueType): valueType is DictionaryT
 
 export function isOptionalType(valueType: ValueType): valueType is OptionalType {
   return valueType.kind === ValueTypeKind.optionalType;
+}
+
+export function isPredefinedType(valueType: ValueType): valueType is PredefinedType {
+  return valueType.kind === ValueTypeKind.predefinedType;
 }

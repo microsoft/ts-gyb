@@ -1,9 +1,9 @@
 import { Method } from '../../types';
 import { MethodView } from '../views';
-import { convertValueType } from './value-transformers';
+import { SwiftValueTransformer } from './SwiftValueTransformer';
 
 export class SwiftMethodView implements MethodView {
-  constructor(private method: Method) {}
+  constructor(private readonly method: Method, private readonly valueTransformer: SwiftValueTransformer) {}
 
   get methodName(): string {
     return this.method.name;
@@ -16,7 +16,7 @@ export class SwiftMethodView implements MethodView {
   get parameters(): { name: string; type: string; last: boolean }[] {
     return this.method.parameters.map((parameter, index) => ({
       name: parameter.name,
-      type: convertValueType(parameter.type),
+      type: this.valueTransformer.convertValueType(parameter.type),
       last: index === this.method.parameters.length - 1,
     }));
   }
@@ -26,7 +26,7 @@ export class SwiftMethodView implements MethodView {
       return null;
     }
 
-    return convertValueType(this.method.returnType);
+    return this.valueTransformer.convertValueType(this.method.returnType);
   }
 
   get documentationLines(): string[] {
