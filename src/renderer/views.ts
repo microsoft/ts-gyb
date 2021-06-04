@@ -18,6 +18,7 @@ export type NamedTypeView = (CustomTypeView | EnumTypeView) & { custom?: boolean
 export interface CustomTypeView {
   readonly typeName: string;
   readonly members: { name: string; type: string; last: boolean }[];
+  readonly staticMembers: { name: string; type: string; value: string }[];
 }
 
 export interface EnumTypeView {

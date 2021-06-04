@@ -81,6 +81,7 @@ public struct FullSize: Codable {
   public var width: Double
   public var height: Double
   public var scale: Double
+  private let member: NumEnum = .one
 
   public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, width: Double, height: Double, scale: Double) {
     self.size = size
@@ -94,14 +95,14 @@ public struct FullSize: Codable {
   }
 }
 
-public enum StringEnum: String, Codable {
-  case a = "a"
-  case b = "b"
-}
-
 public enum NumEnum: Int, Codable {
   case one = 1
   case two = 2
+}
+
+public enum StringEnum: String, Codable {
+  case a = "a"
+  case b = "b"
 }
 
 public enum DefaultEnum: String, Codable {

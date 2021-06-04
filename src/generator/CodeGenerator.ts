@@ -31,8 +31,7 @@ export class CodeGenerator {
     tag: string;
     interfacePaths: string[];
     predefinedTypes: Set<string>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    defaultCustomTags: Record<string, any>;
+    defaultCustomTags: Record<string, unknown>;
     dropInterfaceIPrefix: boolean;
   }): void {
     const parser = new Parser(interfacePaths, predefinedTypes);

@@ -29,6 +29,7 @@ enum DefaultEnum {
 }
 
 interface FullSize extends BaseSize, CustomSize {
+  member: NumEnum.one;
   size: number;
   count: CodeGen_Int;
   stringEnum: StringEnum;

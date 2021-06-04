@@ -7,7 +7,9 @@ import {
   isDictionaryType,
   isEnumType, isOptionalType, isPredefinedType,
   ValueType,
+  Value,
 } from '../../types';
+import { uncapitalize } from '../../utils';
 
 export class SwiftValueTransformer {
 
@@ -71,4 +73,41 @@ export class SwiftValueTransformer {
     throw Error('Type not handled');
   }
 
+  convertValue(value: Value, type: ValueType): string {
+    if (isBasicType(type)) {
+      switch (type.value) {
+        case BasicTypeValue.boolean:
+          return (value as boolean) ? 'True' : 'False';
+        default:
+          return JSON.stringify(value);
+      }
+    }
+
+    if (isCustomType(type)) {
+      throw Error('Custom type static value is not supported');
+    }
+
+    if (isEnumType(type)) {
+      return `.${uncapitalize(value as string)}`;
+    }
+
+    if (isArraryType(type)) {
+      return `[${(value as Value[]).map(element => this.convertValue(element, type.elementType)).join(', ')}]`;
+    }
+
+    if (isDictionaryType(type)) {
+      return `[${Object.entries(value as Record<string, Value>).map(([key, element]) => 
+        `${JSON.stringify(key)}: ${this.convertValue(element, type.valueType)}`
+      ).join(', ')}]`;
+    }
+
+    if (isOptionalType(type)) {
+      if (value === null) {
+        return 'nil';
+      }
+      return this.convertValue(value, type.wrappedType);
+    }
+
+    throw Error('Value not handled');
+  }
 }

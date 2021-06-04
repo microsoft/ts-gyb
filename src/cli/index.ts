@@ -17,7 +17,6 @@ function run(): void {
       tag,
       interfacePaths,
       predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       defaultCustomTags: config.parsing.defaultCustomTags ?? {},
       dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
     });

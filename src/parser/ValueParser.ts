@@ -15,6 +15,7 @@ import {
   DictionaryKeyType,
   isCustomType,
   PredefinedType,
+  Value,
 } from '../types';
 import { isUndefinedOrNull } from './utils';
 
@@ -213,20 +214,7 @@ export class ValueParser {
       return predefinedType;
     }
 
-    let symbol = this.checker.getSymbolAtLocation(node.typeName);
-    if (!symbol) {
-      throw Error('Invalid reference type');
-    }
-
-    if (symbol.flags & ts.SymbolFlags.Alias) {
-      symbol = this.checker.getAliasedSymbol(symbol);
-    }
-
-    const declarations = symbol.getDeclarations();
-    if (declarations === undefined || declarations.length !== 1) {
-      throw Error('Invalid declaration');
-    }
-    const declaration = declarations[0];
+    const declaration = this.getReferencedTypeNode(node);
 
     const interfaceType = this.parseInterfaceType(declaration);
     if (interfaceType !== null) {
@@ -251,6 +239,24 @@ export class ValueParser {
     }
 
     return valueType;
+  }
+
+  private getReferencedTypeNode(referenceNode: ts.TypeReferenceNode): ts.Declaration {
+    let symbol = this.checker.getSymbolAtLocation(referenceNode.typeName);
+    if (!symbol) {
+      throw Error('Invalid reference type');
+    }
+
+    if (symbol.flags & ts.SymbolFlags.Alias) {
+      symbol = this.checker.getAliasedSymbol(symbol);
+    }
+
+    const declarations = symbol.getDeclarations();
+    if (declarations === undefined || declarations.length !== 1) {
+      throw Error('Invalid declaration');
+    }
+
+    return declarations[0];
   }
 
   private arrayTypeKindFromTypeNode(node: ts.TypeNode): ArrayType | null {
@@ -383,18 +389,63 @@ export class ValueParser {
       return null;
     }
 
-    const name = node.name.getText();
-    try {
-      const valueType = this.valueTypeFromNode(node);
-
-      return {
-        name,
-        type: valueType,
-      };
-    } catch {
-      // workaround value assignment in interface field, like: kind: ValueTypeKind.basicType
-      return null;
+    if (!node.type) {
+      throw Error('Invalid type');
     }
+
+    const name = node.name.getText();
+
+    const staticValue = this.parseLiteralNode(node.type);
+    if (staticValue !== null) {
+      return { name, type: staticValue.type, staticValue: staticValue.value };
+    }
+
+    const valueType = this.valueTypeFromNode(node);
+
+    return {
+      name,
+      type: valueType,
+    };
+  }
+
+  private parseLiteralNode(typeNode: ts.TypeNode): { type: ValueType, value: Value } | null {
+    if (ts.isLiteralTypeNode(typeNode)) {
+      if (ts.isNumericLiteral(typeNode.literal)) {
+        return {
+          type: {
+            kind: ValueTypeKind.basicType,
+            value: BasicTypeValue.number,
+          },
+          value: JSON.parse(typeNode.literal.text) as number,
+        };
+      }
+
+      if (ts.isStringLiteral(typeNode.literal)) {
+        return {
+          type: {
+            kind: ValueTypeKind.basicType,
+            value: BasicTypeValue.string,
+          },
+          value: typeNode.literal.text,
+        };
+      }
+    }
+
+    if (ts.isTypeReferenceNode(typeNode)) {
+      const referencedNode = this.getReferencedTypeNode(typeNode);
+      if (ts.isEnumMember(referencedNode)) {
+        const enumType = this.enumTypeKindFromType(referencedNode.parent);
+        if (enumType === null) {
+          throw Error('Invalid enum member');
+        }
+        return {
+          type: enumType,
+          value: referencedNode.name.getText(),
+        };
+      }
+    }
+
+    return null;
   }
 
   private getExtendingMembersFromInterfaceDeclaration(node: ts.InterfaceDeclaration): Field[] {
