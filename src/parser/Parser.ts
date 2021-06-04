@@ -14,14 +14,14 @@ export class Parser {
 
   private logger: ParserLogger;
 
-  constructor(globPatterns: string[]) {
+  constructor(globPatterns: string[], predefinedTypes: Set<string>) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
     this.program = ts.createProgram({
       rootNames: filePaths,
       options: {},
     });
     this.checker = this.program.getTypeChecker();
-    this.valueParser = new ValueParser(this.checker);
+    this.valueParser = new ValueParser(this.checker, predefinedTypes);
     this.logger = new ParserLogger(this.checker);
   }
 

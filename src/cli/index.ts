@@ -16,6 +16,7 @@ function run(): void {
     generator.parse({
       tag,
       interfacePaths,
+      predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       defaultCustomTags: config.parsing.defaultCustomTags ?? {},
       dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
@@ -37,6 +38,7 @@ function run(): void {
         language: RenderingLanguage.Swift,
         outputDirectory: swiftRenderConfig.outputDirectory[tag],
         moduleTemplatePath,
+        typeNameMap: swiftRenderConfig.typeNameMap ?? {},
       });
     });
 
@@ -44,6 +46,7 @@ function run(): void {
       language: RenderingLanguage.Swift,
       namedTypesTemplatePath: swiftRenderConfig.namedTypesTemplatePath,
       namedTypesOutputPath: swiftRenderConfig.namedTypesOutputPath,
+      typeNameMap: swiftRenderConfig.typeNameMap ?? {},
     });
   }
 }

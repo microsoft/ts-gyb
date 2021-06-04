@@ -7,6 +7,7 @@ import {
   isDictionaryType,
   isEnumType,
   isOptionalType,
+  isPredefinedType,
   Method,
   Module,
   ValueType,
@@ -95,6 +96,9 @@ function serializeValueType(valueType: ValueType): string {
   }
   if (isOptionalType(valueType)) {
     return `${serializeValueType(valueType.wrappedType)}?`;
+  }
+  if (isPredefinedType(valueType)) {
+    return valueType.name;
   }
 
   throw Error('Unhandled value type');
