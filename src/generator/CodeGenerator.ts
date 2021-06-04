@@ -3,10 +3,10 @@ import path from 'path';
 import { dropIPrefixInCustomTypes, fetchNamedTypes, NamedType, NamedTypesResult } from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
-import { SwiftCustomTypeView } from '../renderer/swift/SwiftCustomTypeView';
+import { SwiftInterfaceTypeView } from '../renderer/swift/SwiftInterfaceTypeView';
 import { SwiftEnumTypeView } from '../renderer/swift/SwiftEnumTypeView';
 import { SwiftModuleView } from '../renderer/swift/SwiftModuleView';
-import { CustomTypeView, EnumTypeView, ModuleView, NamedTypeView } from '../renderer/views';
+import { InterfaceTypeView, EnumTypeView, ModuleView, NamedTypeView } from '../renderer/views';
 import { serializeModule, serializeNamedType } from '../serializers';
 import { InterfaceType, EnumType, isInterfaceType, Module } from '../types';
 import { applyDefaultCustomTags } from './utils';
@@ -141,7 +141,7 @@ export class CodeGenerator {
   ): NamedTypeView {
     let namedTypeView: NamedTypeView;
     if (isInterfaceType(namedType)) {
-      namedTypeView = this.getCustomTypeView(language, namedType.name, namedType, typeNameMap);
+      namedTypeView = this.getInterfaceTypeView(language, namedType.name, namedType, typeNameMap);
       namedTypeView.custom = true;
     } else {
       namedTypeView = this.getEnumTypeView(language, namedType);
@@ -169,15 +169,15 @@ export class CodeGenerator {
     }
   }
 
-  private getCustomTypeView(
+  private getInterfaceTypeView(
     language: RenderingLanguage,
     typeName: string,
     interfaceType: InterfaceType,
     typeNameMap: Record<string, string>
-  ): CustomTypeView {
+  ): InterfaceTypeView {
     switch (language) {
       case RenderingLanguage.Swift:
-        return new SwiftCustomTypeView(typeName, interfaceType, new SwiftValueTransformer(typeNameMap));
+        return new SwiftInterfaceTypeView(typeName, interfaceType, new SwiftValueTransformer(typeNameMap));
       default:
         throw Error('Unhandled language');
     }
