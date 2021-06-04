@@ -155,7 +155,10 @@ export class ValueParser {
         return;
       }
 
-      if (!isInterfaceType(valueType) && !isTupleType(valueType) || !isInterfaceType(newValueType) && !isTupleType(newValueType)) {
+      if (
+        (!isInterfaceType(valueType) && !isTupleType(valueType)) ||
+        (!isInterfaceType(newValueType) && !isTupleType(newValueType))
+      ) {
         throw Error('Do not support multiple union types except for interface or literal type.');
       }
 
@@ -236,10 +239,7 @@ export class ValueParser {
         name: typeName,
         members: valueType.members,
       };
-    } else if (
-      isOptionalType(valueType) &&
-      isTupleType(valueType.wrappedType)
-    ) {
+    } else if (isOptionalType(valueType) && isTupleType(valueType.wrappedType)) {
       valueType.wrappedType = {
         kind: ValueTypeKind.interfaceType,
         name: typeName,

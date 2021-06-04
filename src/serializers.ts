@@ -13,7 +13,6 @@ import {
   Module,
   ValueType,
   Value,
-  isTupleType,
 } from './types';
 
 const keywordColor = chalk.green;

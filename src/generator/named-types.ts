@@ -87,11 +87,7 @@ function recursiveVisitMembersType(
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(
-        member.type,
-        visit,
-        `${path}${valueType.name}Members${capitalize(member.name)}Type`
-      );
+      recursiveVisitMembersType(member.type, visit, `${path}${valueType.name}Members${capitalize(member.name)}Type`);
     });
 
     return;
@@ -101,11 +97,7 @@ function recursiveVisitMembersType(
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(
-        member.type,
-        visit,
-        `${path}Members${capitalize(member.name)}Type`
-      );
+      recursiveVisitMembersType(member.type, visit, `${path}Members${capitalize(member.name)}Type`);
     });
 
     return;

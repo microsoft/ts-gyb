@@ -19,7 +19,14 @@ export interface Field {
 }
 
 export type ValueType = NonEmptyType | OptionalType;
-export type NonEmptyType = BasicType | InterfaceType | TupleType | EnumType | ArrayType | DictionaryType | PredefinedType;
+export type NonEmptyType =
+  | BasicType
+  | InterfaceType
+  | TupleType
+  | EnumType
+  | ArrayType
+  | DictionaryType
+  | PredefinedType;
 
 export enum ValueTypeKind {
   basicType = 'basicType',
