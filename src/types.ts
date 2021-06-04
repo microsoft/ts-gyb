@@ -19,11 +19,12 @@ export interface Field {
 }
 
 export type ValueType = NonEmptyType | OptionalType;
-export type NonEmptyType = BasicType | CustomType | EnumType | ArrayType | DictionaryType | PredefinedType;
+export type NonEmptyType = BasicType | InterfaceType | TupleType | EnumType | ArrayType | DictionaryType | PredefinedType;
 
 export enum ValueTypeKind {
   basicType = 'basicType',
-  customType = 'customType',
+  interfaceType = 'interfaceType',
+  tupleType = 'tupleType',
   enumType = 'enumType',
   arrayType = 'arrayType',
   dictionaryType = 'dictionaryType',
@@ -46,9 +47,14 @@ export interface BasicType extends BaseValueType {
   value: BasicTypeValue;
 }
 
-export interface CustomType extends BaseValueType {
-  kind: ValueTypeKind.customType;
-  name?: string;
+export interface InterfaceType extends BaseValueType {
+  kind: ValueTypeKind.interfaceType;
+  name: string;
+  members: Field[];
+}
+
+export interface TupleType extends BaseValueType {
+  kind: ValueTypeKind.tupleType;
   members: Field[];
 }
 
@@ -94,8 +100,12 @@ export function isBasicType(valueType: ValueType): valueType is BasicType {
   return valueType.kind === ValueTypeKind.basicType;
 }
 
-export function isCustomType(valueType: ValueType): valueType is CustomType {
-  return valueType.kind === ValueTypeKind.customType;
+export function isInterfaceType(valueType: ValueType): valueType is InterfaceType {
+  return valueType.kind === ValueTypeKind.interfaceType;
+}
+
+export function isTupleType(valueType: ValueType): valueType is TupleType {
+  return valueType.kind === ValueTypeKind.tupleType;
 }
 
 export function isEnumType(valueType: ValueType): valueType is EnumType {

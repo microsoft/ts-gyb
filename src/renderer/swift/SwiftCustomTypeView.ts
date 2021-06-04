@@ -1,11 +1,11 @@
-import { CustomType } from '../../types';
+import { InterfaceType } from '../../types';
 import { CustomTypeView } from '../views';
 import { SwiftValueTransformer } from './SwiftValueTransformer';
 
 export class SwiftCustomTypeView implements CustomTypeView {
   constructor(
     readonly typeName: string,
-    private readonly customType: CustomType,
+    private readonly customType: InterfaceType,
     private readonly valueTransformer: SwiftValueTransformer
   ) {}
 

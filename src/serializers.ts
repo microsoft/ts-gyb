@@ -4,7 +4,7 @@ import {
   Field,
   isArraryType,
   isBasicType,
-  isCustomType,
+  isInterfaceType,
   isDictionaryType,
   isEnumType,
   isOptionalType,
@@ -13,6 +13,7 @@ import {
   Module,
   ValueType,
   Value,
+  isTupleType,
 } from './types';
 
 const keywordColor = chalk.green;
@@ -49,7 +50,7 @@ ${module.methods
 }
 
 export function serializeNamedType(namedType: NamedType): string {
-  if (isCustomType(namedType)) {
+  if (isInterfaceType(namedType)) {
     return `${keywordColor('Type')} ${namedType.name} {
 ${namedType.members.map((member) => `  ${keywordColor('var')} ${serializeField(member)}`).join('\n')}
 }`;
@@ -82,10 +83,7 @@ function serializeValueType(valueType: ValueType): string {
   if (isBasicType(valueType)) {
     return valueType.value;
   }
-  if (isCustomType(valueType)) {
-    if (valueType.name === undefined) {
-      throw Error('Unable to serialize unnamed custom type');
-    }
+  if (isInterfaceType(valueType)) {
     return valueType.name;
   }
   if (isEnumType(valueType)) {
