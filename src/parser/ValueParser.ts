@@ -408,7 +408,7 @@ export class ValueParser {
     };
   }
 
-  private parseLiteralNode(typeNode: ts.TypeNode): { type: ValueType, value: Value } | null {
+  private parseLiteralNode(typeNode: ts.TypeNode): { type: ValueType; value: Value } | null {
     if (ts.isLiteralTypeNode(typeNode)) {
       if (ts.isNumericLiteral(typeNode.literal)) {
         return {

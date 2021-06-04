@@ -4,7 +4,11 @@ import { SwiftMethodView } from './SwiftMethodView';
 import { SwiftValueTransformer } from './SwiftValueTransformer';
 
 export class SwiftModuleView implements ModuleView {
-  constructor(private readonly module: Module, readonly associatedTypes: NamedTypeView[], private readonly valueTransformer: SwiftValueTransformer) {}
+  constructor(
+    private readonly module: Module,
+    readonly associatedTypes: NamedTypeView[],
+    private readonly valueTransformer: SwiftValueTransformer
+  ) {}
 
   get moduleName(): string {
     return this.module.name;

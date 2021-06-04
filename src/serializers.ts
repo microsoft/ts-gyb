@@ -51,12 +51,7 @@ ${module.methods
 export function serializeNamedType(namedType: NamedType): string {
   if (isCustomType(namedType)) {
     return `${keywordColor('Type')} ${namedType.name} {
-${namedType.members
-  .map(
-    (member) =>
-      `  ${keywordColor('var')} ${serializeField(member)}`
-  )
-  .join('\n')}
+${namedType.members.map((member) => `  ${keywordColor('var')} ${serializeField(member)}`).join('\n')}
 }`;
   }
 
@@ -78,7 +73,8 @@ function serializeMethod(method: Method): string {
 }
 
 function serializeField(field: Field): string {
-  const staticValue = field.staticValue !== undefined ? ` = ${serializeStaticValue(field.staticValue, field.type)}` : '';
+  const staticValue =
+    field.staticValue !== undefined ? ` = ${serializeStaticValue(field.staticValue, field.type)}` : '';
   return `${identifierColor(field.name)}: ${typeColor(serializeValueType(field.type))}${staticValue}`;
 }
 

@@ -5,14 +5,15 @@ import {
   isBasicType,
   isCustomType,
   isDictionaryType,
-  isEnumType, isOptionalType, isPredefinedType,
+  isEnumType,
+  isOptionalType,
+  isPredefinedType,
   ValueType,
   Value,
 } from '../../types';
 import { uncapitalize } from '../../utils';
 
 export class SwiftValueTransformer {
-
   constructor(private readonly predefinedTypes: Record<string, string>) {}
 
   convertValueType(valueType: ValueType): string {
@@ -92,13 +93,13 @@ export class SwiftValueTransformer {
     }
 
     if (isArraryType(type)) {
-      return `[${(value as Value[]).map(element => this.convertValue(element, type.elementType)).join(', ')}]`;
+      return `[${(value as Value[]).map((element) => this.convertValue(element, type.elementType)).join(', ')}]`;
     }
 
     if (isDictionaryType(type)) {
-      return `[${Object.entries(value as Record<string, Value>).map(([key, element]) => 
-        `${JSON.stringify(key)}: ${this.convertValue(element, type.valueType)}`
-      ).join(', ')}]`;
+      return `[${Object.entries(value as Record<string, Value>)
+        .map(([key, element]) => `${JSON.stringify(key)}: ${this.convertValue(element, type.valueType)}`)
+        .join(', ')}]`;
     }
 
     if (isOptionalType(type)) {

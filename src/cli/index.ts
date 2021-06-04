@@ -4,9 +4,7 @@ import { Configuration } from './configuration';
 
 const program = yargs(process.argv.slice(2));
 
-const args = program
-  .config()
-  .help().argv;
+const args = program.config().help().argv;
 
 function run(): void {
   const config = args as unknown as Configuration;
