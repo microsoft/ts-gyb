@@ -13,6 +13,6 @@ export interface RenderConfiguration {
 }
 
 export interface Configuration {
-  parse: ParseConfiguration;
-  render: { swift?: RenderConfiguration, kotlin?: RenderConfiguration };
+  parsing: ParseConfiguration;
+  rendering: { swift?: RenderConfiguration, kotlin?: RenderConfiguration };
 }

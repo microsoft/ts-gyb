@@ -12,24 +12,24 @@ function run(): void {
   const config = args as unknown as Configuration;
 
   const generator = new CodeGenerator();
-  Object.entries(config.parse.source).forEach(([tag, interfacePaths]) => {
+  Object.entries(config.parsing.source).forEach(([tag, interfacePaths]) => {
     generator.parse({
       tag,
       interfacePaths,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      defaultCustomTags: config.parse.defaultCustomTags ?? {},
-      dropInterfaceIPrefix: config.parse.dropInterfaceIPrefix ?? false,
+      defaultCustomTags: config.parsing.defaultCustomTags ?? {},
+      dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
     });
   });
 
   generator.parseNamedTypes();
   generator.printSharedNamedTypes();
 
-  Object.entries(config.parse.source).forEach(([tag]) => {
+  Object.entries(config.parsing.source).forEach(([tag]) => {
     generator.printModules({ tag });
   });
 
-  const swiftRenderConfig = config.render.swift;
+  const swiftRenderConfig = config.rendering.swift;
   if (swiftRenderConfig) {
     Object.entries(swiftRenderConfig.templates).forEach(([tag, moduleTemplatePath]) => {
       generator.renderModules({

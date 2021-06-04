@@ -1,12 +1,12 @@
 {
-  "parse": {
+  "parsing": {
     "source": {
       "API": ["demo/interfaces.ts"]
     },
     "defaultCustomTags": {},
     "dropInterfaceIPrefix": true
   },
-  "render": {
+  "rendering": {
     "swift": {
       "templates": {
         "API": "example-templates/swift-bridge.mustache"
