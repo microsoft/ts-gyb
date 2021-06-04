@@ -425,7 +425,7 @@ export class ValueParser {
             kind: ValueTypeKind.basicType,
             value: BasicTypeValue.number,
           },
-          value: JSON.parse(typeNode.literal.text) as number,
+          value: Number(typeNode.literal.text),
         };
       }
 
