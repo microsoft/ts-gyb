@@ -10,7 +10,7 @@ export interface ModuleView {
   readonly moduleName: string;
   readonly methods: MethodView[];
   readonly associatedTypes: NamedTypeView[];
-  readonly customTags: Record<string, string>;
+  readonly customTags: Record<string, unknown>;
 }
 
 export type NamedTypeView = (CustomTypeView | EnumTypeView) & { custom?: boolean; enum?: boolean };

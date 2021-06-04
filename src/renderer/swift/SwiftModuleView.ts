@@ -14,7 +14,7 @@ export class SwiftModuleView implements ModuleView {
     return this.module.methods.map((method) => new SwiftMethodView(method, this.valueTransformer));
   }
 
-  get customTags(): Record<string, string> {
-    return Object.fromEntries(Object.entries(this.module.customTags).map(([key, value]) => [key, JSON.stringify(value)]));
+  get customTags(): Record<string, unknown> {
+    return this.module.customTags;
   }
 }
