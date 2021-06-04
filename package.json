@@ -14,7 +14,7 @@
     "lint:fix": "npm run lint -- --fix && npm run prettier:write",
     "lint:ci": "npm run lint && npm run prettier:check"
   },
-  "main": "dist/cli/index.js",
+  "main": "dist/index.js",
   "bin": {
     "ts-codegen": "bin/ts-codegen"
   },
