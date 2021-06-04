@@ -1,0 +1,21 @@
+{
+  "parsing": {
+    "source": {
+      "API": ["demo/interfaces.ts"]
+    },
+    "defaultCustomTags": {},
+    "dropInterfaceIPrefix": true
+  },
+  "rendering": {
+    "swift": {
+      "templates": {
+        "API": "example-templates/swift-bridge.mustache"
+      },
+      "outputDirectory": {
+        "API": "demo/generated/swift"
+      },
+      "namedTypesTemplatePath": "example-templates/swift-named-types.mustache",
+      "namedTypesOutputPath": "demo/generated/swift/SharedTypes.swift"
+    }
+  }
+}

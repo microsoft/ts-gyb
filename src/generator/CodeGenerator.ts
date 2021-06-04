@@ -16,15 +16,17 @@ export enum RenderingLanguage {
 }
 
 export class CodeGenerator {
-  private modulesMap: Module[][] = [];
+  private modulesMap: Record<string, Module[]> = {};
 
   private namedTypes?: NamedTypesResult;
 
   parse({
+    tag,
     interfacePaths,
     defaultCustomTags,
     dropInterfaceIPrefix,
   }: {
+    tag: string;
     interfacePaths: string[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     defaultCustomTags: Record<string, any>;
@@ -39,15 +41,15 @@ export class CodeGenerator {
       dropIPrefixInCustomTypes(modules);
     }
 
-    this.modulesMap.push(modules);
+    this.modulesMap[tag] = modules;
   }
 
   parseNamedTypes(): void {
     this.namedTypes = fetchNamedTypes(Object.values(this.modulesMap).flatMap((modules) => modules));
   }
 
-  printModules(index: number): void {
-    const modules = this.modulesMap[index];
+  printModules({ tag }: { tag: string }): void {
+    const modules = this.modulesMap[tag];
     if (modules === undefined) {
       throw Error('Modules not parsed. Run parse first.');
     }
@@ -69,17 +71,17 @@ export class CodeGenerator {
   }
 
   renderModules({
-    index,
+    tag,
     language,
     outputDirectory,
     moduleTemplatePath,
   }: {
-    index: number;
+    tag: string;
     language: RenderingLanguage;
     outputDirectory: string;
     moduleTemplatePath: string;
   }): void {
-    const modules = this.modulesMap[index];
+    const modules = this.modulesMap[tag];
     if (modules === undefined) {
       throw Error('Modules not parsed. Run parse first.');
     }
