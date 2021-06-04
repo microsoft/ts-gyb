@@ -1,6 +1,6 @@
 {
   "name": "@olm/ts-codegen",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Generate Native API based on TS interface",
   "scripts": {
     "build": "tsc",
