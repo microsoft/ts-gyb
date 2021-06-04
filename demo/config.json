@@ -1,7 +1,7 @@
 {
   "parsing": {
     "source": {
-      "API": ["demo/interfaces.ts"]
+      "api": ["demo/interfaces.ts"]
     },
     "predefinedTypes": [
       "CodeGen_Int"
@@ -12,10 +12,10 @@
   "rendering": {
     "swift": {
       "templates": {
-        "API": "example-templates/swift-bridge.mustache"
+        "api": "example-templates/swift-bridge.mustache"
       },
       "outputDirectory": {
-        "API": "demo/generated/swift"
+        "api": "demo/generated/swift"
       },
       "namedTypesTemplatePath": "example-templates/swift-named-types.mustache",
       "namedTypesOutputPath": "demo/generated/swift/SharedTypes.swift",
