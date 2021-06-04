@@ -89,7 +89,7 @@ export class SwiftValueTransformer {
     }
 
     if (isEnumType(type)) {
-      return `.${uncapitalize(value as string)}`;
+      return `.${enumUncapitalize(value as string)}`;
     }
 
     if (isArraryType(type)) {
@@ -115,4 +115,13 @@ export class SwiftValueTransformer {
 
     throw Error('Value not handled');
   }
+}
+
+export function enumUncapitalize(text: string): string {
+  // If all characters are upper cased, convert them all to lower case
+  if (!/[a-z]/.test(text) && /[A-Z]/.test(text)) {
+    return text.toLowerCase();
+  }
+
+  return uncapitalize(text);
 }

@@ -1,6 +1,6 @@
-import { uncapitalize } from '../../utils';
 import { EnumSubType, EnumType } from '../../types';
 import { EnumTypeView } from '../views';
+import { enumUncapitalize } from './SwiftValueTransformer';
 
 export class SwiftEnumTypeView implements EnumTypeView {
   constructor(private enumType: EnumType) {}
@@ -22,8 +22,7 @@ export class SwiftEnumTypeView implements EnumTypeView {
 
   get members(): { key: string; value: string }[] {
     return Object.entries(this.enumType.members).map(([key, value]) => ({
-      // TODO: Convert to camel case instead of uncapitalize
-      key: uncapitalize(key),
+      key: enumUncapitalize(key),
       value: typeof value === 'string' ? `"${value}"` : `${value}`,
     }));
   }
