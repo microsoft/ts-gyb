@@ -1,8 +1,7 @@
 export interface ParseConfiguration {
   source: Record<string, string[]>;
   predefinedTypes?: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  defaultCustomTags?: any;
+  defaultCustomTags?: Record<string, unknown>;
   dropInterfaceIPrefix?: boolean;
 }
 
@@ -16,5 +15,5 @@ export interface RenderConfiguration {
 
 export interface Configuration {
   parsing: ParseConfiguration;
-  rendering: { swift?: RenderConfiguration, kotlin?: RenderConfiguration };
+  rendering: { swift?: RenderConfiguration; kotlin?: RenderConfiguration };
 }

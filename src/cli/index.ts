@@ -4,9 +4,7 @@ import { Configuration } from './configuration';
 
 const program = yargs(process.argv.slice(2));
 
-const args = program
-  .config()
-  .help().argv;
+const args = program.config().help().argv;
 
 function run(): void {
   const config = args as unknown as Configuration;
@@ -17,7 +15,6 @@ function run(): void {
       tag,
       interfacePaths,
       predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       defaultCustomTags: config.parsing.defaultCustomTags ?? {},
       dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
     });

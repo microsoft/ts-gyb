@@ -20,7 +20,7 @@ export class CodeGenerator {
   private modulesMap: Record<string, Module[]> = {};
 
   private namedTypes?: NamedTypesResult;
-  
+
   parse({
     tag,
     interfacePaths,
@@ -31,8 +31,7 @@ export class CodeGenerator {
     tag: string;
     interfacePaths: string[];
     predefinedTypes: Set<string>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    defaultCustomTags: Record<string, any>;
+    defaultCustomTags: Record<string, unknown>;
     dropInterfaceIPrefix: boolean;
   }): void {
     const parser = new Parser(interfacePaths, predefinedTypes);
@@ -119,7 +118,9 @@ export class CodeGenerator {
       throw Error('Named types not parsed. Run parseNamedTypes first.');
     }
 
-    const namedTypesView = this.namedTypes.sharedTypes.map((namedType) => this.getNamedTypeView(language, namedType, typeNameMap));
+    const namedTypesView = this.namedTypes.sharedTypes.map((namedType) =>
+      this.getNamedTypeView(language, namedType, typeNameMap)
+    );
     const renderedCode = renderCode(namedTypesTemplatePath, namedTypesView);
     fs.writeFileSync(namedTypesOutputPath, renderedCode);
   }
@@ -133,7 +134,11 @@ export class CodeGenerator {
     }
   }
 
-  private getNamedTypeView(language: RenderingLanguage, namedType: NamedType, typeNameMap: Record<string, string>): NamedTypeView {
+  private getNamedTypeView(
+    language: RenderingLanguage,
+    namedType: NamedType,
+    typeNameMap: Record<string, string>
+  ): NamedTypeView {
     let namedTypeView: NamedTypeView;
     if (isCustomType(namedType)) {
       namedTypeView = this.getCustomTypeView(language, namedType.name, namedType, typeNameMap);
@@ -146,20 +151,30 @@ export class CodeGenerator {
     return namedTypeView;
   }
 
-  private getModuleView(language: RenderingLanguage, module: Module, associatedTypes: NamedType[], typeNameMap: Record<string, string>): ModuleView {
+  private getModuleView(
+    language: RenderingLanguage,
+    module: Module,
+    associatedTypes: NamedType[],
+    typeNameMap: Record<string, string>
+  ): ModuleView {
     switch (language) {
       case RenderingLanguage.Swift:
         return new SwiftModuleView(
           module,
           associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
-          new SwiftValueTransformer(typeNameMap),
+          new SwiftValueTransformer(typeNameMap)
         );
       default:
         throw Error('Unhandled language');
     }
   }
 
-  private getCustomTypeView(language: RenderingLanguage, typeName: string, customType: CustomType, typeNameMap: Record<string, string>): CustomTypeView {
+  private getCustomTypeView(
+    language: RenderingLanguage,
+    typeName: string,
+    customType: CustomType,
+    typeNameMap: Record<string, string>
+  ): CustomTypeView {
     switch (language) {
       case RenderingLanguage.Swift:
         return new SwiftCustomTypeView(typeName, customType, new SwiftValueTransformer(typeNameMap));

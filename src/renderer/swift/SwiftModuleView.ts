@@ -4,7 +4,11 @@ import { SwiftMethodView } from './SwiftMethodView';
 import { SwiftValueTransformer } from './SwiftValueTransformer';
 
 export class SwiftModuleView implements ModuleView {
-  constructor(private readonly module: Module, readonly associatedTypes: NamedTypeView[], private readonly valueTransformer: SwiftValueTransformer) {}
+  constructor(
+    private readonly module: Module,
+    readonly associatedTypes: NamedTypeView[],
+    private readonly valueTransformer: SwiftValueTransformer
+  ) {}
 
   get moduleName(): string {
     return this.module.name;
@@ -14,7 +18,7 @@ export class SwiftModuleView implements ModuleView {
     return this.module.methods.map((method) => new SwiftMethodView(method, this.valueTransformer));
   }
 
-  get customTags(): Record<string, string> {
+  get customTags(): Record<string, unknown> {
     return this.module.customTags;
   }
 }

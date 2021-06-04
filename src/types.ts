@@ -2,8 +2,7 @@ export interface Module {
   name: string;
   methods: Method[];
   documentation: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  customTags: Record<string, any>;
+  customTags: Record<string, unknown>;
 }
 
 export interface Method {
@@ -16,6 +15,7 @@ export interface Method {
 export interface Field {
   name: string;
   type: ValueType;
+  staticValue?: Value;
 }
 
 export type ValueType = NonEmptyType | OptionalType;
@@ -117,3 +117,7 @@ export function isOptionalType(valueType: ValueType): valueType is OptionalType 
 export function isPredefinedType(valueType: ValueType): valueType is PredefinedType {
   return valueType.kind === ValueTypeKind.predefinedType;
 }
+
+// TODO: Define these types to support recursive definition
+type BaseValue = string | number | boolean | Record<string, unknown> | null;
+export type Value = BaseValue | BaseValue[] | Record<string | number, BaseValue>;

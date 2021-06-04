@@ -3,6 +3,9 @@ public struct {{typeName}}: Codable {
   {{#members}}
   public var {{name}}: {{type}}
   {{/members}}
+  {{#staticMembers}}
+  private var {{name}}: {{type}} = {{{value}}}
+  {{/staticMembers}}
 
   public init({{#members}}{{name}}: {{type}}{{^last}}, {{/last}}{{/members}}) {
     {{#members}}

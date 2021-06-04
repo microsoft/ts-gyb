@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { NamedType } from './generator/named-types';
 import {
+  Field,
   isArraryType,
   isBasicType,
   isCustomType,
@@ -11,6 +12,7 @@ import {
   Method,
   Module,
   ValueType,
+  Value,
 } from './types';
 
 const keywordColor = chalk.green;
@@ -49,12 +51,7 @@ ${module.methods
 export function serializeNamedType(namedType: NamedType): string {
   if (isCustomType(namedType)) {
     return `${keywordColor('Type')} ${namedType.name} {
-${namedType.members
-  .map(
-    (member) =>
-      `  ${keywordColor('var')} ${identifierColor(member.name)}: ${typeColor(serializeValueType(member.type))}`
-  )
-  .join('\n')}
+${namedType.members.map((member) => `  ${keywordColor('var')} ${serializeField(member)}`).join('\n')}
 }`;
   }
 
@@ -73,6 +70,12 @@ function serializeMethod(method: Method): string {
   )}(${method.parameters
     .map((parameter) => `${parameter.name}: ${typeColor(serializeValueType(parameter.type))}`)
     .join(', ')})${serializedReturnType}`;
+}
+
+function serializeField(field: Field): string {
+  const staticValue =
+    field.staticValue !== undefined ? ` = ${serializeStaticValue(field.staticValue, field.type)}` : '';
+  return `${identifierColor(field.name)}: ${typeColor(serializeValueType(field.type))}${staticValue}`;
 }
 
 function serializeValueType(valueType: ValueType): string {
@@ -102,6 +105,14 @@ function serializeValueType(valueType: ValueType): string {
   }
 
   throw Error('Unhandled value type');
+}
+
+function serializeStaticValue(value: Value, type: ValueType): string {
+  if (isEnumType(type)) {
+    return `${type.name}.${value as string}`;
+  }
+
+  return JSON.stringify(value);
 }
 
 function serializeDocumentation(documentation: string): string {
