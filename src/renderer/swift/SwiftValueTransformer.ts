@@ -109,6 +109,10 @@ export class SwiftValueTransformer {
       return this.convertValue(value, type.wrappedType);
     }
 
+    if (isPredefinedType(type)) {
+      throw Error('Predefined type static value is not supported');
+    }
+
     throw Error('Value not handled');
   }
 }

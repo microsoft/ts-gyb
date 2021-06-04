@@ -118,5 +118,6 @@ export function isPredefinedType(valueType: ValueType): valueType is PredefinedT
   return valueType.kind === ValueTypeKind.predefinedType;
 }
 
+// TODO: Define these types to support recursive definition
 type BaseValue = string | number | boolean | Record<string, unknown> | null;
 export type Value = BaseValue | BaseValue[] | Record<string | number, BaseValue>;
