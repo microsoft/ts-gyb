@@ -1,25 +1,28 @@
 import { capitalize } from '../utils';
 import {
   isArraryType,
-  isCustomType,
+  isInterfaceType,
   isDictionaryType,
   isEnumType,
   isOptionalType,
   Module,
   ValueType,
-  CustomType,
+  InterfaceType,
   EnumType,
+  TupleType,
+  isTupleType,
+  ValueTypeKind,
 } from '../types';
 
-export type NamedType = (CustomType & { name: string }) | EnumType;
+export type NamedType = InterfaceType | EnumType;
 export type NamedTypesResult = { associatedTypes: Record<string, NamedType[]>; sharedTypes: NamedType[] };
 
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
   modules
     .flatMap((module) => fetchRootTypes(module))
     .forEach((valueType) => {
-      recursiveVisitNamedType(valueType, (namedType) => {
-        if (!isCustomType(namedType)) {
+      recursiveVisitMembersType(valueType, (namedType) => {
+        if (!isInterfaceType(namedType)) {
           return;
         }
 
@@ -33,13 +36,16 @@ export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
 
   modules.forEach((module) => {
     fetchRootTypes(module).forEach((valueType) => {
-      recursiveVisitNamedType(valueType, (namedType, path) => {
-        if (namedType.name === undefined) {
+      recursiveVisitMembersType(valueType, (membersType, path) => {
+        let namedType = membersType;
+        if (isTupleType(namedType)) {
+          namedType = membersType as unknown as InterfaceType;
+          namedType.kind = ValueTypeKind.interfaceType;
           namedType.name = path;
         }
 
         if (typeMap[namedType.name] === undefined) {
-          typeMap[namedType.name] = { namedType: namedType as NamedType, associatedModules: new Set() };
+          typeMap[namedType.name] = { namedType, associatedModules: new Set() };
         }
 
         typeMap[namedType.name].associatedModules.add(module.name);
@@ -72,20 +78,26 @@ function fetchRootTypes(module: Module): ValueType[] {
   );
 }
 
-function recursiveVisitNamedType(
+function recursiveVisitMembersType(
   valueType: ValueType,
-  visit: (namedType: CustomType | EnumType, path: string) => void,
+  visit: (membersType: NamedType | TupleType, path: string) => void,
   path = ''
 ): void {
-  if (isCustomType(valueType)) {
+  if (isInterfaceType(valueType)) {
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitNamedType(
-        member.type,
-        visit,
-        `${path}${valueType.name ?? ''}Members${capitalize(member.name)}Type`
-      );
+      recursiveVisitMembersType(member.type, visit, `${path}${valueType.name}Members${capitalize(member.name)}Type`);
+    });
+
+    return;
+  }
+
+  if (isTupleType(valueType)) {
+    visit(valueType, path);
+
+    valueType.members.forEach((member) => {
+      recursiveVisitMembersType(member.type, visit, `${path}Members${capitalize(member.name)}Type`);
     });
 
     return;
@@ -97,16 +109,16 @@ function recursiveVisitNamedType(
   }
 
   if (isArraryType(valueType)) {
-    recursiveVisitNamedType(valueType.elementType, visit, `${path}Element`);
+    recursiveVisitMembersType(valueType.elementType, visit, `${path}Element`);
     return;
   }
 
   if (isDictionaryType(valueType)) {
-    recursiveVisitNamedType(valueType.valueType, visit, `${path}Value`);
+    recursiveVisitMembersType(valueType.valueType, visit, `${path}Value`);
     return;
   }
 
   if (isOptionalType(valueType)) {
-    recursiveVisitNamedType(valueType.wrappedType, visit, `${path}`);
+    recursiveVisitMembersType(valueType.wrappedType, visit, `${path}`);
   }
 }
