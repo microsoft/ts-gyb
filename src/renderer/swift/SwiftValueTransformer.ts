@@ -11,7 +11,6 @@ import {
   ValueType,
   Value,
 } from '../../types';
-import { uncapitalize } from '../../utils';
 
 export class SwiftValueTransformer {
   constructor(private readonly predefinedTypes: Record<string, string>) {}
@@ -84,7 +83,7 @@ export class SwiftValueTransformer {
     }
 
     if (isEnumType(type)) {
-      return `.${uncapitalize(value as string)}`;
+      return `.${enumUncapitalize(value as string)}`;
     }
 
     if (isArraryType(type)) {
@@ -110,4 +109,26 @@ export class SwiftValueTransformer {
 
     throw Error('Value not handled');
   }
+}
+
+export function enumUncapitalize(text: string): string {
+  if (text.length === 0) {
+    return '';
+  }
+
+  let index = 0;
+  // Get the index of the first lowercased letter
+  while (index < text.length) {
+    if (text[index].toLowerCase() === text[index]) {
+      break;
+    }
+    index += 1;
+  }
+
+  // Get the index before the first lowercased letter
+  if (index > 1 && index < text.length && text[index].toLowerCase() === text[index]) {
+    index -= 1;
+  }
+
+  return text.slice(0, index).toLowerCase() + text.slice(index);
 }
