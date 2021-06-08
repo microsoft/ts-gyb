@@ -3,7 +3,7 @@ import {
   DictionaryKeyType,
   isArraryType,
   isBasicType,
-  isCustomType,
+  isInterfaceType,
   isDictionaryType,
   isEnumType,
   isOptionalType,
@@ -29,13 +29,8 @@ export class SwiftValueTransformer {
       }
     }
 
-    if (isCustomType(valueType)) {
-      if (valueType.name !== undefined) {
-        return valueType.name;
-      }
-
-      // TODO: Handle literal type
-      throw Error('not handled');
+    if (isInterfaceType(valueType)) {
+      return valueType.name;
     }
 
     if (isEnumType(valueType)) {
@@ -83,7 +78,7 @@ export class SwiftValueTransformer {
       }
     }
 
-    if (isCustomType(type)) {
+    if (isInterfaceType(type)) {
       throw Error('Custom type static value is not supported');
     }
 

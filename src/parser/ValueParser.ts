@@ -3,7 +3,7 @@ import {
   Field,
   ValueType,
   BasicTypeValue,
-  CustomType,
+  InterfaceType,
   ArrayType,
   BasicType,
   ValueTypeKind,
@@ -13,9 +13,11 @@ import {
   isOptionalType,
   DictionaryType,
   DictionaryKeyType,
-  isCustomType,
+  isInterfaceType,
   PredefinedType,
   Value,
+  TupleType,
+  isTupleType,
 } from '../types';
 import { isUndefinedOrNull } from './utils';
 
@@ -49,19 +51,19 @@ export class ValueParser {
 
   parseFunctionParameterType(typeNode: ts.TypeNode): Field[] {
     const typeLiteralType = this.parseTypeLiteralNode(typeNode);
-    if (typeLiteralType !== null && isCustomType(typeLiteralType)) {
+    if (typeLiteralType !== null && isTupleType(typeLiteralType)) {
       return typeLiteralType.members;
     }
 
     const referenceType = this.parseReferenceTypeNode(typeNode);
-    if (referenceType !== null && isCustomType(referenceType)) {
+    if (referenceType !== null && (isInterfaceType(referenceType) || isTupleType(referenceType))) {
       return referenceType.members;
     }
 
     throw Error('Not supported parameter type');
   }
 
-  private parseTypeLiteralNode(typeNode: ts.TypeNode): CustomType | DictionaryType | null {
+  private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
     if (!ts.isTypeLiteralNode(typeNode)) {
       return null;
     }
@@ -76,7 +78,7 @@ export class ValueParser {
       .filter((field): field is Field => field !== null);
 
     return {
-      kind: ValueTypeKind.customType,
+      kind: ValueTypeKind.tupleType,
       members: fields,
     };
   }
@@ -153,13 +155,16 @@ export class ValueParser {
         return;
       }
 
-      if (!isCustomType(valueType) || !isCustomType(newValueType)) {
+      if (
+        (!isInterfaceType(valueType) && !isTupleType(valueType)) ||
+        (!isInterfaceType(newValueType) && !isTupleType(newValueType))
+      ) {
         throw Error('Do not support multiple union types except for interface or literal type.');
       }
 
       const existingMemberNames = new Set(valueType.members.map((member) => member.name));
       valueType = {
-        kind: ValueTypeKind.customType,
+        kind: ValueTypeKind.tupleType,
         members: valueType.members.concat(
           newValueType.members.filter((member) => !existingMemberNames.has(member.name))
         ),
@@ -226,16 +231,20 @@ export class ValueParser {
       return enumTypeKind;
     }
 
-    const valueType = this.valueTypeFromNode(declaration);
+    let valueType = this.valueTypeFromNode(declaration);
 
-    if (isCustomType(valueType) && valueType.name === undefined) {
-      valueType.name = typeName;
-    } else if (
-      isOptionalType(valueType) &&
-      isCustomType(valueType.wrappedType) &&
-      valueType.wrappedType.name === undefined
-    ) {
-      valueType.wrappedType.name = typeName;
+    if (isTupleType(valueType)) {
+      valueType = {
+        kind: ValueTypeKind.interfaceType,
+        name: typeName,
+        members: valueType.members,
+      };
+    } else if (isOptionalType(valueType) && isTupleType(valueType.wrappedType)) {
+      valueType.wrappedType = {
+        kind: ValueTypeKind.interfaceType,
+        name: typeName,
+        members: valueType.wrappedType.members,
+      };
     }
 
     return valueType;
@@ -285,7 +294,7 @@ export class ValueParser {
     return null;
   }
 
-  private parseInterfaceType(node: ts.Node): CustomType | DictionaryType | null {
+  private parseInterfaceType(node: ts.Node): InterfaceType | DictionaryType | null {
     if (!ts.isInterfaceDeclaration(node)) {
       return null;
     }
@@ -307,7 +316,7 @@ export class ValueParser {
     }
 
     return {
-      kind: ValueTypeKind.customType,
+      kind: ValueTypeKind.interfaceType,
       name,
       members,
     };
@@ -416,7 +425,7 @@ export class ValueParser {
             kind: ValueTypeKind.basicType,
             value: BasicTypeValue.number,
           },
-          value: JSON.parse(typeNode.literal.text) as number,
+          value: Number(typeNode.literal.text),
         };
       }
 
@@ -469,7 +478,7 @@ export class ValueParser {
       if (interfaceType === null) {
         return [];
       }
-      if (!isCustomType(interfaceType)) {
+      if (!isInterfaceType(interfaceType)) {
         throw Error('Invalid extended type');
       }
 

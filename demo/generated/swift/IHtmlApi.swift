@@ -81,7 +81,7 @@ public struct FullSize: Codable {
   public var width: Double
   public var height: Double
   public var scale: Double
-  private let member: NumEnum = .one
+  private var member: NumEnum = .one
 
   public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, width: Double, height: Double, scale: Double) {
     self.size = size
