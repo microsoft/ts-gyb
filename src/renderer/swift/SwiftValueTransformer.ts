@@ -118,10 +118,23 @@ export class SwiftValueTransformer {
 }
 
 export function enumUncapitalize(text: string): string {
-  // If all characters are upper cased, convert them all to lower case
-  if (!/[a-z]/.test(text) && /[A-Z]/.test(text)) {
-    return text.toLowerCase();
+  if (text.length === 0) {
+    return '';
   }
 
-  return uncapitalize(text);
+  let index = 0;
+  // Get the index of the first lowercased letter
+  while (index < text.length) {
+    if (text[index].toLowerCase() === text[index]) {
+      break;
+    }
+    index += 1;
+  }
+
+  // Get the index before the first lowercased letter
+  if (index > 1 && index < text.length && text[index].toLowerCase() === text[index]) {
+    index -= 1;
+  }
+
+  return text.slice(0, index).toLowerCase() + text.slice(index);
 }
