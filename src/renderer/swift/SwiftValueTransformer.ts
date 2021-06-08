@@ -11,7 +11,6 @@ import {
   ValueType,
   Value,
 } from '../../types';
-import { uncapitalize } from '../../utils';
 
 export class SwiftValueTransformer {
   constructor(private readonly predefinedTypes: Record<string, string>) {}
