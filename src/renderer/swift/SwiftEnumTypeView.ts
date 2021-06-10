@@ -26,4 +26,12 @@ export class SwiftEnumTypeView implements EnumTypeView {
       value: typeof value === 'string' ? `"${value}"` : `${value}`,
     }));
   }
+
+  get documentationLines(): string[] {
+    if (this.enumType.documentation.length === 0) {
+      return [];
+    }
+
+    return this.enumType.documentation.split('\n');
+  }
 }

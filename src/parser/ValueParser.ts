@@ -19,7 +19,7 @@ import {
   TupleType,
   isTupleType,
 } from '../types';
-import { isUndefinedOrNull } from './utils';
+import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 
 export class ValueParser {
   constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
@@ -233,17 +233,29 @@ export class ValueParser {
 
     let valueType = this.valueTypeFromNode(declaration);
 
+    const symbol = this.checker.getSymbolAtLocation(node.typeName);
+    if (symbol === undefined) {
+      throw Error('Invalid reference type');
+    }
+
+    const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
+    const jsDocTagsResult = parseTypeJSDocTags(symbol);
+
     if (isTupleType(valueType)) {
       valueType = {
         kind: ValueTypeKind.interfaceType,
-        name: typeName,
+        name: jsDocTagsResult.overrideName ?? typeName,
         members: valueType.members,
+        documentation,
+        customTags: jsDocTagsResult.customTags,
       };
     } else if (isOptionalType(valueType) && isTupleType(valueType.wrappedType)) {
       valueType.wrappedType = {
         kind: ValueTypeKind.interfaceType,
-        name: typeName,
+        name: jsDocTagsResult.overrideName ?? typeName,
         members: valueType.wrappedType.members,
+        documentation,
+        customTags: jsDocTagsResult.customTags,
       };
     }
 
@@ -315,10 +327,20 @@ export class ValueParser {
       members.push(...membersInExtendingInterface);
     }
 
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    if (symbol === undefined) {
+      throw Error('Invalid interface type');
+    }
+
+    const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
+    const jsDocTagsResult = parseTypeJSDocTags(symbol);
+
     return {
       kind: ValueTypeKind.interfaceType,
-      name,
+      name: jsDocTagsResult.overrideName ?? name,
       members,
+      documentation,
+      customTags: jsDocTagsResult.customTags,
     };
   }
 
@@ -365,11 +387,21 @@ export class ValueParser {
       throw new Error("Enum doesn't support multiple sub types");
     }
 
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    if (symbol === undefined) {
+      throw Error('Invalid enum type');
+    }
+
+    const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
+    const jsDocTagsResult = parseTypeJSDocTags(symbol);
+
     return {
       kind: ValueTypeKind.enumType,
-      name,
+      name: jsDocTagsResult.overrideName ?? name,
       subType: enumSubType,
       members,
+      documentation,
+      customTags: jsDocTagsResult.customTags,
     };
   }
 

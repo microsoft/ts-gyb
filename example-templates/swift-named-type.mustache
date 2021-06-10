@@ -1,4 +1,7 @@
 {{#custom}}
+{{#documentationLines}}
+/// {{{.}}}
+{{/documentationLines}}
 public struct {{typeName}}: Codable {
   {{#members}}
   public var {{name}}: {{type}}
@@ -15,6 +18,9 @@ public struct {{typeName}}: Codable {
 }
 {{/custom}}
 {{#enum}}
+{{#documentationLines}}
+/// {{{.}}}
+{{/documentationLines}}
 public enum {{typeName}}: {{valueType}}, Codable {
   {{#members}}
   case {{key}} = {{{value}}}

@@ -58,6 +58,8 @@ export interface InterfaceType extends BaseValueType {
   kind: ValueTypeKind.interfaceType;
   name: string;
   members: Field[];
+  documentation: string;
+  customTags: Record<string, unknown>;
 }
 
 export interface TupleType extends BaseValueType {
@@ -75,6 +77,8 @@ export interface EnumType extends BaseValueType {
   name: string;
   subType: EnumSubType;
   members: Record<string, string | number>;
+  documentation: string;
+  customTags: Record<string, unknown>;
 }
 
 export interface ArrayType extends BaseValueType {

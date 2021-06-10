@@ -28,6 +28,10 @@ enum DefaultEnum {
   d,
 }
 
+/**
+ * Example documentation for interface
+ * @overrideTypeName OverriddenFullSize
+ */
 interface FullSize extends BaseSize, CustomSize {
   member: NumEnum.one;
   size: number;

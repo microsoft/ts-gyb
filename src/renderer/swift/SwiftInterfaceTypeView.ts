@@ -34,4 +34,12 @@ export class SwiftInterfaceTypeView implements InterfaceTypeView {
         };
       });
   }
+
+  get documentationLines(): string[] {
+    if (this.interfaceType.documentation.length === 0) {
+      return [];
+    }
+
+    return this.interfaceType.documentation.split('\n');
+  }
 }

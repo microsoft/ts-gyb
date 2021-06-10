@@ -53,7 +53,7 @@ public class IHtmlApi {
     jsExecutor.execute(with: "", feature: "requestRenderingResult", args: nil, completion: completion)
   }
 
-  public func getSize(completion: @escaping BridgeCompletion<FullSize>) {
+  public func getSize(completion: @escaping BridgeCompletion<OverriddenFullSize>) {
     jsExecutor.execute(with: "", feature: "getSize", args: nil, completion: completion)
   }
 
@@ -72,7 +72,8 @@ public class IHtmlApi {
   }
 }
 
-public struct FullSize: Codable {
+/// Example documentation for interface
+public struct OverriddenFullSize: Codable {
   public var size: Double
   public var count: Int
   public var stringEnum: StringEnum

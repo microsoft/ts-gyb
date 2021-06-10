@@ -19,10 +19,12 @@ export interface InterfaceTypeView {
   readonly typeName: string;
   readonly members: { name: string; type: string; last: boolean }[];
   readonly staticMembers: { name: string; type: string; value: string }[];
+  readonly documentationLines: string[];
 }
 
 export interface EnumTypeView {
   readonly typeName: string;
   readonly valueType: string;
   readonly members: { key: string; value: string }[];
+  readonly documentationLines: string[];
 }
