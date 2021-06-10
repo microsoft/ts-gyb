@@ -1,12 +1,18 @@
 {{#custom}}
 {{#documentationLines}}
-/// {{{.}}}
+///{{{.}}}
 {{/documentationLines}}
 public struct {{typeName}}: Codable {
   {{#members}}
+  {{#documentationLines}}
+  ///{{{.}}}
+  {{/documentationLines}}
   public var {{name}}: {{type}}
   {{/members}}
   {{#staticMembers}}
+  {{#documentationLines}}
+  ///{{{.}}}
+  {{/documentationLines}}
   private var {{name}}: {{type}} = {{{value}}}
   {{/staticMembers}}
 
@@ -19,7 +25,7 @@ public struct {{typeName}}: Codable {
 {{/custom}}
 {{#enum}}
 {{#documentationLines}}
-/// {{{.}}}
+///{{{.}}}
 {{/documentationLines}}
 public enum {{typeName}}: {{valueType}}, Codable {
   {{#members}}

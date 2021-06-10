@@ -82,6 +82,7 @@ public struct OverriddenFullSize: Codable {
   public var width: Double
   public var height: Double
   public var scale: Double
+  /// Example documentation for member
   private var member: NumEnum = .one
 
   public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, width: Double, height: Double, scale: Double) {

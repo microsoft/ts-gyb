@@ -16,6 +16,7 @@ export interface Field {
   name: string;
   type: ValueType;
   staticValue?: Value;
+  documentation: string;
 }
 
 export type ValueType = NonEmptyType | OptionalType;

@@ -1,6 +1,7 @@
 import { EnumSubType, EnumType } from '../../types';
 import { EnumTypeView } from '../views';
 import { enumUncapitalize } from './SwiftValueTransformer';
+import { getDocumentationLines } from './utils';
 
 export class SwiftEnumTypeView implements EnumTypeView {
   constructor(private enumType: EnumType) {}
@@ -28,10 +29,6 @@ export class SwiftEnumTypeView implements EnumTypeView {
   }
 
   get documentationLines(): string[] {
-    if (this.enumType.documentation.length === 0) {
-      return [];
-    }
-
-    return this.enumType.documentation.split('\n');
+    return getDocumentationLines(this.enumType.documentation);
   }
 }

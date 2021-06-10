@@ -33,6 +33,9 @@ enum DefaultEnum {
  * @overrideTypeName OverriddenFullSize
  */
 interface FullSize extends BaseSize, CustomSize {
+  /**
+  * Example documentation for member
+  */
   member: NumEnum.one;
   size: number;
   count: CodeGen_Int;

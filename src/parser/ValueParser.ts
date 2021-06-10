@@ -436,9 +436,12 @@ export class ValueParser {
 
     const name = node.name.getText();
 
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+
     const staticValue = this.parseLiteralNode(node.type);
     if (staticValue !== null) {
-      return { name, type: staticValue.type, staticValue: staticValue.value };
+      return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
     }
 
     const valueType = this.valueTypeFromNode(node);
@@ -446,6 +449,7 @@ export class ValueParser {
     return {
       name,
       type: valueType,
+      documentation,
     };
   }
 
