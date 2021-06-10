@@ -1,3 +1,4 @@
+import path from 'path';
 import yargs from 'yargs';
 import { CodeGenerator, RenderingLanguage } from '../generator/CodeGenerator';
 import { Configuration } from './configuration';
@@ -7,6 +8,10 @@ const program = yargs(process.argv.slice(2));
 const args = program.config().help().argv;
 
 function run(): void {
+  const configPath = args.config as string;
+  const directory = path.dirname(configPath);
+  process.chdir(directory);
+
   const config = args as unknown as Configuration;
 
   const generator = new CodeGenerator();
