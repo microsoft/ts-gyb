@@ -18,6 +18,7 @@ import {
   Value,
   TupleType,
   isTupleType,
+  EnumField,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 
@@ -351,7 +352,7 @@ export class ValueParser {
 
     const name = node.name.getText();
     let enumSubType: EnumSubType = EnumSubType.string;
-    const members: Record<string, string | number> = {};
+    const members: EnumField[] = [];
     let hasMultipleSubType = false;
 
     node.members.forEach((enumMember, index) => {
@@ -379,8 +380,11 @@ export class ValueParser {
         return;
       }
 
+      const symbol = this.checker.getSymbolAtLocation(enumMember.name);
+      const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+
       enumSubType = subType;
-      members[key] = value;
+      members.push({ key, value, documentation });
     });
 
     if (hasMultipleSubType) {

@@ -29,6 +29,9 @@ public struct {{typeName}}: Codable {
 {{/documentationLines}}
 public enum {{typeName}}: {{valueType}}, Codable {
   {{#members}}
+  {{#documentationLines}}
+  ///{{{.}}}
+  {{/documentationLines}}
   case {{key}} = {{{value}}}
   {{/members}}
 }

@@ -73,11 +73,17 @@ export enum EnumSubType {
   number = 'number',
 }
 
+export interface EnumField {
+  key: string;
+  value: string | number;
+  documentation: string;
+}
+
 export interface EnumType extends BaseValueType {
   kind: ValueTypeKind.enumType;
   name: string;
   subType: EnumSubType;
-  members: Record<string, string | number>;
+  members: EnumField[];
   documentation: string;
   customTags: Record<string, unknown>;
 }

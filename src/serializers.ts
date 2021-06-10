@@ -68,8 +68,14 @@ ${namedType.members
   return `${serializeDocumentation(namedType.documentation)}${documentationColor(customTags)}${keywordColor('Enum')} ${
     namedType.name
   } {
-${Object.entries(namedType.members)
-  .map(([key, value]) => `  ${identifierColor(key)} = ${valueColor(value)}`)
+${namedType.members
+  .map(
+    (member) =>
+      `${serializeDocumentation(member.documentation)}${identifierColor(member.key)} = ${valueColor(member.value)}`
+  )
+  .join('\n')
+  .split('\n')
+  .map((line) => `  ${line}`)
   .join('\n')}
 }`;
 }

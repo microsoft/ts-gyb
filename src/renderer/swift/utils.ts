@@ -3,5 +3,5 @@ export function getDocumentationLines(documentation: string): string[] {
     return [];
   }
 
-  return documentation.split('\n').map((line) => line.length !== 0 ? ` ${line.trimEnd()}` : '');
+  return documentation.split('\n').map((line) => (line.length !== 0 ? ` ${line.trimEnd()}` : ''));
 }

@@ -103,6 +103,7 @@ public enum NumEnum: Int, Codable {
 }
 
 public enum StringEnum: String, Codable {
+  /// Description for enum member a
   case a = "a"
   case b = "b"
 }

@@ -14,6 +14,9 @@ interface CustomSize {
 }
 
 enum StringEnum {
+  /**
+   * Description for enum member a
+   */
   a = 'a',
   b = 'b',
 }
