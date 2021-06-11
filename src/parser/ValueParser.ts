@@ -242,21 +242,23 @@ export class ValueParser {
     const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
     const jsDocTagsResult = parseTypeJSDocTags(symbol);
 
+    const customType = {
+      name: jsDocTagsResult.overrideName ?? typeName,
+      documentation,
+      customTags: jsDocTagsResult.customTags,
+    };
+
     if (isTupleType(valueType)) {
       valueType = {
         kind: ValueTypeKind.interfaceType,
-        name: jsDocTagsResult.overrideName ?? typeName,
         members: valueType.members,
-        documentation,
-        customTags: jsDocTagsResult.customTags,
+        ...customType,
       };
     } else if (isOptionalType(valueType) && isTupleType(valueType.wrappedType)) {
       valueType.wrappedType = {
         kind: ValueTypeKind.interfaceType,
-        name: jsDocTagsResult.overrideName ?? typeName,
         members: valueType.wrappedType.members,
-        documentation,
-        customTags: jsDocTagsResult.customTags,
+        ...customType,
       };
     }
 
