@@ -16,6 +16,7 @@ export interface Field {
   name: string;
   type: ValueType;
   staticValue?: Value;
+  documentation: string;
 }
 
 export type ValueType = NonEmptyType | OptionalType;
@@ -58,6 +59,8 @@ export interface InterfaceType extends BaseValueType {
   kind: ValueTypeKind.interfaceType;
   name: string;
   members: Field[];
+  documentation: string;
+  customTags: Record<string, unknown>;
 }
 
 export interface TupleType extends BaseValueType {
@@ -70,11 +73,19 @@ export enum EnumSubType {
   number = 'number',
 }
 
+export interface EnumField {
+  key: string;
+  value: string | number;
+  documentation: string;
+}
+
 export interface EnumType extends BaseValueType {
   kind: ValueTypeKind.enumType;
   name: string;
   subType: EnumSubType;
-  members: Record<string, string | number>;
+  members: EnumField[];
+  documentation: string;
+  customTags: Record<string, unknown>;
 }
 
 export interface ArrayType extends BaseValueType {

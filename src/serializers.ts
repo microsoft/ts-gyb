@@ -49,15 +49,33 @@ ${module.methods
 }
 
 export function serializeNamedType(namedType: NamedType): string {
+  const customTags =
+    Object.keys(namedType.customTags).length > 0 ? `Custom tags: ${JSON.stringify(namedType.customTags)}\n` : '';
+
   if (isInterfaceType(namedType)) {
-    return `${keywordColor('Type')} ${namedType.name} {
-${namedType.members.map((member) => `  ${keywordColor('var')} ${serializeField(member)}`).join('\n')}
+    return `${serializeDocumentation(namedType.documentation)}${documentationColor(customTags)}${keywordColor(
+      'Type'
+    )} ${namedType.name} {
+${namedType.members
+  .map((member) => `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member)}`)
+  .join('\n')
+  .split('\n')
+  .map((line) => `  ${line}`)
+  .join('\n')}
 }`;
   }
 
-  return `${keywordColor('Enum')} ${namedType.name} {
-${Object.entries(namedType.members)
-  .map(([key, value]) => `  ${identifierColor(key)} = ${valueColor(value)}`)
+  return `${serializeDocumentation(namedType.documentation)}${documentationColor(customTags)}${keywordColor('Enum')} ${
+    namedType.name
+  } {
+${namedType.members
+  .map(
+    (member) =>
+      `${serializeDocumentation(member.documentation)}${identifierColor(member.key)} = ${valueColor(member.value)}`
+  )
+  .join('\n')
+  .split('\n')
+  .map((line) => `  ${line}`)
   .join('\n')}
 }`;
 }

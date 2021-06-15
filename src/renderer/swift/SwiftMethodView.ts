@@ -1,6 +1,7 @@
 import { Method } from '../../types';
 import { MethodView } from '../views';
 import { SwiftValueTransformer } from './SwiftValueTransformer';
+import { getDocumentationLines } from './utils';
 
 export class SwiftMethodView implements MethodView {
   constructor(private readonly method: Method, private readonly valueTransformer: SwiftValueTransformer) {}
@@ -30,10 +31,6 @@ export class SwiftMethodView implements MethodView {
   }
 
   get documentationLines(): string[] {
-    if (this.method.documentation.length === 0) {
-      return [];
-    }
-
-    return this.method.documentation.split('\n');
+    return getDocumentationLines(this.method.documentation);
   }
 }

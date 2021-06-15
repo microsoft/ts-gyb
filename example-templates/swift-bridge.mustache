@@ -14,7 +14,7 @@ public class {{moduleName}} {
   {{#methods}}
 
   {{#documentationLines}}
-  /// {{{.}}}
+  ///{{{.}}}
   {{/documentationLines}}
   public func {{methodName}}({{parametersDeclaration}}{{#parametersDeclaration.length}}, {{/parametersDeclaration.length}}completion: {{#returnType}}@escaping BridgeCompletion<{{returnType}}>{{/returnType}}{{^returnType}}BridgeJSExecutor.Completion? = nil{{/returnType}}) {
     {{#parameters.length}}

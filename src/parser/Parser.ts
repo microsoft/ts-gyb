@@ -2,7 +2,7 @@ import ts from 'typescript';
 import { glob } from 'glob';
 import { Module, Method, Field } from '../types';
 import { ValueParser } from './ValueParser';
-import { parseJsDocTags } from './utils';
+import { parseModuleJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
 
 export class Parser {
@@ -54,7 +54,7 @@ export class Parser {
       throw Error('Invalid module node');
     }
 
-    const jsDocTagsResult = parseJsDocTags(symbol);
+    const jsDocTagsResult = parseModuleJSDocTags(symbol);
 
     if (!jsDocTagsResult.shouldExport) {
       return null;

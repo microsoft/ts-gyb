@@ -18,8 +18,9 @@ import {
   Value,
   TupleType,
   isTupleType,
+  EnumField,
 } from '../types';
-import { isUndefinedOrNull } from './utils';
+import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 
 export class ValueParser {
   constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
@@ -233,17 +234,31 @@ export class ValueParser {
 
     let valueType = this.valueTypeFromNode(declaration);
 
+    const symbol = this.checker.getSymbolAtLocation(node.typeName);
+    if (symbol === undefined) {
+      throw Error('Invalid reference type');
+    }
+
+    const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
+    const jsDocTagsResult = parseTypeJSDocTags(symbol);
+
+    const customType = {
+      name: jsDocTagsResult.overrideName ?? typeName,
+      documentation,
+      customTags: jsDocTagsResult.customTags,
+    };
+
     if (isTupleType(valueType)) {
       valueType = {
         kind: ValueTypeKind.interfaceType,
-        name: typeName,
         members: valueType.members,
+        ...customType,
       };
     } else if (isOptionalType(valueType) && isTupleType(valueType.wrappedType)) {
       valueType.wrappedType = {
         kind: ValueTypeKind.interfaceType,
-        name: typeName,
         members: valueType.wrappedType.members,
+        ...customType,
       };
     }
 
@@ -315,10 +330,20 @@ export class ValueParser {
       members.push(...membersInExtendingInterface);
     }
 
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    if (symbol === undefined) {
+      throw Error('Invalid interface type');
+    }
+
+    const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
+    const jsDocTagsResult = parseTypeJSDocTags(symbol);
+
     return {
       kind: ValueTypeKind.interfaceType,
-      name,
+      name: jsDocTagsResult.overrideName ?? name,
       members,
+      documentation,
+      customTags: jsDocTagsResult.customTags,
     };
   }
 
@@ -329,7 +354,7 @@ export class ValueParser {
 
     const name = node.name.getText();
     let enumSubType: EnumSubType = EnumSubType.string;
-    const members: Record<string, string | number> = {};
+    const members: EnumField[] = [];
     let hasMultipleSubType = false;
 
     node.members.forEach((enumMember, index) => {
@@ -357,19 +382,32 @@ export class ValueParser {
         return;
       }
 
+      const symbol = this.checker.getSymbolAtLocation(enumMember.name);
+      const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+
       enumSubType = subType;
-      members[key] = value;
+      members.push({ key, value, documentation });
     });
 
     if (hasMultipleSubType) {
       throw new Error("Enum doesn't support multiple sub types");
     }
 
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    if (symbol === undefined) {
+      throw Error('Invalid enum type');
+    }
+
+    const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
+    const jsDocTagsResult = parseTypeJSDocTags(symbol);
+
     return {
       kind: ValueTypeKind.enumType,
-      name,
+      name: jsDocTagsResult.overrideName ?? name,
       subType: enumSubType,
       members,
+      documentation,
+      customTags: jsDocTagsResult.customTags,
     };
   }
 
@@ -404,9 +442,12 @@ export class ValueParser {
 
     const name = node.name.getText();
 
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+
     const staticValue = this.parseLiteralNode(node.type);
     if (staticValue !== null) {
-      return { name, type: staticValue.type, staticValue: staticValue.value };
+      return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
     }
 
     const valueType = this.valueTypeFromNode(node);
@@ -414,6 +455,7 @@ export class ValueParser {
     return {
       name,
       type: valueType,
+      documentation,
     };
   }
 

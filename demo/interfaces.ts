@@ -14,6 +14,9 @@ interface CustomSize {
 }
 
 enum StringEnum {
+  /**
+   * Description for enum member a
+   */
   a = 'a',
   b = 'b',
 }
@@ -28,7 +31,14 @@ enum DefaultEnum {
   d,
 }
 
+/**
+ * Example documentation for interface
+ * @overrideTypeName OverriddenFullSize
+ */
 interface FullSize extends BaseSize, CustomSize {
+  /**
+  * Example documentation for member
+  */
   member: NumEnum.one;
   size: number;
   count: CodeGen_Int;

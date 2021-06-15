@@ -53,7 +53,7 @@ public class IHtmlApi {
     jsExecutor.execute(with: "", feature: "requestRenderingResult", args: nil, completion: completion)
   }
 
-  public func getSize(completion: @escaping BridgeCompletion<FullSize>) {
+  public func getSize(completion: @escaping BridgeCompletion<OverriddenFullSize>) {
     jsExecutor.execute(with: "", feature: "getSize", args: nil, completion: completion)
   }
 
@@ -72,7 +72,8 @@ public class IHtmlApi {
   }
 }
 
-public struct FullSize: Codable {
+/// Example documentation for interface
+public struct OverriddenFullSize: Codable {
   public var size: Double
   public var count: Int
   public var stringEnum: StringEnum
@@ -81,6 +82,7 @@ public struct FullSize: Codable {
   public var width: Double
   public var height: Double
   public var scale: Double
+  /// Example documentation for member
   private var member: NumEnum = .one
 
   public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, width: Double, height: Double, scale: Double) {
@@ -101,6 +103,7 @@ public enum NumEnum: Int, Codable {
 }
 
 public enum StringEnum: String, Codable {
+  /// Description for enum member a
   case a = "a"
   case b = "b"
 }

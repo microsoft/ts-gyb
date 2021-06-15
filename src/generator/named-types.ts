@@ -42,6 +42,8 @@ export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
           namedType = membersType as unknown as InterfaceType;
           namedType.kind = ValueTypeKind.interfaceType;
           namedType.name = path;
+          namedType.documentation = '';
+          namedType.customTags = {};
         }
 
         if (typeMap[namedType.name] === undefined) {

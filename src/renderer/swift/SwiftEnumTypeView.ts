@@ -1,6 +1,7 @@
 import { EnumSubType, EnumType } from '../../types';
 import { EnumTypeView } from '../views';
 import { enumUncapitalize } from './SwiftValueTransformer';
+import { getDocumentationLines } from './utils';
 
 export class SwiftEnumTypeView implements EnumTypeView {
   constructor(private enumType: EnumType) {}
@@ -20,10 +21,15 @@ export class SwiftEnumTypeView implements EnumTypeView {
     }
   }
 
-  get members(): { key: string; value: string }[] {
-    return Object.entries(this.enumType.members).map(([key, value]) => ({
-      key: enumUncapitalize(key),
-      value: typeof value === 'string' ? `"${value}"` : `${value}`,
+  get members(): { key: string; value: string; documentationLines: string[] }[] {
+    return this.enumType.members.map((member) => ({
+      key: enumUncapitalize(member.key),
+      value: typeof member.value === 'string' ? `"${member.value}"` : `${member.value}`,
+      documentationLines: getDocumentationLines(member.documentation),
     }));
+  }
+
+  get documentationLines(): string[] {
+    return getDocumentationLines(this.enumType.documentation);
   }
 }
