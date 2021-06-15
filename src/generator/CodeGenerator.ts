@@ -169,13 +169,13 @@ export class CodeGenerator {
         return new SwiftModuleView(
           module,
           associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
-          new SwiftValueTransformer(typeNameMap),
+          new SwiftValueTransformer(typeNameMap)
         );
       case RenderingLanguage.Kotlin:
         return new KotlinModuleView(
-          module, 
+          module,
           associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
-          new KotlinValueTransformer(typeNameMap),
+          new KotlinValueTransformer(typeNameMap)
         );
       default:
         throw Error('Unhandled language');

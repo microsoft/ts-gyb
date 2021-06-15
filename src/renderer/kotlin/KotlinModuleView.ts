@@ -7,7 +7,7 @@ export class KotlinModuleView implements ModuleView {
   constructor(
     private readonly module: Module,
     readonly associatedTypes: NamedTypeView[],
-    private readonly valueTransformer: KotlinValueTransformer,
+    private readonly valueTransformer: KotlinValueTransformer
   ) {}
 
   get moduleName(): string {

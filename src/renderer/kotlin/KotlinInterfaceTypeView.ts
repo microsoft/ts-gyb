@@ -2,13 +2,10 @@ import { InterfaceType } from '../../types';
 import { InterfaceTypeView } from '../views';
 
 export class KotlinInterfaceTypeView implements InterfaceTypeView {
-  constructor(
-    readonly typeName: string,
-    private readonly interfaceType: InterfaceType,
-  ) {}
+  constructor(readonly typeName: string, private readonly interfaceType: InterfaceType) {}
 
   get members(): { name: string; type: string; last: boolean }[] {
-    const members = this.interfaceType.members.filter((member) => member.staticValue === undefined);
+    // const members = this.interfaceType.members.filter((member) => member.staticValue === undefined);
 
     return [];
     // return members.map((member, index) => ({
