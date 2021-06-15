@@ -77,30 +77,14 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
 }
 
 data class OverriddenFullSize(
-
-    @JvmField
-    val size: Float,
-
-    @JvmField
-    val count: Int,
-
-    @JvmField
-    val stringEnum: StringEnum,
-
-    @JvmField
-    val numEnum: NumEnum,
-
-    @JvmField
-    val defEnum: DefaultEnum,
-
-    @JvmField
-    val width: Float,
-
-    @JvmField
-    val height: Float,
-
-    @JvmField
-    val scale: Float
+    @JvmField val size: Float,
+    @JvmField val count: Int,
+    @JvmField val stringEnum: StringEnum,
+    @JvmField val numEnum: NumEnum,
+    @JvmField val defEnum: DefaultEnum,
+    @JvmField val width: Float,
+    @JvmField val height: Float,
+    @JvmField val scale: Float
     val member: NumEnum = NumEnum.ONE
 )
 
@@ -134,10 +118,6 @@ enum class DefaultEnum {
 }
 
 data class BaseSize(
-
-    @JvmField
-    val width: Float,
-
-    @JvmField
-    val height: Float
+    @JvmField val width: Float,
+    @JvmField val height: Float
 )

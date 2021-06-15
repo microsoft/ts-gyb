@@ -1,9 +1,7 @@
 {{#custom}}
 data class {{typeName}}(
     {{#members}}
-
-    @JvmField
-    val {{name}}: {{type}}{{^last}},{{/last}}
+    @JvmField val {{name}}: {{type}}{{^last}},{{/last}}
     {{/members}}
     {{#staticMembers}}
     val {{name}}: {{type}} = {{{value}}}
