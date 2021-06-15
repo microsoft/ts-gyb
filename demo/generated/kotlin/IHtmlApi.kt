@@ -101,6 +101,7 @@ data class OverriddenFullSize(
 
     @JvmField
     val scale: Float
+    val member: NumEnum = NumEnum.ONE
 )
 
 enum class NumEnum(val value: Int) {

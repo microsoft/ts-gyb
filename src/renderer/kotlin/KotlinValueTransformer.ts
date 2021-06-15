@@ -9,6 +9,7 @@ import {
   isOptionalType,
   isPredefinedType,
   ValueType,
+  Value,
 } from '../../types';
 
 export class KotlinValueTransformer {
@@ -22,7 +23,7 @@ export class KotlinValueTransformer {
         case BasicTypeValue.number:
           return 'Float';
         case BasicTypeValue.boolean:
-          return 'Bool';
+          return 'Boolean';
         default:
           throw Error('Type not exists');
       }
@@ -73,5 +74,47 @@ export class KotlinValueTransformer {
     }
 
     return this.convertValueType(valueType);
+  }
+
+  convertValue(value: Value, type: ValueType): string {
+    if (isBasicType(type)) {
+      switch (type.value) {
+        case BasicTypeValue.boolean:
+          return (value as boolean) ? 'true' : 'false';
+        default:
+          return JSON.stringify(value);
+      }
+    }
+
+    if (isInterfaceType(type)) {
+      throw Error('Custom type static value is not supported');
+    }
+
+    if (isEnumType(type)) {
+      return `${type.name}.${(value as string).toUpperCase()}`;
+    }
+
+    if (isArraryType(type)) {
+      return `arrayOf(${(value as Value[]).map((element) => this.convertValue(element, type.elementType)).join(', ')})`;
+    }
+
+    if (isDictionaryType(type)) {
+      return `mapOf(${Object.entries(value as Record<string, Value>)
+        .map(([key, element]) => `${JSON.stringify(key)} to ${this.convertValue(element, type.valueType)}`)
+        .join(', ')})`;
+    }
+
+    if (isOptionalType(type)) {
+      if (value === null) {
+        return 'null';
+      }
+      return this.convertValue(value, type.wrappedType);
+    }
+
+    if (isPredefinedType(type)) {
+      throw Error('Predefined type static value is not supported');
+    }
+
+    throw Error('Value not handled');
   }
 }

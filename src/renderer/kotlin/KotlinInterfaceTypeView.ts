@@ -32,7 +32,7 @@ export class KotlinInterfaceTypeView implements InterfaceTypeView {
         return {
           name: member.name,
           type: this.valueTransformer.convertValueType(member.type),
-          value: '',
+          value: this.valueTransformer.convertValue(member.staticValue, member.type),
           documentationLines: getDocumentationLines(member.documentation),
         };
       });

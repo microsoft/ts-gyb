@@ -5,6 +5,9 @@ data class {{typeName}}(
     @JvmField
     val {{name}}: {{type}}{{^last}},{{/last}}
     {{/members}}
+    {{#staticMembers}}
+    val {{name}}: {{type}} = {{{value}}}
+    {{/staticMembers}}
 )
 {{/custom}}
 {{#enum}}
