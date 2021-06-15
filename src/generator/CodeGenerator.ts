@@ -11,9 +11,14 @@ import { serializeModule, serializeNamedType } from '../serializers';
 import { InterfaceType, EnumType, isInterfaceType, Module } from '../types';
 import { applyDefaultCustomTags } from './utils';
 import { SwiftValueTransformer } from '../renderer/swift/SwiftValueTransformer';
+import { KotlinModuleView } from '../renderer/kotlin/KotlinModuleView';
+import { KotlinInterfaceTypeView } from '../renderer/kotlin/KotlinInterfaceTypeView';
+import { KotlinEnumTypeView } from '../renderer/kotlin/KotlinEnumTypeView';
+import { KotlinValueTransformer } from '../renderer/kotlin/KotlinValueTransformer';
 
 export enum RenderingLanguage {
   Swift = 'Swift',
+  Kotlin = 'Kotlin',
 }
 
 export class CodeGenerator {
@@ -129,6 +134,8 @@ export class CodeGenerator {
     switch (language) {
       case RenderingLanguage.Swift:
         return '.swift';
+      case RenderingLanguage.Kotlin:
+        return '.kt';
       default:
         throw Error('Unhandled language');
     }
@@ -162,7 +169,13 @@ export class CodeGenerator {
         return new SwiftModuleView(
           module,
           associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
-          new SwiftValueTransformer(typeNameMap)
+          new SwiftValueTransformer(typeNameMap),
+        );
+      case RenderingLanguage.Kotlin:
+        return new KotlinModuleView(
+          module, 
+          associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
+          new KotlinValueTransformer(typeNameMap),
         );
       default:
         throw Error('Unhandled language');
@@ -178,6 +191,8 @@ export class CodeGenerator {
     switch (language) {
       case RenderingLanguage.Swift:
         return new SwiftInterfaceTypeView(typeName, interfaceType, new SwiftValueTransformer(typeNameMap));
+      case RenderingLanguage.Kotlin:
+        return new KotlinInterfaceTypeView(typeName, interfaceType);
       default:
         throw Error('Unhandled language');
     }
@@ -187,6 +202,8 @@ export class CodeGenerator {
     switch (language) {
       case RenderingLanguage.Swift:
         return new SwiftEnumTypeView(enumType);
+      case RenderingLanguage.Kotlin:
+        return new KotlinEnumTypeView(enumType);
       default:
         throw Error('Unhandled language');
     }

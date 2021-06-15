@@ -22,6 +22,19 @@
       "typeNameMap": {
         "CodeGen_Int": "Int"
       }
+    },
+    "kotlin": {
+      "templates": {
+        "api": "../example-templates/kotlin-bridge.mustache"
+      },
+      "outputDirectory": {
+        "api": "generated/kotlin"
+      },
+      "namedTypesTemplatePath": "../example-templates/kotlin-named-types.mustache",
+      "namedTypesOutputPath": "generated/kotlin/BridgeTypes.kt",
+      "typeNameMap": {
+        "CodeGen_Int": "Int"
+      }
     }
   }
 }

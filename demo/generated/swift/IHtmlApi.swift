@@ -22,11 +22,11 @@ public class IHtmlApi {
     let args = Args(
       idToClassNames: idToClassNames
     )
-    jsExecutor.execute(with: "", feature: "setMentionClassNames", args: args, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "setMentionClassNames", args: args, completion: completion)
   }
 
   public func getHeight(completion: @escaping BridgeCompletion<Double>) {
-    jsExecutor.execute(with: "", feature: "getHeight", args: nil, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "getHeight", args: nil, completion: completion)
   }
 
   public func getHeightWithBottomAnchor(sta: [String], completion: @escaping BridgeCompletion<Double>) {
@@ -36,7 +36,7 @@ public class IHtmlApi {
     let args = Args(
       sta: sta
     )
-    jsExecutor.execute(with: "", feature: "getHeightWithBottomAnchor", args: args, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "getHeightWithBottomAnchor", args: args, completion: completion)
   }
 
   public func getHTML(title: String, completion: @escaping BridgeCompletion<String>) {
@@ -46,19 +46,19 @@ public class IHtmlApi {
     let args = Args(
       title: title
     )
-    jsExecutor.execute(with: "", feature: "getHTML", args: args, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "getHTML", args: args, completion: completion)
   }
 
   public func requestRenderingResult(completion: BridgeJSExecutor.Completion? = nil) {
-    jsExecutor.execute(with: "", feature: "requestRenderingResult", args: nil, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "requestRenderingResult", args: nil, completion: completion)
   }
 
   public func getSize(completion: @escaping BridgeCompletion<OverriddenFullSize>) {
-    jsExecutor.execute(with: "", feature: "getSize", args: nil, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "getSize", args: nil, completion: completion)
   }
 
   public func getAliasSize(completion: @escaping BridgeCompletion<BaseSize>) {
-    jsExecutor.execute(with: "", feature: "getAliasSize", args: nil, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "getAliasSize", args: nil, completion: completion)
   }
 
   public func testDictionaryWithAnyKey(dict: [String: String], completion: BridgeJSExecutor.Completion? = nil) {
@@ -68,7 +68,7 @@ public class IHtmlApi {
     let args = Args(
       dict: dict
     )
-    jsExecutor.execute(with: "", feature: "testDictionaryWithAnyKey", args: args, completion: completion)
+    jsExecutor.execute(with: "htmlApi", feature: "testDictionaryWithAnyKey", args: args, completion: completion)
   }
 }
 

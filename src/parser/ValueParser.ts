@@ -483,7 +483,14 @@ export class ValueParser {
     }
 
     if (ts.isTypeReferenceNode(typeNode)) {
+      const typeName = typeNode.typeName.getText();
+      const predefinedType = this.parsePredefinedType(typeName);
+      if (predefinedType) {
+        return null;
+      }
+
       const referencedNode = this.getReferencedTypeNode(typeNode);
+
       if (ts.isEnumMember(referencedNode)) {
         const enumType = this.enumTypeKindFromType(referencedNode.parent);
         if (enumType === null) {

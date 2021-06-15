@@ -32,25 +32,33 @@ function run(): void {
     generator.printModules({ tag });
   });
 
-  const swiftRenderConfig = config.rendering.swift;
-  if (swiftRenderConfig) {
-    Object.entries(swiftRenderConfig.templates).forEach(([tag, moduleTemplatePath]) => {
+  const languageRenderingConfigs = [
+    { language: RenderingLanguage.Swift, renderingConfig: config.rendering.swift },
+    { language: RenderingLanguage.Kotlin, renderingConfig: config.rendering.kotlin },
+  ];
+
+  languageRenderingConfigs.forEach(({ language, renderingConfig }) => {
+    if (renderingConfig === undefined) {
+      return;
+    }
+
+    Object.entries(renderingConfig.templates).forEach(([tag, moduleTemplatePath]) => {
       generator.renderModules({
         tag,
-        language: RenderingLanguage.Swift,
-        outputDirectory: swiftRenderConfig.outputDirectory[tag],
+        language,
+        outputDirectory: renderingConfig.outputDirectory[tag],
         moduleTemplatePath,
-        typeNameMap: swiftRenderConfig.typeNameMap ?? {},
+        typeNameMap: renderingConfig.typeNameMap ?? {},
       });
     });
 
     generator.renderNamedTypes({
-      language: RenderingLanguage.Swift,
-      namedTypesTemplatePath: swiftRenderConfig.namedTypesTemplatePath,
-      namedTypesOutputPath: swiftRenderConfig.namedTypesOutputPath,
-      typeNameMap: swiftRenderConfig.typeNameMap ?? {},
+      language,
+      namedTypesTemplatePath: renderingConfig.namedTypesTemplatePath,
+      namedTypesOutputPath: renderingConfig.namedTypesOutputPath,
+      typeNameMap: renderingConfig.typeNameMap ?? {},
     });
-  }
+  });
 }
 
 run();

@@ -126,3 +126,5 @@ basic-types/dist
 .vscode/launch.json
 
 src/basic-types
+
+.DS_Store

@@ -3,6 +3,7 @@ export interface MethodView {
   readonly parametersDeclaration: string;
   readonly parameters: { name: string; type: string; last: boolean }[];
   readonly returnType: string | null;
+  readonly nonOptionalReturnType: string | null;
   readonly documentationLines: string[];
 }
 

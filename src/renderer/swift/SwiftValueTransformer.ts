@@ -68,6 +68,14 @@ export class SwiftValueTransformer {
     throw Error('Type not handled');
   }
 
+  convertNonOptionalValueType(valueType: ValueType): string {
+    if (isOptionalType(valueType)) {
+      return this.convertValueType(valueType.wrappedType);
+    }
+
+    return this.convertValueType(valueType);
+  }
+
   convertValue(value: Value, type: ValueType): string {
     if (isBasicType(type)) {
       switch (type.value) {
