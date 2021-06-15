@@ -192,7 +192,7 @@ export class CodeGenerator {
       case RenderingLanguage.Swift:
         return new SwiftInterfaceTypeView(typeName, interfaceType, new SwiftValueTransformer(typeNameMap));
       case RenderingLanguage.Kotlin:
-        return new KotlinInterfaceTypeView(typeName, interfaceType);
+        return new KotlinInterfaceTypeView(typeName, interfaceType, new KotlinValueTransformer(typeNameMap));
       default:
         throw Error('Unhandled language');
     }

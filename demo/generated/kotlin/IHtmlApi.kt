@@ -67,3 +67,68 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
         ))
     }
 }
+
+data class FullSize(
+
+    @JvmField
+    val size: Float,
+
+    @JvmField
+    val count: Int,
+
+    @JvmField
+    val stringEnum: StringEnum,
+
+    @JvmField
+    val numEnum: NumEnum,
+
+    @JvmField
+    val defEnum: DefaultEnum,
+
+    @JvmField
+    val width: Float,
+
+    @JvmField
+    val height: Float,
+
+    @JvmField
+    val scale: Float
+)
+
+enum class NumEnum(val value: Int) {
+    ONE(1),
+    TWO(2)
+
+    companion object {
+        fun find(value: Int) = values().find { it.value == value }
+    }
+}
+
+class NumEnumTypeAdapter : JsonSerializer<NumEnum>, JsonDeserializer<NumEnum> {
+    override fun serialize(obj: NumEnum, type: Type, ctx: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(obj.value)
+    }
+
+    override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): NumEnum? {
+        return NumEnum.find(json.asInt)
+    }
+}
+
+enum class StringEnum {
+    @SerializedName("a") A,
+    @SerializedName("b") B
+}
+
+enum class DefaultEnum {
+    @SerializedName("c") C,
+    @SerializedName("d") D
+}
+
+data class BaseSize(
+
+    @JvmField
+    val width: Float,
+
+    @JvmField
+    val height: Float
+)

@@ -26,6 +26,8 @@ export interface InterfaceTypeView {
 export interface EnumTypeView {
   readonly typeName: string;
   readonly valueType: string;
-  readonly members: { key: string; value: string; documentationLines: string[] }[];
+  readonly isNumberType: boolean;
+  readonly isStringType: boolean;
+  readonly members: { key: string; value: string; documentationLines: string[]; last: boolean }[];
   readonly documentationLines: string[];
 }

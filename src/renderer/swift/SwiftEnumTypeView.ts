@@ -21,11 +21,22 @@ export class SwiftEnumTypeView implements EnumTypeView {
     }
   }
 
-  get members(): { key: string; value: string; documentationLines: string[] }[] {
-    return this.enumType.members.map((member) => ({
+  get isNumberType(): boolean {
+    return this.enumType.subType === EnumSubType.number;
+  }
+
+  get isStringType(): boolean {
+    return this.enumType.subType === EnumSubType.string;
+  }
+
+  get members(): { key: string; value: string; documentationLines: string[]; last: boolean }[] {
+    const { members } = this.enumType;
+
+    return members.map((member, index) => ({
       key: enumUncapitalize(member.key),
       value: typeof member.value === 'string' ? `"${member.value}"` : `${member.value}`,
       documentationLines: getDocumentationLines(member.documentation),
+      last: index === members.length - 1,
     }));
   }
 

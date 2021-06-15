@@ -34,3 +34,7 @@ open class {{moduleName}}Bridge(editor: WebEditor, gson: Gson) : JsBridge(editor
     }
     {{/methods}}
 }
+{{#associatedTypes}}
+
+{{> kotlin-named-type}}
+{{/associatedTypes}}

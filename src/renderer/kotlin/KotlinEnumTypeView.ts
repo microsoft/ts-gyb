@@ -1,5 +1,6 @@
 import { EnumSubType, EnumType } from '../../types';
 import { EnumTypeView } from '../views';
+import { getDocumentationLines } from '../swift/utils';
 
 export class KotlinEnumTypeView implements EnumTypeView {
   constructor(private enumType: EnumType) {}
@@ -19,11 +20,26 @@ export class KotlinEnumTypeView implements EnumTypeView {
     }
   }
 
-  get members(): { key: string; value: string }[] {
-    return [];
-    // return Object.entries(this.enumType.members).map(([key, value]) => ({
-    //   key: enumUncapitalize(key),
-    //   value: typeof value === 'string' ? `"${value}"` : `${value}`,
-    // }));
+  get isNumberType(): boolean {
+    return this.enumType.subType === EnumSubType.number;
+  }
+
+  get isStringType(): boolean {
+    return this.enumType.subType === EnumSubType.string;
+  }
+
+  get members(): { key: string; value: string; documentationLines: string[]; last: boolean }[] {
+    const { members } = this.enumType;
+
+    return members.map((member, index) => ({
+      key: member.key.toUpperCase(),
+      value: `${member.value}`,
+      documentationLines: getDocumentationLines(member.documentation),
+      last: index === members.length - 1,
+    }));
+  }
+
+  get documentationLines(): string[] {
+    return getDocumentationLines(this.enumType.documentation);
   }
 }
