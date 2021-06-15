@@ -28,7 +28,7 @@ interface IHtmlApiBridge {
     fun getHeightWithBottomAnchor(sta: Array<String>, callback: Callback<Float>)
     fun getHTML(title: String, callback: Callback<String>)
     fun requestRenderingResult()
-    fun getSize(callback: Callback<FullSize>)
+    fun getSize(callback: Callback<OverriddenFullSize>)
     fun getAliasSize(callback: Callback<BaseSize>)
     fun testDictionaryWithAnyKey(dict: Map<String, String>)
 }
@@ -61,8 +61,8 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
         executeJs("requestRenderingResult")
     }
 
-    override fun getSize(callback: Callback<FullSize>) {
-        executeJsForResponse(FullSize::class.java, "getSize", callback)
+    override fun getSize(callback: Callback<OverriddenFullSize>) {
+        executeJsForResponse(OverriddenFullSize::class.java, "getSize", callback)
     }
 
     override fun getAliasSize(callback: Callback<BaseSize>) {
@@ -76,7 +76,7 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
     }
 }
 
-data class FullSize(
+data class OverriddenFullSize(
 
     @JvmField
     val size: Float,
