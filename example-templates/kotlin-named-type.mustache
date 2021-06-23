@@ -21,7 +21,7 @@ enum class {{typeName}}(val value: Int) {
 }
 
 class {{typeName}}TypeAdapter : JsonSerializer<{{typeName}}>, JsonDeserializer<{{typeName}}> {
-    override fun serialize(obj: {{typeName}}, type: Type, ctx: JsonSerializationContext): JsonElement {
+    override fun serialize(obj: {{typeName}}, type: Type, context: JsonSerializationContext): JsonElement {
         return JsonPrimitive(obj.value)
     }
 
