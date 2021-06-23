@@ -23,7 +23,7 @@ import {
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 
 export class ValueParser {
-  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
+  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) { }
 
   parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
     if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
@@ -86,7 +86,8 @@ export class ValueParser {
 
   private valueTypeFromNode(node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }): ValueType {
     if (node.type === undefined) {
-      throw Error('Invalid type');
+      const { fileName } = node.getSourceFile();
+      throw Error(`invalid type in ${fileName}`);
     }
 
     const nullable = node.questionToken !== undefined;
@@ -132,7 +133,8 @@ export class ValueParser {
       return arrayTypeKind;
     }
 
-    throw Error('invalid type');
+    const { fileName } = typeNode.getSourceFile();
+    throw Error(`invalid type in ${fileName}`);
   }
 
   private parseUnionTypeNode(node: ts.TypeNode): ValueType | null {
@@ -437,7 +439,8 @@ export class ValueParser {
     }
 
     if (!node.type) {
-      throw Error('Invalid type');
+      const {fileName} = node.getSourceFile();
+      throw Error(`invalid type in ${fileName}`);
     }
 
     const name = node.name.getText();
