@@ -84,13 +84,13 @@ data class OverriddenFullSize(
     @JvmField val defEnum: DefaultEnum,
     @JvmField val width: Float,
     @JvmField val height: Float,
-    @JvmField val scale: Float
-    val member: NumEnum = NumEnum.ONE
+    @JvmField val scale: Float,
+    @JvmField val member: NumEnum = NumEnum.ONE,
 )
 
 enum class NumEnum(val value: Int) {
     ONE(1),
-    TWO(2)
+    TWO(2);
 
     companion object {
         fun find(value: Int) = values().find { it.value == value }
@@ -119,5 +119,5 @@ enum class DefaultEnum {
 
 data class BaseSize(
     @JvmField val width: Float,
-    @JvmField val height: Float
+    @JvmField val height: Float,
 )

@@ -1,10 +1,10 @@
 {{#custom}}
 data class {{typeName}}(
     {{#members}}
-    @JvmField val {{name}}: {{type}}{{^last}},{{/last}}
+    @JvmField val {{name}}: {{type}},
     {{/members}}
     {{#staticMembers}}
-    val {{name}}: {{type}} = {{{value}}}
+    @JvmField val {{name}}: {{type}} = {{{value}}},
     {{/staticMembers}}
 )
 {{/custom}}
@@ -12,7 +12,7 @@ data class {{typeName}}(
 {{#isNumberType}}
 enum class {{typeName}}(val value: Int) {
     {{#members}}
-    {{key}}({{{value}}}){{^last}},{{/last}}
+    {{key}}({{{value}}}){{^last}},{{/last}}{{#last}};{{/last}}
     {{/members}}
 
     companion object {
