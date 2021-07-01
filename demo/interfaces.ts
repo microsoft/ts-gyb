@@ -54,6 +54,7 @@ interface DictionaryWithAnyKey {
 /**
  * Documentation for module
  * @shouldExport true
+ * @invokePath htmlApi
  */
 export interface IHtmlApi {
   /**
@@ -73,6 +74,7 @@ export interface IHtmlApi {
 
 /**
  * @shouldExport true
+ * @invokePath imageOption
  */
 export interface IImageOptionApi {
   hideElementWithID({ id }: { id: string }): void;

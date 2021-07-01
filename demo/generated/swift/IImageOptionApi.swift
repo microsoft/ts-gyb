@@ -19,7 +19,7 @@ public class IImageOptionApi {
     let args = Args(
       id: id
     )
-    jsExecutor.execute(with: "", feature: "hideElementWithID", args: args, completion: completion)
+    jsExecutor.execute(with: "imageOption", feature: "hideElementWithID", args: args, completion: completion)
   }
 
   public func restoreElementVisibilityWithID(id: String, completion: BridgeJSExecutor.Completion? = nil) {
@@ -29,7 +29,7 @@ public class IImageOptionApi {
     let args = Args(
       id: id
     )
-    jsExecutor.execute(with: "", feature: "restoreElementVisibilityWithID", args: args, completion: completion)
+    jsExecutor.execute(with: "imageOption", feature: "restoreElementVisibilityWithID", args: args, completion: completion)
   }
 
   public func getSourceOfImageWithID(id: String, completion: @escaping BridgeCompletion<String?>) {
@@ -39,11 +39,11 @@ public class IImageOptionApi {
     let args = Args(
       id: id
     )
-    jsExecutor.execute(with: "", feature: "getSourceOfImageWithID", args: args, completion: completion)
+    jsExecutor.execute(with: "imageOption", feature: "getSourceOfImageWithID", args: args, completion: completion)
   }
 
   public func getImageDataList(completion: @escaping BridgeCompletion<String>) {
-    jsExecutor.execute(with: "", feature: "getImageDataList", args: nil, completion: completion)
+    jsExecutor.execute(with: "imageOption", feature: "getImageDataList", args: nil, completion: completion)
   }
 
   public func getContentBoundsOfElementWithID(id: String, completion: @escaping BridgeCompletion<String?>) {
@@ -53,6 +53,6 @@ public class IImageOptionApi {
     let args = Args(
       id: id
     )
-    jsExecutor.execute(with: "", feature: "getContentBoundsOfElementWithID", args: args, completion: completion)
+    jsExecutor.execute(with: "imageOption", feature: "getContentBoundsOfElementWithID", args: args, completion: completion)
   }
 }
