@@ -1,4 +1,4 @@
-import { ValueType, Value } from "../../types";
+import { ValueType, Value } from '../../types';
 
 export interface ValueTransformer {
   convertValueType(valueType: ValueType): string;

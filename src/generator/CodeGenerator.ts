@@ -137,10 +137,7 @@ export class CodeGenerator {
     }
   }
 
-  private getNamedTypeView(
-    namedType: NamedType,
-    valueTransformer: ValueTransformer,
-  ): NamedTypeView {
+  private getNamedTypeView(namedType: NamedType, valueTransformer: ValueTransformer): NamedTypeView {
     let namedTypeView: NamedTypeView;
     if (isInterfaceType(namedType)) {
       namedTypeView = new InterfaceTypeView(namedType.name, namedType, valueTransformer);
@@ -153,11 +150,7 @@ export class CodeGenerator {
     return namedTypeView;
   }
 
-  private getModuleView(
-    module: Module,
-    associatedTypes: NamedType[],
-    valueTransformer: ValueTransformer,
-  ): ModuleView {
+  private getModuleView(module: Module, associatedTypes: NamedType[], valueTransformer: ValueTransformer): ModuleView {
     return new ModuleView(
       module,
       associatedTypes.map((associatedType) => this.getNamedTypeView(associatedType, valueTransformer)),

@@ -141,4 +141,3 @@ export class SwiftValueTransformer implements ValueTransformer {
     return text.slice(0, index).toLowerCase() + text.slice(index);
   }
 }
-

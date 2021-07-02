@@ -23,7 +23,7 @@ import {
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 
 export class ValueParser {
-  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) { }
+  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
 
   parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
     if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
@@ -439,7 +439,7 @@ export class ValueParser {
     }
 
     if (!node.type) {
-      const {fileName} = node.getSourceFile();
+      const { fileName } = node.getSourceFile();
       throw Error(`invalid type in ${fileName}`);
     }
 
