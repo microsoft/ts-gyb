@@ -33,7 +33,7 @@ class {{typeName}}TypeAdapter : JsonSerializer<{{typeName}}>, JsonDeserializer<{
 {{#isStringType}}
 enum class {{typeName}} {
     {{#members}}
-    @SerializedName("{{value}}") {{key}}{{^last}},{{/last}}
+    @SerializedName({{{value}}}) {{key}}{{^last}},{{/last}}
     {{/members}}
 }
 {{/isStringType}}

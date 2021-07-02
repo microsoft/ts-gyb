@@ -1,9 +1,9 @@
 import { Method } from '../../types';
-import { MethodView } from '../views';
-import { KotlinValueTransformer } from './KotlinValueTransformer';
+import { getDocumentationLines } from '../utils';
+import { ValueTransformer } from '../value-transformer';
 
-export class KotlinMethodView implements MethodView {
-  constructor(private readonly method: Method, private readonly valueTransformer: KotlinValueTransformer) {}
+export class MethodView {
+  constructor(private readonly method: Method, private readonly valueTransformer: ValueTransformer) {}
 
   get methodName(): string {
     return this.method.name;
@@ -38,10 +38,6 @@ export class KotlinMethodView implements MethodView {
   }
 
   get documentationLines(): string[] {
-    if (this.method.documentation.length === 0) {
-      return [];
-    }
-
-    return this.method.documentation.split('\n');
+    return getDocumentationLines(this.method.documentation);
   }
 }
