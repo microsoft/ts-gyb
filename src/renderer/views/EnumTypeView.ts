@@ -1,9 +1,9 @@
 import { EnumSubType, EnumType } from '../../types';
-import { EnumTypeView } from '../views';
-import { getDocumentationLines } from '../swift/utils';
+import { getDocumentationLines } from '../utils';
+import { ValueTransformer } from '../value-transformer';
 
-export class KotlinEnumTypeView implements EnumTypeView {
-  constructor(private enumType: EnumType) {}
+export class EnumTypeView {
+  constructor(private enumType: EnumType, private valueTransformer: ValueTransformer) {}
 
   get typeName(): string {
     return this.enumType.name;
@@ -32,8 +32,8 @@ export class KotlinEnumTypeView implements EnumTypeView {
     const { members } = this.enumType;
 
     return members.map((member, index) => ({
-      key: member.key.toUpperCase(),
-      value: `${member.value}`,
+      key: this.valueTransformer.convertEnumKey(member.key),
+      value: typeof member.value === 'string' ? `"${member.value}"` : `${member.value}`,
       documentationLines: getDocumentationLines(member.documentation),
       last: index === members.length - 1,
     }));

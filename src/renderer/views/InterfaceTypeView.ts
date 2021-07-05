@@ -1,13 +1,12 @@
 import { InterfaceType } from '../../types';
-import { InterfaceTypeView } from '../views';
-import { SwiftValueTransformer } from './SwiftValueTransformer';
-import { getDocumentationLines } from './utils';
+import { getDocumentationLines } from '../utils';
+import { ValueTransformer } from '../value-transformer';
 
-export class SwiftInterfaceTypeView implements InterfaceTypeView {
+export class InterfaceTypeView {
   constructor(
     readonly typeName: string,
     private readonly interfaceType: InterfaceType,
-    private readonly valueTransformer: SwiftValueTransformer
+    private readonly valueTransformer: ValueTransformer
   ) {}
 
   get members(): { name: string; type: string; documentationLines: string[]; last: boolean }[] {

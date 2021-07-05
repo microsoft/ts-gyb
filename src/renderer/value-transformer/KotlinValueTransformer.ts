@@ -11,8 +11,9 @@ import {
   ValueType,
   Value,
 } from '../../types';
+import { ValueTransformer } from './ValueTransformer';
 
-export class SwiftValueTransformer {
+export class KotlinValueTransformer implements ValueTransformer {
   constructor(private readonly predefinedTypes: Record<string, string>) {}
 
   convertValueType(valueType: ValueType): string {
@@ -21,9 +22,9 @@ export class SwiftValueTransformer {
         case BasicTypeValue.string:
           return 'String';
         case BasicTypeValue.number:
-          return 'Double';
+          return 'Float';
         case BasicTypeValue.boolean:
-          return 'Bool';
+          return 'Boolean';
         default:
           throw Error('Type not exists');
       }
@@ -38,7 +39,7 @@ export class SwiftValueTransformer {
     }
 
     if (isArraryType(valueType)) {
-      return `[${this.convertValueType(valueType.elementType)}]`;
+      return `Array<${this.convertValueType(valueType.elementType)}>`;
     }
 
     if (isDictionaryType(valueType)) {
@@ -54,7 +55,7 @@ export class SwiftValueTransformer {
           throw Error('Type not exists');
       }
 
-      return `[${keyType}: ${this.convertValueType(valueType.valueType)}]`;
+      return `Map<${keyType}, ${this.convertValueType(valueType.valueType)}>`;
     }
 
     if (isOptionalType(valueType)) {
@@ -80,7 +81,7 @@ export class SwiftValueTransformer {
     if (isBasicType(type)) {
       switch (type.value) {
         case BasicTypeValue.boolean:
-          return (value as boolean) ? 'True' : 'False';
+          return (value as boolean) ? 'true' : 'false';
         default:
           return JSON.stringify(value);
       }
@@ -91,22 +92,22 @@ export class SwiftValueTransformer {
     }
 
     if (isEnumType(type)) {
-      return `.${enumUncapitalize(value as string)}`;
+      return `${type.name}.${this.convertEnumKey(value as string)}`;
     }
 
     if (isArraryType(type)) {
-      return `[${(value as Value[]).map((element) => this.convertValue(element, type.elementType)).join(', ')}]`;
+      return `arrayOf(${(value as Value[]).map((element) => this.convertValue(element, type.elementType)).join(', ')})`;
     }
 
     if (isDictionaryType(type)) {
-      return `[${Object.entries(value as Record<string, Value>)
-        .map(([key, element]) => `${JSON.stringify(key)}: ${this.convertValue(element, type.valueType)}`)
-        .join(', ')}]`;
+      return `mapOf(${Object.entries(value as Record<string, Value>)
+        .map(([key, element]) => `${JSON.stringify(key)} to ${this.convertValue(element, type.valueType)}`)
+        .join(', ')})`;
     }
 
     if (isOptionalType(type)) {
       if (value === null) {
-        return 'nil';
+        return 'null';
       }
       return this.convertValue(value, type.wrappedType);
     }
@@ -117,26 +118,8 @@ export class SwiftValueTransformer {
 
     throw Error('Value not handled');
   }
-}
 
-export function enumUncapitalize(text: string): string {
-  if (text.length === 0) {
-    return '';
+  convertEnumKey(text: string): string {
+    return text.toUpperCase();
   }
-
-  let index = 0;
-  // Get the index of the first lowercased letter
-  while (index < text.length) {
-    if (text[index].toLowerCase() === text[index]) {
-      break;
-    }
-    index += 1;
-  }
-
-  // Get the index before the first lowercased letter
-  if (index > 1 && index < text.length && text[index].toLowerCase() === text[index]) {
-    index -= 1;
-  }
-
-  return text.slice(0, index).toLowerCase() + text.slice(index);
 }

@@ -3,18 +3,11 @@ import path from 'path';
 import { dropIPrefixInCustomTypes, fetchNamedTypes, NamedType, NamedTypesResult } from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
-import { SwiftInterfaceTypeView } from '../renderer/swift/SwiftInterfaceTypeView';
-import { SwiftEnumTypeView } from '../renderer/swift/SwiftEnumTypeView';
-import { SwiftModuleView } from '../renderer/swift/SwiftModuleView';
-import { InterfaceTypeView, EnumTypeView, ModuleView, NamedTypeView } from '../renderer/views';
+import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView } from '../renderer/views';
 import { serializeModule, serializeNamedType } from '../serializers';
-import { InterfaceType, EnumType, isInterfaceType, Module } from '../types';
+import { isInterfaceType, Module } from '../types';
 import { applyDefaultCustomTags } from './utils';
-import { SwiftValueTransformer } from '../renderer/swift/SwiftValueTransformer';
-import { KotlinModuleView } from '../renderer/kotlin/KotlinModuleView';
-import { KotlinInterfaceTypeView } from '../renderer/kotlin/KotlinInterfaceTypeView';
-import { KotlinEnumTypeView } from '../renderer/kotlin/KotlinEnumTypeView';
-import { KotlinValueTransformer } from '../renderer/kotlin/KotlinValueTransformer';
+import { ValueTransformer, SwiftValueTransformer, KotlinValueTransformer } from '../renderer/value-transformer';
 
 export enum RenderingLanguage {
   Swift = 'Swift',
@@ -99,9 +92,10 @@ export class CodeGenerator {
     }
 
     const { associatedTypes } = this.namedTypes;
+    const valueTransformer = this.getValueTransformer(language, typeNameMap);
 
     modules.forEach((module) => {
-      const moduleView = this.getModuleView(language, module, associatedTypes[module.name] ?? [], typeNameMap);
+      const moduleView = this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer);
       const renderedCode = renderCode(moduleTemplatePath, moduleView);
 
       this.writeFile(renderedCode, outputDirectory, `${moduleView.moduleName}${this.getFileExtension(language)}`);
@@ -123,8 +117,10 @@ export class CodeGenerator {
       throw Error('Named types not parsed. Run parseNamedTypes first.');
     }
 
+    const valueTransformer = this.getValueTransformer(language, typeNameMap);
+
     const namedTypesView = this.namedTypes.sharedTypes.map((namedType) =>
-      this.getNamedTypeView(language, namedType, typeNameMap)
+      this.getNamedTypeView(namedType, valueTransformer)
     );
     const renderedCode = renderCode(namedTypesTemplatePath, namedTypesView);
     fs.writeFileSync(namedTypesOutputPath, renderedCode);
@@ -141,69 +137,33 @@ export class CodeGenerator {
     }
   }
 
-  private getNamedTypeView(
-    language: RenderingLanguage,
-    namedType: NamedType,
-    typeNameMap: Record<string, string>
-  ): NamedTypeView {
+  private getNamedTypeView(namedType: NamedType, valueTransformer: ValueTransformer): NamedTypeView {
     let namedTypeView: NamedTypeView;
     if (isInterfaceType(namedType)) {
-      namedTypeView = this.getInterfaceTypeView(language, namedType.name, namedType, typeNameMap);
+      namedTypeView = new InterfaceTypeView(namedType.name, namedType, valueTransformer);
       namedTypeView.custom = true;
     } else {
-      namedTypeView = this.getEnumTypeView(language, namedType);
+      namedTypeView = new EnumTypeView(namedType, valueTransformer);
       namedTypeView.enum = true;
     }
 
     return namedTypeView;
   }
 
-  private getModuleView(
-    language: RenderingLanguage,
-    module: Module,
-    associatedTypes: NamedType[],
-    typeNameMap: Record<string, string>
-  ): ModuleView {
-    switch (language) {
-      case RenderingLanguage.Swift:
-        return new SwiftModuleView(
-          module,
-          associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
-          new SwiftValueTransformer(typeNameMap)
-        );
-      case RenderingLanguage.Kotlin:
-        return new KotlinModuleView(
-          module,
-          associatedTypes.map((associatedType) => this.getNamedTypeView(language, associatedType, typeNameMap)),
-          new KotlinValueTransformer(typeNameMap)
-        );
-      default:
-        throw Error('Unhandled language');
-    }
+  private getModuleView(module: Module, associatedTypes: NamedType[], valueTransformer: ValueTransformer): ModuleView {
+    return new ModuleView(
+      module,
+      associatedTypes.map((associatedType) => this.getNamedTypeView(associatedType, valueTransformer)),
+      valueTransformer
+    );
   }
 
-  private getInterfaceTypeView(
-    language: RenderingLanguage,
-    typeName: string,
-    interfaceType: InterfaceType,
-    typeNameMap: Record<string, string>
-  ): InterfaceTypeView {
+  private getValueTransformer(language: RenderingLanguage, typeNameMap: Record<string, string>): ValueTransformer {
     switch (language) {
       case RenderingLanguage.Swift:
-        return new SwiftInterfaceTypeView(typeName, interfaceType, new SwiftValueTransformer(typeNameMap));
+        return new SwiftValueTransformer(typeNameMap);
       case RenderingLanguage.Kotlin:
-        return new KotlinInterfaceTypeView(typeName, interfaceType, new KotlinValueTransformer(typeNameMap));
-      default:
-        throw Error('Unhandled language');
-    }
-  }
-
-  private getEnumTypeView(language: RenderingLanguage, enumType: EnumType): EnumTypeView {
-    switch (language) {
-      case RenderingLanguage.Swift:
-        return new SwiftEnumTypeView(enumType);
-      case RenderingLanguage.Kotlin:
-        return new KotlinEnumTypeView(enumType);
+        return new KotlinValueTransformer(typeNameMap);
       default:
         throw Error('Unhandled language');
     }
