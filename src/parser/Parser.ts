@@ -1,9 +1,10 @@
 import ts from 'typescript';
 import { glob } from 'glob';
-import { Module, Method, Field } from '../types';
+import { Module, Method, Field, ValueType } from '../types';
 import { ValueParser } from './ValueParser';
 import { parseModuleJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
+import { ValueParserError } from './ValueParserError';
 
 export class Parser {
   private program: ts.Program;
@@ -84,8 +85,30 @@ export class Parser {
 
     const methodName = node.name.getText();
 
-    const parameters = this.fieldsFromParameters(node);
-    const returnType = this.valueParser.parseFunctionReturnType(node);
+    let parameters: Field[];
+    try {
+      parameters = this.fieldsFromParameters(node);
+    } catch (error) {
+      if (error instanceof ValueParserError) {
+        this.logger.warnSkippedNode(node, `parameters error: ${error.message}`, error.guide);
+        return null;
+      }
+
+      throw error;
+    }
+
+    let returnType: ValueType | null;
+    try {
+      returnType = this.valueParser.parseFunctionReturnType(node);
+
+    } catch (error) {
+      if (error instanceof ValueParserError) {
+        this.logger.warn(error.message);
+        return null;
+      }
+
+      throw error;
+    }
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
     const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));

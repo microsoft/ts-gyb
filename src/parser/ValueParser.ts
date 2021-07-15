@@ -21,20 +21,22 @@ import {
   EnumField,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
+import { ValueParserError } from './ValueParserError';
 
 export class ValueParser {
   constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
 
   parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
-    if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
+    if (methodSignature.type === undefined) {
+      throw Error('Invalid method signature');
+    }
+
+    if (methodSignature.type.kind === ts.SyntaxKind.VoidKeyword) {
       return null;
     }
 
-    if (
-      methodSignature.type !== undefined &&
-      ts.isTypeReferenceNode(methodSignature.type) &&
-      methodSignature.type.typeName.getText() === 'Promise'
-    ) {
+    // Handle promise
+    if (ts.isTypeReferenceNode(methodSignature.type) && methodSignature.type.typeName.getText() === 'Promise') {
       if (methodSignature.type.typeArguments === undefined || methodSignature.type.typeArguments.length !== 1) {
         throw Error('Invalid promise');
       }
@@ -61,7 +63,7 @@ export class ValueParser {
       return referenceType.members;
     }
 
-    throw Error('Not supported parameter type');
+    throw new ValueParserError('parameters type is not supported', 'Only object literal, interface and enum are supported');
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
