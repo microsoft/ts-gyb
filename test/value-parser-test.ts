@@ -2,7 +2,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempMethodParser, withTempValueParser } from './utils';
 import { ParserError } from '../src/parser/ParserError';
-import { BasicTypeValue, OptionalType, ValueType, ValueTypeKind } from '../src/types';
+import { BasicType, BasicTypeValue, OptionalType, TupleType, ValueType, ValueTypeKind } from '../src/types';
 
 describe('ValueParser', () => {
   describe('Return types', () => {
@@ -46,6 +46,12 @@ describe('ValueParser', () => {
     });
   });
 
+  describe('Parse basic type', () => {
+    testValueType('string', 'string', { kind: ValueTypeKind.basicType, value: BasicTypeValue.string });
+    testValueType('number', 'number', { kind: ValueTypeKind.basicType, value: BasicTypeValue.number });
+    testValueType('boolean', 'boolean', { kind: ValueTypeKind.basicType, value: BasicTypeValue.boolean });
+  })
+
   describe('Parse union type', () => {
     it('Empty types union', () => {
       const valueTypeCode = 'null | undefined';
@@ -61,11 +67,22 @@ describe('ValueParser', () => {
       });
     });
 
-    const optionalString: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: { kind: ValueTypeKind.basicType, value: BasicTypeValue.string } };
+    const stringType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.string };
+    const optionalStringType: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: stringType };
 
-    testValueType('null union', 'string | null', optionalString);
-    testValueType('undefined union', 'string | undefined', optionalString);
-    testValueType('null and undefined union', 'string | null | undefined', optionalString);
+    testValueType('null union', 'string | null', optionalStringType);
+    testValueType('undefined union', 'string | undefined', optionalStringType);
+    testValueType('null and undefined union', 'string | null | undefined', optionalStringType);
+
+    const numberType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.number };
+    const tupleType: TupleType = { 
+      kind: ValueTypeKind.tupleType, 
+      members: [{ name: 'stringField', type: stringType, documentation: '' }, { name: 'numberField', type: numberType, documentation: '' }],
+    };
+    const optionalTupleType: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: tupleType };
+
+    testValueType('merged tuple union', '{ stringField: string } | { numberField: number }', tupleType);
+    testValueType('merged optional tuple union', '{ stringField: string } | { numberField: number } | null', optionalTupleType);
   });
 });
 
