@@ -15,9 +15,13 @@ export class Editor implements IEditor {
     document.execCommand('underline');
   }
 
+  focus(): void {
+    this.contentEditableDiv.focus();
+  }
+
   clear(): void {
     this.contentEditableDiv.innerHTML = '';
-    this.contentEditableDiv.focus();
+    this.focus();
   }
 
   insertContent({ content, newLine }: { content: string; newLine?: boolean | undefined; }): void {

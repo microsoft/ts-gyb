@@ -7,4 +7,8 @@ onReady(() => {
 
   // Mount `editor` into global scope
   window.editor = editor;
+
+  requestAnimationFrame(() => {
+    editor.focus();
+  });
 });
