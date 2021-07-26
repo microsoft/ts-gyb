@@ -63,7 +63,7 @@ export class ValueParser {
       return referenceType.members;
     }
 
-    throw new ValueParserError('parameters type is not supported', 'Only object literal and interface are supported');
+    throw new ValueParserError(`parameters type ${typeNode.getText()} is not supported`, 'Only object literal and interface are supported');
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
@@ -88,8 +88,7 @@ export class ValueParser {
 
   private valueTypeFromNode(node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }): ValueType {
     if (node.type === undefined) {
-      const { fileName } = node.getSourceFile();
-      throw Error(`invalid type in ${fileName}`);
+      throw Error(`type ${node.getText()} is invalid`);
     }
 
     const nullable = node.questionToken !== undefined;
@@ -135,8 +134,7 @@ export class ValueParser {
       return arrayTypeKind;
     }
 
-    const { fileName } = typeNode.getSourceFile();
-    throw Error(`invalid type in ${fileName}`);
+    throw new ValueParserError(`type ${typeNode.getText()} is not supported`, 'Supproted types are: string, number, boolean, array, dictionary, object, interface and enum');
   }
 
   private parseUnionTypeNode(node: ts.TypeNode): ValueType | null {

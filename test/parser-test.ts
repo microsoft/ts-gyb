@@ -5,7 +5,7 @@ import { ParserError } from '../src/parser/ParserError';
 
 describe('Parser', () => {
   it('shouldExport symbol', () => {
-    const exportedTrueSourceCode = `
+    const sourceCode = `
       /**
       * @shouldExport true
       */
@@ -18,7 +18,7 @@ describe('Parser', () => {
 
       interface NoExportInterface {}
       `;
-    withTempParser(exportedTrueSourceCode, parser => {
+    withTempParser(sourceCode, parser => {
       const modules = parser.parse();
       expect(modules).to.deep.equal([{name: 'ExportTrueInterface', methods: [], documentation: '', customTags: {}}]);
     });
