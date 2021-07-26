@@ -5,8 +5,9 @@
   "main": "src/main.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" webpack --env target='web'",
-    "serve": "cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" webpack serve --env target='web'"
+    "build:web": "cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" webpack --env target='web'",
+    "build:apple": "cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" webpack --env target='apple'",
+    "serve:web": "cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" webpack serve --env target='web'"
   },
   "author": "",
   "license": "MIT",

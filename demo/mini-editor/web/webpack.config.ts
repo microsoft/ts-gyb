@@ -1,4 +1,5 @@
-// TypeScript based configuration for webpack. Reference: https://webpack.js.org/configuration/configuration-languages/#typescript
+// TypeScript based configuration for webpack.
+// Reference: https://webpack.js.org/configuration/configuration-languages/#typescript
 
 import path from 'path';
 import * as webpack from 'webpack';

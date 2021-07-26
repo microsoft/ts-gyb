@@ -1,8 +1,7 @@
 import { IEditor } from "./IEditor";
 
 export class Editor implements IEditor {
-  constructor(private contentEditableDiv: HTMLDivElement) {
-  }
+  constructor(private contentEditableDiv: HTMLDivElement) {}
 
   toggleBold(): void {
     document.execCommand('bold');
