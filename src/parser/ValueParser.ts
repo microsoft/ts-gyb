@@ -270,7 +270,7 @@ export class ValueParser {
   private getReferencedTypeNode(referenceNode: ts.TypeReferenceNode): ts.Declaration {
     let symbol = this.checker.getSymbolAtLocation(referenceNode.typeName);
     if (!symbol) {
-      throw Error('Invalid reference type');
+      throw new ValueParserError(`reference type ${referenceNode.getText()} not found`, 'Make sure it is property imported or the file where the type is defined is included in search paths.');
     }
 
     if (symbol.flags & ts.SymbolFlags.Alias) {

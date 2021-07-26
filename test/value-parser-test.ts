@@ -2,7 +2,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempMethodParser, withTempValueParser } from './utils';
 import { ParserError } from '../src/parser/ParserError';
-import { BasicType, BasicTypeValue, OptionalType, TupleType, ValueType, ValueTypeKind } from '../src/types';
+import { BasicType, BasicTypeValue, InterfaceType, OptionalType, TupleType, ValueType, ValueTypeKind } from '../src/types';
 
 describe('ValueParser', () => {
   describe('Return types', () => {
@@ -44,12 +44,31 @@ describe('ValueParser', () => {
         expect(parseFunc).to.throw('type void is not supported');
       });
     });
+
+    it('Non-existent type', () => {
+      withTempValueParser('NonExistentType', parseFunc => {
+        expect(parseFunc).to.throw('reference type NonExistentType not found');
+      });
+    })
+
+    it('Predefined type', () => {
+      testValueType('predefined type', 'PredefinedType', { kind: ValueTypeKind.predefinedType, name: 'PredefinedType' }, new Set(['PredefinedType']));
+    })
   });
 
   describe('Parse basic type', () => {
     testValueType('string', 'string', { kind: ValueTypeKind.basicType, value: BasicTypeValue.string });
     testValueType('number', 'number', { kind: ValueTypeKind.basicType, value: BasicTypeValue.number });
     testValueType('boolean', 'boolean', { kind: ValueTypeKind.basicType, value: BasicTypeValue.boolean });
+  })
+
+  describe('Parse InterfaceType', () => {
+    const customTypesCode = `
+    interface CustomType {}
+    `;
+
+    const emptyInterfaceType: InterfaceType = { kind: ValueTypeKind.interfaceType, name: 'CustomType', members: [], documentation: '', customTags: {} };
+    testValueType('empty interface', 'CustomType', emptyInterfaceType, new Set(), customTypesCode);
   })
 
   describe('Parse union type', () => {
@@ -86,7 +105,7 @@ describe('ValueParser', () => {
   });
 });
 
-function testValueType(name: string, valueTypeCode: string, type: ValueType) {
+function testValueType(name: string, valueTypeCode: string, type: ValueType, predefinedTypes: Set<string> = new Set(), customTypesCode: string = '') {
   withTempValueParser(valueTypeCode, parseFunc => {
     const valueType = parseFunc();
 
@@ -101,6 +120,6 @@ function testValueType(name: string, valueTypeCode: string, type: ValueType) {
     it(`Parameter type ${name}`, () => {
       expect(valueType.parameter).to.deep.equal(type);
     })
-  });
+  }, predefinedTypes, customTypesCode);
 }
 

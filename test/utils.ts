@@ -6,19 +6,21 @@ import { Parser } from '../src/parser/Parser';
 import {ParserError} from '../src/parser/ParserError';
 import { Method, ValueType } from '../src/types';
 
-export function withTempParser(sourceCode: string, handler: (parser: Parser) => void): void {
+export function withTempParser(sourceCode: string, handler: (parser: Parser) => void, predefinedTypes: Set<string> = new Set()): void {
   const tempPath = fs.mkdtempSync(os.tmpdir());
   const filePath = path.join(tempPath, `${UUID()}.ts`);
   fs.writeFileSync(filePath, sourceCode);
 
-  const parser = new Parser([filePath], new Set(), false);
+  const parser = new Parser([filePath], predefinedTypes, false);
   handler(parser);
 
   fs.rmdirSync(tempPath, { recursive: true });
 }
 
-export function withTempMethodParser(methodCode: string, handler: (parseFunc: () => Method | null) => void): void {
+export function withTempMethodParser(methodCode: string, handler: (parseFunc: () => Method | null) => void, predefinedTypes: Set<string> = new Set(), customTypesCode: string = ''): void {
   const sourceCode = `
+    ${customTypesCode}
+
     /**
     * @shouldExport true
     */
@@ -38,11 +40,17 @@ export function withTempMethodParser(methodCode: string, handler: (parseFunc: ()
     };
 
     handler(parseFunc);
-  });
+  }, predefinedTypes);
 }
 
-export function withTempValueParser(valueTypeCode: string, handler: (parseFunc: () => { return: ValueType, promiseReturn: ValueType, parameter: ValueType }) => void): void {
+export function withTempValueParser(
+  valueTypeCode: string, 
+  handler: (parseFunc: () => { return: ValueType, promiseReturn: ValueType, parameter: ValueType }) => void,
+  predefinedTypes: Set<string> = new Set(),
+  customTypesCode: string = ''): void {
   const sourceCode = `
+    ${customTypesCode}
+
     /**
     * @shouldExport true
     */
@@ -76,5 +84,5 @@ export function withTempValueParser(valueTypeCode: string, handler: (parseFunc: 
     };
 
     handler(parseFunc);
-  });
+  }, predefinedTypes);
 }
