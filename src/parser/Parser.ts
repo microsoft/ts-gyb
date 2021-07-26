@@ -5,6 +5,7 @@ import { ValueParser } from './ValueParser';
 import { parseModuleJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
 import { ValueParserError } from './ValueParserError';
+import {ParserError} from './ParserError';
 
 export class Parser {
   private program: ts.Program;
@@ -15,7 +16,11 @@ export class Parser {
 
   private logger: ParserLogger;
 
-  constructor(globPatterns: string[], predefinedTypes: Set<string>) {
+  constructor(
+    globPatterns: string[], 
+    predefinedTypes: Set<string>,
+    private skipInvalidMethods: boolean = false,
+  ) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
     this.program = ts.createProgram({
       rootNames: filePaths,
@@ -64,7 +69,22 @@ export class Parser {
     const interfaceName = jsDocTagsResult.overrideName ?? node.name.text;
 
     const methods: Method[] = node.members
-      .map((methodNode) => this.methodFromNode(methodNode))
+      .map((methodNode) => {
+        try {
+          return this.methodFromNode(methodNode);
+        } catch (error) {
+          if (error instanceof ParserError) {
+            if (this.skipInvalidMethods) {
+              this.logger.warnSkippedNode(error.node, error.reason, error.guide);
+              return null;
+            }
+
+            throw error;
+          }
+
+          throw error;
+        }
+      })
       .filter((method): method is Method => method !== null);
 
     const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
@@ -79,8 +99,7 @@ export class Parser {
 
   private methodFromNode(node: ts.Node): Method | null {
     if (!ts.isMethodSignature(node)) {
-      this.logger.warnSkippedNode(node, 'it is not valid method signature', 'Please define only methods');
-      return null;
+      throw new ParserError(node, 'it is not valid method signature', 'Please define only methods');
     }
 
     const methodName = node.name.getText();
@@ -90,8 +109,7 @@ export class Parser {
       parameters = this.fieldsFromParameters(node);
     } catch (error) {
       if (error instanceof ValueParserError) {
-        this.logger.warnSkippedNode(node, `parameters error: ${error.message}`, error.guide);
-        return null;
+        throw new ParserError(node, `parameters error: ${error.message}`, error.guide);
       }
 
       throw error;
@@ -104,7 +122,7 @@ export class Parser {
     } catch (error) {
       if (error instanceof ValueParserError) {
         this.logger.warn(error.message);
-        return null;
+        throw new ParserError(node, `return type error: ${error.message}`, error.guide);
       }
 
       throw error;
@@ -128,12 +146,7 @@ export class Parser {
       return [];
     }
     if (parameterNodes.length > 1) {
-      this.logger.warnSkippedNode(
-        methodSignature,
-        'it has multiple parameters',
-        'Methods should only have one property. Please use destructuring object for multiple parameters'
-      );
-      throw new Error('Multiple parameters is not supported.');
+      throw new ParserError(methodSignature, 'it has multiple parameters', 'Methods should only have one property. Please use destructuring object for multiple parameters');
     }
 
     const parameterDeclaration = parameterNodes[0];

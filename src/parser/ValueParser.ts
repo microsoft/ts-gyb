@@ -63,7 +63,7 @@ export class ValueParser {
       return referenceType.members;
     }
 
-    throw new ValueParserError('parameters type is not supported', 'Only object literal, interface and enum are supported');
+    throw new ValueParserError('parameters type is not supported', 'Only object literal and interface are supported');
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
