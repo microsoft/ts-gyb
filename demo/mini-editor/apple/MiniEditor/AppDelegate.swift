@@ -1,8 +1,5 @@
 //
-//  AppDelegate.swift
-//  MiniEditor
-//
-//  Created by Daohan Chong on 7/26/21.
+//  Copyright (c) Microsoft Corporation. All rights reserved.
 //
 
 import UIKit
