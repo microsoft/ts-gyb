@@ -29,6 +29,10 @@ class ViewController: UIViewController {
 
     loadJavaScriptBundle()
   }
+
+  override var inputAccessoryView: UIView? {
+    Toolbar()
+  }
 }
 
 private extension ViewController {
