@@ -22,6 +22,9 @@ const config: webpack.Configuration | webpack.WebpackOptionsNormalized = {
     path: distPath,
     filename: 'bundle.js',
   },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js'],
+  },
   module: {
     rules: [
       {
@@ -34,9 +37,9 @@ const config: webpack.Configuration | webpack.WebpackOptionsNormalized = {
             loader: 'ts-loader',
             options: {
               configFile: 'tsconfig.json',
-              compilerOptions: {
-                sourceMap: true,
-              },
+              // compilerOptions: {
+              //   sourceMap: true,
+              // },
             },
           },
         ],

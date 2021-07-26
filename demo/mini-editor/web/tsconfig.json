@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.json",
   "include": [
-    "src/*.ts",
     "src/**/*.ts"
   ],
   "compilerOptions": {
@@ -12,6 +11,9 @@
       "es6",
       "es2015.promise",
       "es2016"
+    ],
+    "typeRoots": [
+      "src/types"
     ]
   }
 }
