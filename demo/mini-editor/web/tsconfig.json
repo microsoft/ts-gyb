@@ -1,3 +1,17 @@
 {
-  "extends": "../../../tsconfig.json"
+  "extends": "../../../tsconfig.json",
+  "include": [
+    "src/*.ts",
+    "src/**/*.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es5",
+      "es6",
+      "es2015.promise",
+      "es2016"
+    ]
+  }
 }
