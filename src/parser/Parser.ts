@@ -121,7 +121,6 @@ export class Parser {
 
     } catch (error) {
       if (error instanceof ValueParserError) {
-        this.logger.warn(error.message);
         throw new ParserError(node, `return type error: ${error.message}`, error.guide);
       }
 

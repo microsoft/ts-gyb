@@ -32,7 +32,7 @@ export class CodeGenerator {
     defaultCustomTags: Record<string, unknown>;
     dropInterfaceIPrefix: boolean;
   }): void {
-    const parser = new Parser(interfacePaths, predefinedTypes);
+    const parser = new Parser(interfacePaths, predefinedTypes, true);
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));

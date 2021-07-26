@@ -28,7 +28,7 @@ export class ValueParser {
 
   parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
     if (methodSignature.type === undefined) {
-      throw Error('Invalid method signature');
+      throw new ValueParserError('no return type provided', "Use void to explicity specify the method doesn't return a value");
     }
 
     if (methodSignature.type.kind === ts.SyntaxKind.VoidKeyword) {
@@ -49,7 +49,7 @@ export class ValueParser {
       return this.valueTypeFromTypeNode(wrappedTypeNode);
     }
 
-    return this.valueTypeFromNode(methodSignature);
+    return this.valueTypeFromTypeNode(methodSignature.type);
   }
 
   parseFunctionParameterType(typeNode: ts.TypeNode): Field[] {
@@ -162,7 +162,7 @@ export class ValueParser {
         (!isInterfaceType(valueType) && !isTupleType(valueType)) ||
         (!isInterfaceType(newValueType) && !isTupleType(newValueType))
       ) {
-        throw Error('Do not support multiple union types except for interface or literal type.');
+        throw new ValueParserError(`union type ${node.getText()} is invalid`, 'Do not support multiple union types except for interface or literal type');
       }
 
       const existingMemberNames = new Set(valueType.members.map((member) => member.name));
@@ -175,7 +175,7 @@ export class ValueParser {
     });
 
     if (!valueType) {
-      throw Error('Invald union type');
+      throw new ValueParserError(`union type ${node.getText()} is invalid`, 'Union type must contain one supported non empty type');
     }
 
     if (!isOptionalType(valueType) && nullable) {

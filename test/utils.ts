@@ -3,7 +3,8 @@ import os from 'os';
 import path from 'path';
 import { v4 as UUID } from 'uuid';
 import { Parser } from '../src/parser/Parser';
-import { Method } from '../src/types';
+import {ParserError} from '../src/parser/ParserError';
+import { Method, ValueType } from '../src/types';
 
 export function withTempParser(sourceCode: string, handler: (parser: Parser) => void): void {
   const tempPath = fs.mkdtempSync(os.tmpdir());
@@ -34,6 +35,44 @@ export function withTempMethodParser(methodCode: string, handler: (parseFunc: ()
       }
 
       return module.methods.length > 0 ? module.methods[0] : null;
+    };
+
+    handler(parseFunc);
+  });
+}
+
+export function withTempValueParser(valueTypeCode: string, handler: (parseFunc: () => { return: ValueType, promiseReturn: ValueType, parameter: ValueType }) => void): void {
+  const sourceCode = `
+    /**
+    * @shouldExport true
+    */
+    interface MockedInterface {
+      returnTypeMethod(): ${valueTypeCode};
+      promiseReturnTypeMethod(): Promise<${valueTypeCode}>;
+      parameterTypeMethod(args: { foobar: ${valueTypeCode} }): void;
+    }
+    `;
+
+  withTempParser(sourceCode, parser => {
+    const parseFunc = () => {
+      try {
+        const module = parser.parse()[0];
+        if (module.methods.length !== 3) {
+          throw Error("The number of parsed methods doesn't match the number of defined methods");
+        }
+
+        return {
+          return: module.methods[0].returnType!,
+          promiseReturn: module.methods[1].returnType!,
+          parameter: module.methods[2].parameters[0].type,
+        }
+      } catch (error) {
+        if (error instanceof ParserError) {
+          throw error.reason.replace('parameters error: ', '').replace('return type error: ', '');
+        }
+
+        throw error
+      }
     };
 
     handler(parseFunc);
