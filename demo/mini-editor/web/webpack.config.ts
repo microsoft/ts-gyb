@@ -68,6 +68,8 @@ function buildConfig(env: WebpackEnvironment): webpack.Configuration | webpack.W
         filename: '[name].css',
         chunkFilename: '[id].css',
       }),
+      // Note: For mobile platforms, we need to inline all JavaScript 
+      // and CSS resources into a single file for simplicity.
       new HtmlWebpackPlugin({
         template: `${sourcePath}/index.html`,
         filename: './bundle.html',
