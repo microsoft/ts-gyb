@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		722DC0A126AFBB4B00945DC3 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 722DC0A026AFBB4B00945DC3 /* WebView.swift */; };
 		7232FDEC26AE9B30000C5376 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FDEB26AE9B30000C5376 /* AppDelegate.swift */; };
 		7232FDEE26AE9B30000C5376 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FDED26AE9B30000C5376 /* SceneDelegate.swift */; };
 		7232FDF026AE9B30000C5376 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FDEF26AE9B30000C5376 /* ViewController.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		722DC0A026AFBB4B00945DC3 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		7232FDE826AE9B30000C5376 /* MiniEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiniEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7232FDEB26AE9B30000C5376 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7232FDED26AE9B30000C5376 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 				7232FE1C26AEB099000C5376 /* Resources */,
 				7232FE2426AEB5D6000C5376 /* Toolbar.swift */,
 				7232FE2626AEB831000C5376 /* ActionButtion.swift */,
+				722DC0A026AFBB4B00945DC3 /* WebView.swift */,
 			);
 			path = MiniEditor;
 			sourceTree = "<group>";
@@ -289,6 +292,7 @@
 				7232FDF026AE9B30000C5376 /* ViewController.swift in Sources */,
 				7232FDEC26AE9B30000C5376 /* AppDelegate.swift in Sources */,
 				7232FDEE26AE9B30000C5376 /* SceneDelegate.swift in Sources */,
+				722DC0A126AFBB4B00945DC3 /* WebView.swift in Sources */,
 				7232FE2726AEB831000C5376 /* ActionButtion.swift in Sources */,
 				7232FE2526AEB5D6000C5376 /* Toolbar.swift in Sources */,
 			);

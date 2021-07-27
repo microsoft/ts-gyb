@@ -6,9 +6,17 @@ import UIKit
 
 class Toolbar: UIView {
   private lazy var stackViewContainer: UIStackView = {
-    let stackViewContainer = UIStackView(arrangedSubviews: [])
+    let stackViewContainer = UIStackView(arrangedSubviews: [
+      boldButton,
+      italicButton,
+      underlineButton,
+    ])
 
     stackViewContainer.translatesAutoresizingMaskIntoConstraints = false
+
+    stackViewContainer.spacing = 5.0
+    stackViewContainer.distribution = .fillEqually
+
     return stackViewContainer
   }()
 
@@ -16,11 +24,11 @@ class Toolbar: UIView {
     self?.toggleBold()
   }
 
-  private lazy var boldItalic = buildButton(systemImage: "italic") { [weak self] in
+  private lazy var italicButton = buildButton(systemImage: "italic") { [weak self] in
     self?.toggleItalic()
   }
 
-  private lazy var boldUnderline = buildButton(systemImage: "underline") { [weak self] in
+  private lazy var underlineButton = buildButton(systemImage: "underline") { [weak self] in
     self?.toggleUnderline()
   }
 
@@ -35,11 +43,21 @@ class Toolbar: UIView {
       stackViewContainer.trailingAnchor.constraint(equalTo: trailingAnchor),
       stackViewContainer.bottomAnchor.constraint(equalTo: bottomAnchor),
     ])
+
+    stackViewContainer.backgroundColor = .secondarySystemBackground
+
+    configurateFrame()
+    setNeedsLayout()
   }
 
   @available(*, unavailable)
   required init?(coder _: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    configurateFrame()
   }
 }
 
@@ -52,4 +70,8 @@ private extension Toolbar {
 
   func toggleItalic() {}
   func toggleUnderline() {}
+
+  func configurateFrame() {
+    frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50)
+  }
 }

@@ -7,7 +7,7 @@ import WebKit
 
 class ViewController: UIViewController {
   private lazy var webView: WKWebView = {
-    let webView = WKWebView()
+    let webView = WebView()
     webView.translatesAutoresizingMaskIntoConstraints = false
     return webView
   }()
