@@ -392,7 +392,7 @@ export class ValueParser {
     });
 
     if (hasMultipleSubType) {
-      throw new Error("Enum doesn't support multiple sub types");
+      throw new ValueParserError(`enum ${name} is invalid because enums with multiple subtypes are not supported.`, 'Use only either string or number as the value of the enum');
     }
 
     const symbol = this.checker.getSymbolAtLocation(node.name);

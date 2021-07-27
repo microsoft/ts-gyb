@@ -2,7 +2,11 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempMethodParser, withTempValueParser } from './utils';
 import { ParserError } from '../src/parser/ParserError';
-import { BasicType, BasicTypeValue, InterfaceType, OptionalType, TupleType, ValueType, ValueTypeKind } from '../src/types';
+import { BasicType, BasicTypeValue, EnumSubType, EnumType, InterfaceType, OptionalType, TupleType, ValueType, ValueTypeKind } from '../src/types';
+
+const stringType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.string };
+const numberType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.number };
+const booleanType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.boolean };
 
 describe('ValueParser', () => {
   describe('Return types', () => {
@@ -63,12 +67,142 @@ describe('ValueParser', () => {
   })
 
   describe('Parse InterfaceType', () => {
-    const customTypesCode = `
-    interface CustomType {}
+    const interfacesCode = `
+    interface EmptyInterface {}
+
+    interface InterfaceWithMembers {
+      stringMember: string;
+      numberMember: number;
+    }
+
+    interface ExtendedInterface extends InterfaceWithMembers {
+      booleanMember: boolean;
+    }
+
+    interface RecursiveInterface {
+      self: RecursiveInterface;
+    }
     `;
 
-    const emptyInterfaceType: InterfaceType = { kind: ValueTypeKind.interfaceType, name: 'CustomType', members: [], documentation: '', customTags: {} };
-    testValueType('empty interface', 'CustomType', emptyInterfaceType, new Set(), customTypesCode);
+    const emptyInterfaceType: InterfaceType = { kind: ValueTypeKind.interfaceType, name: 'EmptyInterface', members: [], documentation: '', customTags: {} };
+    testValueType('empty interface', 'EmptyInterface', emptyInterfaceType, new Set(), interfacesCode);
+
+    const interfaceWithMembersType: InterfaceType = {
+      kind: ValueTypeKind.interfaceType,
+      name: 'InterfaceWithMembers',
+      members: [
+        { name: 'stringMember', type: stringType, documentation: '' },
+        { name: 'numberMember', type: numberType, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    };
+    testValueType('interface with members', 'InterfaceWithMembers', interfaceWithMembersType, new Set(), interfacesCode);
+
+    const extendedInterfaceType: InterfaceType = {
+      kind: ValueTypeKind.interfaceType,
+      name: 'ExtendedInterface',
+      members: [
+        { name: 'booleanMember', type: booleanType, documentation: '' },
+        { name: 'stringMember', type: stringType, documentation: '' },
+        { name: 'numberMember', type: numberType, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    };
+    testValueType('extended interface', 'ExtendedInterface', extendedInterfaceType, new Set(), interfacesCode);
+
+    // TODO: Recursive interface is not handled yet
+    // const recursiveInterfaceType: InterfaceType = {
+    //   kind: ValueTypeKind.interfaceType,
+    //   name: 'RecursiveInterface',
+    //   members: [
+    //     { name: 'self', type: { kind: ValueTypeKind.predefinedType, name: 'RecursiveInterface' }, documentation: '' },
+    //   ],
+    //   documentation: '',
+    //   customTags: {},
+    // };
+    // testValueType('recursive interface', 'RecursiveInterface', recursiveInterfaceType, new Set(), interfacesCode);
+  })
+  
+  describe('Parse tuple type', () => {
+    const emptyTupleType: TupleType = { kind: ValueTypeKind.tupleType, members: [] };
+    testValueType('empty tuple', '{}', emptyTupleType);
+
+    const tupleWithMembersType: TupleType = { 
+      kind: ValueTypeKind.tupleType, 
+      members: [{ name: 'stringField', type: stringType, documentation: '' }, { name: 'numberField', type: numberType, documentation: '' }],
+    };
+    testValueType('tuple with members', '{ stringField: string, numberField: number }', tupleWithMembersType);
+    testValueType('merged tuple', '{ stringField: string } | { numberField: number }', tupleWithMembersType);
+
+    const interfacesCode = `
+    interface InterfaceWithStringField {
+      stringField: string;
+    }
+
+    interface InterfaceWithNumberField {
+      numberField: number;
+    }
+    `;
+    testValueType('merged interface and tuple', 'InterfaceWithStringField | { numberField: number }', tupleWithMembersType, new Set(), interfacesCode);
+    testValueType('merged interfaces to tuple', 'InterfaceWithStringField | InterfaceWithNumberField', tupleWithMembersType, new Set(), interfacesCode);
+  })
+
+  describe('Parse enum type', () => {
+    const enumsCode = `
+    enum EmptyEnum {}
+
+    enum StringEnum {
+      firstCase = 'firstCase',
+      secondCase = 'secondCase',
+    }
+
+    enum NumberEnum {
+      one = 1,
+      two = 2,
+    }
+
+    enum InvalidEnum {
+      firstCase = 'firstCase',
+      two = 2,
+    }
+    `;
+
+    const emptyEnumType: EnumType = { kind: ValueTypeKind.enumType, name: 'EmptyEnum', subType: EnumSubType.string, members: [], documentation: '', customTags: {} };
+    testValueType('empty enum', 'EmptyEnum', emptyEnumType, new Set(), enumsCode);
+
+    const stringEnumType: EnumType = {
+      kind: ValueTypeKind.enumType,
+      name: 'StringEnum',
+      subType: EnumSubType.string,
+      members: [
+        { key: 'firstCase', value: 'firstCase', documentation: '' },
+        { key: 'secondCase', value: 'secondCase', documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    }
+    testValueType('string enum', 'StringEnum', stringEnumType, new Set(), enumsCode);
+    
+    const numberEnumType: EnumType = {
+      kind: ValueTypeKind.enumType,
+      name: 'NumberEnum',
+      subType: EnumSubType.number,
+      members: [
+        { key: 'one', value: 1, documentation: '' },
+        { key: 'two', value: 2, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    }
+    testValueType('number enum', 'NumberEnum', numberEnumType, new Set(), enumsCode);
+
+    it('Invalid enum', () => {
+      withTempValueParser('InvalidEnum', parseFunc => {
+        expect(parseFunc).to.throw('enum InvalidEnum is invalid because enums with multiple subtypes are not supported.');
+      }, new Set(), enumsCode);
+    });
   })
 
   describe('Parse union type', () => {
@@ -77,7 +211,7 @@ describe('ValueParser', () => {
       withTempValueParser(valueTypeCode, parseFunc => {
         expect(parseFunc).to.throw('union type null | undefined is invalid');
       });
-    })
+    });
 
     it('Multiple types union', () => {
       const valueTypeCode = 'string | number';
@@ -86,21 +220,18 @@ describe('ValueParser', () => {
       });
     });
 
-    const stringType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.string };
     const optionalStringType: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: stringType };
 
     testValueType('null union', 'string | null', optionalStringType);
     testValueType('undefined union', 'string | undefined', optionalStringType);
     testValueType('null and undefined union', 'string | null | undefined', optionalStringType);
 
-    const numberType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.number };
     const tupleType: TupleType = { 
       kind: ValueTypeKind.tupleType, 
       members: [{ name: 'stringField', type: stringType, documentation: '' }, { name: 'numberField', type: numberType, documentation: '' }],
     };
     const optionalTupleType: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: tupleType };
 
-    testValueType('merged tuple union', '{ stringField: string } | { numberField: number }', tupleType);
     testValueType('merged optional tuple union', '{ stringField: string } | { numberField: number } | null', optionalTupleType);
   });
 });
