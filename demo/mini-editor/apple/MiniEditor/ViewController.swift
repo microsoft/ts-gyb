@@ -57,6 +57,20 @@ extension ViewController: ToolbarDelegate {
       self.handleVoidResult(result)
     }
   }
+
+  func toolbarDidTapInsertContent() {
+    editorBridge.insertContent(
+      content: "did tap insert content",
+      newLine: true
+    ) { result in
+      switch result {
+      case .success(let contentString):
+        print("[ts-codegen] contentString after insertContent(): \(contentString)")
+      case .failure(let error):
+        assertionFailure("\(error)")
+      }
+    }
+  }
 }
 
 private extension ViewController {

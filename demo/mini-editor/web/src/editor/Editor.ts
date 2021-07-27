@@ -1,7 +1,8 @@
-import { IEditor } from "./IEditor";
+import { IEditor, IInsertContentResult } from "./IEditor";
+
 
 export class Editor implements IEditor {
-  constructor(private contentEditableDiv: HTMLDivElement) {}
+  constructor(private contentEditableDiv: HTMLDivElement) { }
 
   toggleBold(): void {
     document.execCommand('bold');
@@ -24,8 +25,10 @@ export class Editor implements IEditor {
     this.focus();
   }
 
-  insertContent({ content, newLine }: { content: string; newLine?: boolean | undefined; }): void {
+  insertContent({ content, newLine }: { content: string; newLine?: boolean | undefined; }): IInsertContentResult {
     const contentBeingInserted = newLine ? `${content}\n` : content;
     document.execCommand('insertHTML', false, contentBeingInserted);
+
+    return { html: this.contentEditableDiv.innerHTML };
   }
 }

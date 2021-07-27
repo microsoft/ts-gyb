@@ -24,12 +24,13 @@ public class IEditor {
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+      guard let completion = completion else { return }
       if let error = error {
-        completion?(.failure(error))
+        completion(.failure(error))
         return
       }
-      completion?(.success(()))
+      completion(.success(()))
     }
   }
 
@@ -40,12 +41,13 @@ public class IEditor {
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+      guard let completion = completion else { return }
       if let error = error {
-        completion?(.failure(error))
+        completion(.failure(error))
         return
       }
-      completion?(.success(()))
+      completion(.success(()))
     }
   }
 
@@ -56,12 +58,13 @@ public class IEditor {
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+      guard let completion = completion else { return }
       if let error = error {
-        completion?(.failure(error))
+        completion(.failure(error))
         return
       }
-      completion?(.success(()))
+      completion(.success(()))
     }
   }
 
@@ -72,16 +75,17 @@ public class IEditor {
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+      guard let completion = completion else { return }
       if let error = error {
-        completion?(.failure(error))
+        completion(.failure(error))
         return
       }
-      completion?(.success(()))
+      completion(.success(()))
     }
   }
 
-  public func insertContent(content: String, newLine: Bool?, completion: ((Result<Void, Error>) -> Void)? = nil) {
+  public func insertContent(content: String, newLine: Bool?, completion: @escaping (Result<InsertContentResult, Error>) -> Void) {
     struct Args: Encodable {
       let content: String
       let newLine: Bool?
@@ -97,12 +101,22 @@ public class IEditor {
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
       if let error = error {
-        completion?(.failure(error))
+        completion(.failure(error))
         return
       }
-      completion?(.success(()))
+      let data = try! JSONSerialization.data(withJSONObject: evaluationResult!)
+      let result = try! self.jsonDecoder.decode(InsertContentResult.self, from: data)
+      completion(.success(result))
     }
+  }
+}
+
+public struct InsertContentResult: Codable {
+  public var html: String
+
+  public init(html: String) {
+    self.html = html
   }
 }

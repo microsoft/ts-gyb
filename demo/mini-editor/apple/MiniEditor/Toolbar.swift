@@ -8,6 +8,7 @@ protocol ToolbarDelegate: AnyObject {
   func toolbarDidToggleBold()
   func toolbarDidToggleItalic()
   func toolbarDidToggleUnderline()
+  func toolbarDidTapInsertContent()
 }
 
 class Toolbar: UIView {
@@ -18,6 +19,7 @@ class Toolbar: UIView {
       boldButton,
       italicButton,
       underlineButton,
+      insertContentButton,
     ])
 
     stackViewContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -29,15 +31,19 @@ class Toolbar: UIView {
   }()
 
   private lazy var boldButton = buildButton(systemImage: "bold") { [weak self] in
-    self?.toggleBold()
+    self?.delegate?.toolbarDidToggleBold()
   }
 
   private lazy var italicButton = buildButton(systemImage: "italic") { [weak self] in
-    self?.toggleItalic()
+    self?.delegate?.toolbarDidToggleItalic()
   }
 
   private lazy var underlineButton = buildButton(systemImage: "underline") { [weak self] in
-    self?.toggleUnderline()
+    self?.delegate?.toolbarDidToggleBold()
+  }
+
+  private lazy var insertContentButton = buildButton(systemImage: "rectangle.and.pencil.and.ellipsis") { [weak self] in
+    self?.delegate?.toolbarDidTapInsertContent()
   }
 
   override init(frame: CGRect) {
@@ -72,18 +78,6 @@ class Toolbar: UIView {
 private extension Toolbar {
   func buildButton(systemImage: String, onTap: @escaping () -> Void) -> UIButton {
     ActionButton(systemName: systemImage, onTap: onTap)
-  }
-
-  func toggleBold() {
-    delegate?.toolbarDidToggleBold()
-  }
-
-  func toggleItalic() {
-    delegate?.toolbarDidToggleItalic()
-  }
-
-  func toggleUnderline() {
-    delegate?.toolbarDidToggleUnderline()
   }
 
   func configurateFrame() {

@@ -10,5 +10,9 @@ export interface IEditor {
 
   clear(): void;
 
-  insertContent({ content, newLine }: { content: string; newLine?: boolean }): void;
+  insertContent({ content, newLine }: { content: string; newLine?: boolean }): IInsertContentResult;
+}
+
+export interface IInsertContentResult {
+  html: string;
 }

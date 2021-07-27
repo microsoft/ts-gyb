@@ -43,18 +43,21 @@ public class {{moduleName}} {
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+      {{^returnType}}
+      guard let completion = completion else { return }
+      {{/returnType}}
       if let error = error {
-        completion?(.failure(error))
+        completion(.failure(error))
         return
       }
       {{#returnType}}
-      let data = try! JSONSerialization.data(withJSONObject: evaluationResult)
-      let result = try! jsonDecoder.decode(data, as: {{returnType}}.self)
-      completion?(.success(result))
+      let data = try! JSONSerialization.data(withJSONObject: evaluationResult!)
+      let result = try! self.jsonDecoder.decode({{returnType}}.self, from: data)
+      completion(.success(result))
       {{/returnType}}
       {{^returnType}}
-      completion?(.success(()))
+      completion(.success(()))
       {{/returnType}}
     }
   }
