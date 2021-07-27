@@ -75,10 +75,6 @@ function buildConfig(env: WebpackEnvironment): webpack.Configuration | webpack.W
         template: `${sourcePath}/index.html`,
         filename: './bundle.html',
         inlineSource: '.(js|css)$',
-        minify: {
-          removeComments: true,
-          collapseWhitespace: true,
-        }
       }),
       new HTMLInlineCSSWebpackPlugin(),
       new HtmlInlineScriptPlugin(),
