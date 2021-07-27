@@ -22,6 +22,7 @@ function run(): void {
       predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
       defaultCustomTags: config.parsing.defaultCustomTags ?? {},
       dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
+      skipInvalidMethods: config.parsing.skipInvalidMethods ?? false,
     });
   });
 
