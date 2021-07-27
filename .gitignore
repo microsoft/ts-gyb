@@ -123,7 +123,7 @@ basic-types/dist
 .npmrc
 
 # debug config
-.vscode/launch.json
+**/.vscode/launch.json
 
 src/basic-types
 

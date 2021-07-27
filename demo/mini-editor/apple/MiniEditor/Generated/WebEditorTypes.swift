@@ -6,7 +6,3 @@
 // Don't modify this file manually, it's auto generated.
 
 import UIKit
-{{#.}}
-
-{{> swift-named-type}}
-{{/.}}
