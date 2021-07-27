@@ -6,7 +6,9 @@ import UIKit
 import WebKit
 
 class WebView: WKWebView {
+  var toolbar: Toolbar?
+
   override var inputAccessoryView: UIView? {
-    Toolbar()
+    toolbar
   }
 }

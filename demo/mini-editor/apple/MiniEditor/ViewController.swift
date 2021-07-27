@@ -9,6 +9,12 @@ class ViewController: UIViewController {
   private lazy var webView: WKWebView = {
     let webView = WebView()
     webView.translatesAutoresizingMaskIntoConstraints = false
+
+    let toolbar = Toolbar()
+    toolbar.delegate = self
+
+    webView.toolbar = toolbar
+
     return webView
   }()
 
@@ -29,10 +35,14 @@ class ViewController: UIViewController {
 
     loadJavaScriptBundle()
   }
+}
 
-  override var inputAccessoryView: UIView? {
-    Toolbar()
-  }
+extension ViewController: ToolbarDelegate {
+  func toolbarDidToggleBold() {}
+
+  func toolbarDidToggleItalic() {}
+
+  func toolbarDidToggleUnderline() {}
 }
 
 private extension ViewController {

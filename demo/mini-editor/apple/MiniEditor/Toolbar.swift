@@ -4,7 +4,15 @@
 
 import UIKit
 
+protocol ToolbarDelegate: AnyObject {
+  func toolbarDidToggleBold()
+  func toolbarDidToggleItalic()
+  func toolbarDidToggleUnderline()
+}
+
 class Toolbar: UIView {
+  weak var delegate: ToolbarDelegate?
+
   private lazy var stackViewContainer: UIStackView = {
     let stackViewContainer = UIStackView(arrangedSubviews: [
       boldButton,
@@ -66,10 +74,17 @@ private extension Toolbar {
     ActionButton(systemName: systemImage, onTap: onTap)
   }
 
-  func toggleBold() {}
+  func toggleBold() {
+    delegate?.toolbarDidToggleBold()
+  }
 
-  func toggleItalic() {}
-  func toggleUnderline() {}
+  func toggleItalic() {
+    delegate?.toolbarDidToggleItalic()
+  }
+
+  func toggleUnderline() {
+    delegate?.toolbarDidToggleUnderline()
+  }
 
   func configurateFrame() {
     frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50)
