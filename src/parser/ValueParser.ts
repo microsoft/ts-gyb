@@ -19,22 +19,28 @@ import {
   TupleType,
   isTupleType,
   EnumField,
+  isDictionaryType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
+import { ValueParserError } from './ValueParserError';
 
 export class ValueParser {
   constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
 
   parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
-    if (methodSignature.type?.kind === ts.SyntaxKind.VoidKeyword) {
+    if (methodSignature.type === undefined) {
+      throw new ValueParserError(
+        'no return type provided',
+        "Use void to explicity specify the method doesn't return a value"
+      );
+    }
+
+    if (methodSignature.type.kind === ts.SyntaxKind.VoidKeyword) {
       return null;
     }
 
-    if (
-      methodSignature.type !== undefined &&
-      ts.isTypeReferenceNode(methodSignature.type) &&
-      methodSignature.type.typeName.getText() === 'Promise'
-    ) {
+    // Handle promise
+    if (ts.isTypeReferenceNode(methodSignature.type) && methodSignature.type.typeName.getText() === 'Promise') {
       if (methodSignature.type.typeArguments === undefined || methodSignature.type.typeArguments.length !== 1) {
         throw Error('Invalid promise');
       }
@@ -47,7 +53,7 @@ export class ValueParser {
       return this.valueTypeFromTypeNode(wrappedTypeNode);
     }
 
-    return this.valueTypeFromNode(methodSignature);
+    return this.valueTypeFromTypeNode(methodSignature.type);
   }
 
   parseFunctionParameterType(typeNode: ts.TypeNode): Field[] {
@@ -61,7 +67,10 @@ export class ValueParser {
       return referenceType.members;
     }
 
-    throw Error('Not supported parameter type');
+    throw new ValueParserError(
+      `parameters type ${typeNode.getText()} is not supported`,
+      'Only object literal and interface are supported'
+    );
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
@@ -86,8 +95,7 @@ export class ValueParser {
 
   private valueTypeFromNode(node: ts.Node & { type?: ts.TypeNode; questionToken?: ts.QuestionToken }): ValueType {
     if (node.type === undefined) {
-      const { fileName } = node.getSourceFile();
-      throw Error(`invalid type in ${fileName}`);
+      throw Error(`type ${node.getText()} is invalid`);
     }
 
     const nullable = node.questionToken !== undefined;
@@ -128,13 +136,15 @@ export class ValueParser {
       return typeLiteralType;
     }
 
-    const arrayTypeKind = this.arrayTypeKindFromTypeNode(typeNode);
-    if (arrayTypeKind !== null) {
-      return arrayTypeKind;
+    const arrayType = this.arrayTypeKindFromTypeNode(typeNode);
+    if (arrayType !== null) {
+      return arrayType;
     }
 
-    const { fileName } = typeNode.getSourceFile();
-    throw Error(`invalid type in ${fileName}`);
+    throw new ValueParserError(
+      `type ${typeNode.getText()} is not supported`,
+      'Supproted types are: string, number, boolean, array, dictionary, object, interface and enum'
+    );
   }
 
   private parseUnionTypeNode(node: ts.TypeNode): ValueType | null {
@@ -162,7 +172,10 @@ export class ValueParser {
         (!isInterfaceType(valueType) && !isTupleType(valueType)) ||
         (!isInterfaceType(newValueType) && !isTupleType(newValueType))
       ) {
-        throw Error('Do not support multiple union types except for interface or literal type.');
+        throw new ValueParserError(
+          `union type ${node.getText()} is invalid`,
+          'Do not support multiple union types except for interface or literal type'
+        );
       }
 
       const existingMemberNames = new Set(valueType.members.map((member) => member.name));
@@ -175,7 +188,10 @@ export class ValueParser {
     });
 
     if (!valueType) {
-      throw Error('Invald union type');
+      throw new ValueParserError(
+        `union type ${node.getText()} is invalid`,
+        'Union type must contain one supported non empty type'
+      );
     }
 
     if (!isOptionalType(valueType) && nullable) {
@@ -238,7 +254,7 @@ export class ValueParser {
 
     const symbol = this.checker.getSymbolAtLocation(node.typeName);
     if (symbol === undefined) {
-      throw Error('Invalid reference type');
+      throw Error(`Reference type ${typeName} is invalid`);
     }
 
     const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
@@ -270,7 +286,10 @@ export class ValueParser {
   private getReferencedTypeNode(referenceNode: ts.TypeReferenceNode): ts.Declaration {
     let symbol = this.checker.getSymbolAtLocation(referenceNode.typeName);
     if (!symbol) {
-      throw Error('Invalid reference type');
+      throw new ValueParserError(
+        `reference type ${referenceNode.getText()} not found`,
+        'Make sure it is property imported or the file where the type is defined is included in search paths.'
+      );
     }
 
     if (symbol.flags & ts.SymbolFlags.Alias) {
@@ -279,7 +298,7 @@ export class ValueParser {
 
     const declarations = symbol.getDeclarations();
     if (declarations === undefined || declarations.length !== 1) {
-      throw Error('Invalid declaration');
+      throw Error(`Invalid declaration for reference type ${symbol.name}`);
     }
 
     return declarations[0];
@@ -334,7 +353,7 @@ export class ValueParser {
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
     if (symbol === undefined) {
-      throw Error('Invalid interface type');
+      throw Error(`Invalid interface type ${name}`);
     }
 
     const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
@@ -392,12 +411,15 @@ export class ValueParser {
     });
 
     if (hasMultipleSubType) {
-      throw new Error("Enum doesn't support multiple sub types");
+      throw new ValueParserError(
+        `enum ${name} is invalid because enums with multiple subtypes are not supported.`,
+        'Use only either string or number as the value of the enum'
+      );
     }
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
     if (symbol === undefined) {
-      throw Error('Invalid enum type');
+      throw Error(`Invalid enum type ${name}`);
     }
 
     const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
@@ -439,8 +461,7 @@ export class ValueParser {
     }
 
     if (!node.type) {
-      const { fileName } = node.getSourceFile();
-      throw Error(`invalid type in ${fileName}`);
+      throw Error(`Type ${node.name.getText()} is invalid`);
     }
 
     const name = node.name.getText();
@@ -497,7 +518,7 @@ export class ValueParser {
       if (ts.isEnumMember(referencedNode)) {
         const enumType = this.enumTypeKindFromType(referencedNode.parent);
         if (enumType === null) {
-          throw Error('Invalid enum member');
+          throw Error(`Invalid enum member ${typeName}`);
         }
         return {
           type: enumType,
@@ -522,7 +543,7 @@ export class ValueParser {
       const type = this.checker.getTypeAtLocation(extendingInterface);
       const declarations = type.symbol.getDeclarations();
       if (declarations === undefined || declarations.length !== 1) {
-        throw Error('Invalid decration');
+        throw Error(`Invalid decration of extended interface type ${type.symbol.name}`);
       }
       const declaration = declarations[0];
       const interfaceType = this.parseInterfaceType(declaration);
@@ -530,8 +551,11 @@ export class ValueParser {
       if (interfaceType === null) {
         return [];
       }
-      if (!isInterfaceType(interfaceType)) {
-        throw Error('Invalid extended type');
+      if (isDictionaryType(interfaceType)) {
+        throw new ValueParserError(
+          `cannot extend dictionary type ${type.symbol.name}`,
+          'Only extending an interface is supported'
+        );
       }
 
       return interfaceType.members;
