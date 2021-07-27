@@ -7,7 +7,7 @@ import {ParserError} from '../src/parser/ParserError';
 import { Method, ValueType } from '../src/types';
 
 export function withTempParser(sourceCode: string, handler: (parser: Parser) => void, predefinedTypes: Set<string> = new Set()): void {
-  const tempPath = fs.mkdtempSync(os.tmpdir());
+  const tempPath = fs.mkdtempSync(`${os.tmpdir()}/`);
   const filePath = path.join(tempPath, `${UUID()}.ts`);
   fs.writeFileSync(filePath, sourceCode);
 
