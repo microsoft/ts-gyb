@@ -5,7 +5,7 @@ import { ValueParser } from './ValueParser';
 import { parseModuleJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
 import { ValueParserError } from './ValueParserError';
-import {ParserError} from './ParserError';
+import { ParserError } from './ParserError';
 
 export class Parser {
   private program: ts.Program;
@@ -16,11 +16,7 @@ export class Parser {
 
   private logger: ParserLogger;
 
-  constructor(
-    globPatterns: string[], 
-    predefinedTypes: Set<string>,
-    private skipInvalidMethods: boolean = false,
-  ) {
+  constructor(globPatterns: string[], predefinedTypes: Set<string>, private skipInvalidMethods: boolean = false) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
     this.program = ts.createProgram({
       rootNames: filePaths,
@@ -118,7 +114,6 @@ export class Parser {
     let returnType: ValueType | null;
     try {
       returnType = this.valueParser.parseFunctionReturnType(node);
-
     } catch (error) {
       if (error instanceof ValueParserError) {
         throw new ParserError(node, `return type error: ${error.message}`, error.guide);
@@ -145,7 +140,11 @@ export class Parser {
       return [];
     }
     if (parameterNodes.length > 1) {
-      throw new ParserError(methodSignature, 'it has multiple parameters', 'Methods should only have one property. Please use destructuring object for multiple parameters');
+      throw new ParserError(
+        methodSignature,
+        'it has multiple parameters',
+        'Methods should only have one property. Please use destructuring object for multiple parameters'
+      );
     }
 
     const parameterDeclaration = parameterNodes[0];

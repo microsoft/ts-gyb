@@ -29,7 +29,10 @@ export class ValueParser {
 
   parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
     if (methodSignature.type === undefined) {
-      throw new ValueParserError('no return type provided', "Use void to explicity specify the method doesn't return a value");
+      throw new ValueParserError(
+        'no return type provided',
+        "Use void to explicity specify the method doesn't return a value"
+      );
     }
 
     if (methodSignature.type.kind === ts.SyntaxKind.VoidKeyword) {
@@ -64,7 +67,10 @@ export class ValueParser {
       return referenceType.members;
     }
 
-    throw new ValueParserError(`parameters type ${typeNode.getText()} is not supported`, 'Only object literal and interface are supported');
+    throw new ValueParserError(
+      `parameters type ${typeNode.getText()} is not supported`,
+      'Only object literal and interface are supported'
+    );
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
@@ -135,7 +141,10 @@ export class ValueParser {
       return arrayType;
     }
 
-    throw new ValueParserError(`type ${typeNode.getText()} is not supported`, 'Supproted types are: string, number, boolean, array, dictionary, object, interface and enum');
+    throw new ValueParserError(
+      `type ${typeNode.getText()} is not supported`,
+      'Supproted types are: string, number, boolean, array, dictionary, object, interface and enum'
+    );
   }
 
   private parseUnionTypeNode(node: ts.TypeNode): ValueType | null {
@@ -163,7 +172,10 @@ export class ValueParser {
         (!isInterfaceType(valueType) && !isTupleType(valueType)) ||
         (!isInterfaceType(newValueType) && !isTupleType(newValueType))
       ) {
-        throw new ValueParserError(`union type ${node.getText()} is invalid`, 'Do not support multiple union types except for interface or literal type');
+        throw new ValueParserError(
+          `union type ${node.getText()} is invalid`,
+          'Do not support multiple union types except for interface or literal type'
+        );
       }
 
       const existingMemberNames = new Set(valueType.members.map((member) => member.name));
@@ -176,7 +188,10 @@ export class ValueParser {
     });
 
     if (!valueType) {
-      throw new ValueParserError(`union type ${node.getText()} is invalid`, 'Union type must contain one supported non empty type');
+      throw new ValueParserError(
+        `union type ${node.getText()} is invalid`,
+        'Union type must contain one supported non empty type'
+      );
     }
 
     if (!isOptionalType(valueType) && nullable) {
@@ -271,7 +286,10 @@ export class ValueParser {
   private getReferencedTypeNode(referenceNode: ts.TypeReferenceNode): ts.Declaration {
     let symbol = this.checker.getSymbolAtLocation(referenceNode.typeName);
     if (!symbol) {
-      throw new ValueParserError(`reference type ${referenceNode.getText()} not found`, 'Make sure it is property imported or the file where the type is defined is included in search paths.');
+      throw new ValueParserError(
+        `reference type ${referenceNode.getText()} not found`,
+        'Make sure it is property imported or the file where the type is defined is included in search paths.'
+      );
     }
 
     if (symbol.flags & ts.SymbolFlags.Alias) {
@@ -393,7 +411,10 @@ export class ValueParser {
     });
 
     if (hasMultipleSubType) {
-      throw new ValueParserError(`enum ${name} is invalid because enums with multiple subtypes are not supported.`, 'Use only either string or number as the value of the enum');
+      throw new ValueParserError(
+        `enum ${name} is invalid because enums with multiple subtypes are not supported.`,
+        'Use only either string or number as the value of the enum'
+      );
     }
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
@@ -531,7 +552,10 @@ export class ValueParser {
         return [];
       }
       if (isDictionaryType(interfaceType)) {
-        throw new ValueParserError(`cannot extend dictionary type ${type.symbol.name}`, 'Only extending an interface is supported');
+        throw new ValueParserError(
+          `cannot extend dictionary type ${type.symbol.name}`,
+          'Only extending an interface is supported'
+        );
       }
 
       return interfaceType.members;
