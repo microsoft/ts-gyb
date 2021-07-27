@@ -1,0 +1,27 @@
+{
+  "parsing": {
+    "source": {
+      "api": ["src/editor/IEditor.ts"]
+    },
+    "predefinedTypes": [
+      "CodeGen_Int"
+    ],
+    "defaultCustomTags": {},
+    "dropInterfaceIPrefix": true
+  },
+  "rendering": {
+    "swift": {
+      "templates": {
+        "api": "../../example-templates/swift-bridge.mustache"
+      },
+      "outputDirectory": {
+        "api": "generated/swift"
+      },
+      "namedTypesTemplatePath": "../../example-templates/swift-named-types.mustache",
+      "namedTypesOutputPath": "../apple/MiniEditor/Generated/WebEditorTypes.swift",
+      "typeNameMap": {
+        "CodeGen_Int": "Int"
+      }
+    }
+  }
+}
