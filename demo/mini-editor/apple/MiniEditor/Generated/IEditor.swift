@@ -19,12 +19,11 @@ public class IEditor {
 
   public func toggleBold(completion: ((Result<Void, Error>) -> Void)? = nil) {
 
-    let javaScriptString = "editor.toggleBold"
-      + "("  + ")"
+    let javaScriptString = "editor.toggleBold" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
       if let error = error {
         completion(.failure(error))
@@ -36,12 +35,11 @@ public class IEditor {
 
   public func toggleItalic(completion: ((Result<Void, Error>) -> Void)? = nil) {
 
-    let javaScriptString = "editor.toggleItalic"
-      + "("  + ")"
+    let javaScriptString = "editor.toggleItalic" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
       if let error = error {
         completion(.failure(error))
@@ -53,12 +51,11 @@ public class IEditor {
 
   public func toggleUnderline(completion: ((Result<Void, Error>) -> Void)? = nil) {
 
-    let javaScriptString = "editor.toggleUnderline"
-      + "("  + ")"
+    let javaScriptString = "editor.toggleUnderline" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
       if let error = error {
         completion(.failure(error))
@@ -70,12 +67,11 @@ public class IEditor {
 
   public func clear(completion: ((Result<Void, Error>) -> Void)? = nil) {
 
-    let javaScriptString = "editor.clear"
-      + "("  + ")"
+    let javaScriptString = "editor.clear" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
       if let error = error {
         completion(.failure(error))
@@ -96,12 +92,11 @@ public class IEditor {
     )
     let argsString = String(data: try! jsonEncoder.encode(args), encoding: .utf8)!
 
-    let javaScriptString = "editor.insertContent"
-      + "(" + "\(argsString)" + ")"
+    let javaScriptString = "editor.insertContent" + "(" + "\(argsString)" + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { [unowned self]evaluationResult, error in
       if let error = error {
         completion(.failure(error))
         return

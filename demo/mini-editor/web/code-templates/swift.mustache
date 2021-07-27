@@ -38,12 +38,11 @@ public class {{moduleName}} {
     let argsString = String(data: try! jsonEncoder.encode(args), encoding: .utf8)!
     {{/parameters.length}}
 
-    let javaScriptString = "{{customTags.invokePath}}.{{methodName}}"
-      + "(" {{#parameters.length}}+ "\(argsString)"{{/parameters.length}} + ")"
+    let javaScriptString = "{{customTags.invokePath}}.{{methodName}}" + "(" {{#parameters.length}}+ "\(argsString)"{{/parameters.length}} + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
 
-    webView?.evaluateJavaScript(javaScriptString) { [unowned self] evaluationResult, error in
+    webView?.evaluateJavaScript(javaScriptString) { {{#returnType}}[unowned self]{{/returnType}}evaluationResult, error in
       {{^returnType}}
       guard let completion = completion else { return }
       {{/returnType}}

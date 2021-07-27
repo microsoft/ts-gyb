@@ -13,8 +13,6 @@
 		7232FDF026AE9B30000C5376 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FDEF26AE9B30000C5376 /* ViewController.swift */; };
 		7232FDF526AE9B34000C5376 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7232FDF426AE9B34000C5376 /* Assets.xcassets */; };
 		7232FDF826AE9B34000C5376 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7232FDF626AE9B34000C5376 /* LaunchScreen.storyboard */; };
-		7232FE0326AE9B34000C5376 /* MiniEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FE0226AE9B34000C5376 /* MiniEditorTests.swift */; };
-		7232FE0E26AE9B34000C5376 /* MiniEditorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FE0D26AE9B34000C5376 /* MiniEditorUITests.swift */; };
 		7232FE2026AEB099000C5376 /* bundle.html in Resources */ = {isa = PBXBuildFile; fileRef = 7232FE1E26AEB099000C5376 /* bundle.html */; };
 		7232FE2326AEB0ED000C5376 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7232FE2226AEB0ED000C5376 /* WebKit.framework */; };
 		7232FE2526AEB5D6000C5376 /* Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FE2426AEB5D6000C5376 /* Toolbar.swift */; };
@@ -22,23 +20,6 @@
 		726EB1F826AFE5AB0008AF41 /* IEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726EB1F626AFE5AB0008AF41 /* IEditor.swift */; };
 		726EB1F926AFE5AB0008AF41 /* WebEditorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726EB1F726AFE5AB0008AF41 /* WebEditorTypes.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		7232FDFF26AE9B34000C5376 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7232FDE026AE9B30000C5376 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7232FDE726AE9B30000C5376;
-			remoteInfo = MiniEditor;
-		};
-		7232FE0A26AE9B34000C5376 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7232FDE026AE9B30000C5376 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7232FDE726AE9B30000C5376;
-			remoteInfo = MiniEditor;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		722DC0A026AFBB4B00945DC3 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
@@ -49,12 +30,6 @@
 		7232FDF426AE9B34000C5376 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7232FDF726AE9B34000C5376 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7232FDF926AE9B34000C5376 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7232FDFE26AE9B34000C5376 /* MiniEditorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniEditorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		7232FE0226AE9B34000C5376 /* MiniEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniEditorTests.swift; sourceTree = "<group>"; };
-		7232FE0426AE9B34000C5376 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7232FE0926AE9B34000C5376 /* MiniEditorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MiniEditorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		7232FE0D26AE9B34000C5376 /* MiniEditorUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniEditorUITests.swift; sourceTree = "<group>"; };
-		7232FE0F26AE9B34000C5376 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7232FE1B26AEB047000C5376 /* MiniEditor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MiniEditor.entitlements; sourceTree = "<group>"; };
 		7232FE1E26AEB099000C5376 /* bundle.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = bundle.html; sourceTree = "<group>"; };
 		7232FE2226AEB0ED000C5376 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/iOSSupport/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -73,20 +48,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7232FDFB26AE9B34000C5376 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7232FE0626AE9B34000C5376 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -94,8 +55,6 @@
 			isa = PBXGroup;
 			children = (
 				7232FDEA26AE9B30000C5376 /* MiniEditor */,
-				7232FE0126AE9B34000C5376 /* MiniEditorTests */,
-				7232FE0C26AE9B34000C5376 /* MiniEditorUITests */,
 				7232FDE926AE9B30000C5376 /* Products */,
 				7232FE2126AEB0ED000C5376 /* Frameworks */,
 			);
@@ -105,8 +64,6 @@
 			isa = PBXGroup;
 			children = (
 				7232FDE826AE9B30000C5376 /* MiniEditor.app */,
-				7232FDFE26AE9B34000C5376 /* MiniEditorTests.xctest */,
-				7232FE0926AE9B34000C5376 /* MiniEditorUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -128,24 +85,6 @@
 				722DC0A026AFBB4B00945DC3 /* WebView.swift */,
 			);
 			path = MiniEditor;
-			sourceTree = "<group>";
-		};
-		7232FE0126AE9B34000C5376 /* MiniEditorTests */ = {
-			isa = PBXGroup;
-			children = (
-				7232FE0226AE9B34000C5376 /* MiniEditorTests.swift */,
-				7232FE0426AE9B34000C5376 /* Info.plist */,
-			);
-			path = MiniEditorTests;
-			sourceTree = "<group>";
-		};
-		7232FE0C26AE9B34000C5376 /* MiniEditorUITests */ = {
-			isa = PBXGroup;
-			children = (
-				7232FE0D26AE9B34000C5376 /* MiniEditorUITests.swift */,
-				7232FE0F26AE9B34000C5376 /* Info.plist */,
-			);
-			path = MiniEditorUITests;
 			sourceTree = "<group>";
 		};
 		7232FE1C26AEB099000C5376 /* Resources */ = {
@@ -193,42 +132,6 @@
 			productReference = 7232FDE826AE9B30000C5376 /* MiniEditor.app */;
 			productType = "com.apple.product-type.application";
 		};
-		7232FDFD26AE9B34000C5376 /* MiniEditorTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7232FE1526AE9B34000C5376 /* Build configuration list for PBXNativeTarget "MiniEditorTests" */;
-			buildPhases = (
-				7232FDFA26AE9B34000C5376 /* Sources */,
-				7232FDFB26AE9B34000C5376 /* Frameworks */,
-				7232FDFC26AE9B34000C5376 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7232FE0026AE9B34000C5376 /* PBXTargetDependency */,
-			);
-			name = MiniEditorTests;
-			productName = MiniEditorTests;
-			productReference = 7232FDFE26AE9B34000C5376 /* MiniEditorTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		7232FE0826AE9B34000C5376 /* MiniEditorUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7232FE1826AE9B34000C5376 /* Build configuration list for PBXNativeTarget "MiniEditorUITests" */;
-			buildPhases = (
-				7232FE0526AE9B34000C5376 /* Sources */,
-				7232FE0626AE9B34000C5376 /* Frameworks */,
-				7232FE0726AE9B34000C5376 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7232FE0B26AE9B34000C5376 /* PBXTargetDependency */,
-			);
-			name = MiniEditorUITests;
-			productName = MiniEditorUITests;
-			productReference = 7232FE0926AE9B34000C5376 /* MiniEditorUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -240,14 +143,6 @@
 				TargetAttributes = {
 					7232FDE726AE9B30000C5376 = {
 						CreatedOnToolsVersion = 12.5.1;
-					};
-					7232FDFD26AE9B34000C5376 = {
-						CreatedOnToolsVersion = 12.5.1;
-						TestTargetID = 7232FDE726AE9B30000C5376;
-					};
-					7232FE0826AE9B34000C5376 = {
-						CreatedOnToolsVersion = 12.5.1;
-						TestTargetID = 7232FDE726AE9B30000C5376;
 					};
 				};
 			};
@@ -265,8 +160,6 @@
 			projectRoot = "";
 			targets = (
 				7232FDE726AE9B30000C5376 /* MiniEditor */,
-				7232FDFD26AE9B34000C5376 /* MiniEditorTests */,
-				7232FE0826AE9B34000C5376 /* MiniEditorUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -279,20 +172,6 @@
 				7232FE2026AEB099000C5376 /* bundle.html in Resources */,
 				7232FDF826AE9B34000C5376 /* LaunchScreen.storyboard in Resources */,
 				7232FDF526AE9B34000C5376 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7232FDFC26AE9B34000C5376 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7232FE0726AE9B34000C5376 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,36 +193,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7232FDFA26AE9B34000C5376 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7232FE0326AE9B34000C5376 /* MiniEditorTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7232FE0526AE9B34000C5376 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7232FE0E26AE9B34000C5376 /* MiniEditorUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		7232FE0026AE9B34000C5376 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7232FDE726AE9B30000C5376 /* MiniEditor */;
-			targetProxy = 7232FDFF26AE9B34000C5376 /* PBXContainerItemProxy */;
-		};
-		7232FE0B26AE9B34000C5376 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7232FDE726AE9B30000C5376 /* MiniEditor */;
-			targetProxy = 7232FE0A26AE9B34000C5376 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		7232FDF626AE9B34000C5376 /* LaunchScreen.storyboard */ = {
@@ -515,86 +365,6 @@
 			};
 			name = Release;
 		};
-		7232FE1626AE9B34000C5376 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = MiniEditorTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.ts-codegen.demo.MiniEditor.MiniEditorTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MiniEditor.app/MiniEditor";
-			};
-			name = Debug;
-		};
-		7232FE1726AE9B34000C5376 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = MiniEditorTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.ts-codegen.demo.MiniEditor.MiniEditorTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MiniEditor.app/MiniEditor";
-			};
-			name = Release;
-		};
-		7232FE1926AE9B34000C5376 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = MiniEditorUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.ts-codegen.demo.MiniEditor.MiniEditorUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MiniEditor;
-			};
-			name = Debug;
-		};
-		7232FE1A26AE9B34000C5376 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				INFOPLIST_FILE = MiniEditorUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.ts-codegen.demo.MiniEditor.MiniEditorUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MiniEditor;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -612,24 +382,6 @@
 			buildConfigurations = (
 				7232FE1326AE9B34000C5376 /* Debug */,
 				7232FE1426AE9B34000C5376 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		7232FE1526AE9B34000C5376 /* Build configuration list for PBXNativeTarget "MiniEditorTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7232FE1626AE9B34000C5376 /* Debug */,
-				7232FE1726AE9B34000C5376 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		7232FE1826AE9B34000C5376 /* Build configuration list for PBXNativeTarget "MiniEditorUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7232FE1926AE9B34000C5376 /* Debug */,
-				7232FE1A26AE9B34000C5376 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
