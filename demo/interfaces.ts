@@ -67,7 +67,7 @@ export interface IHtmlApi {
   getHeightWithBottomAnchor({ sta }: { sta: string[] }): number;
   getHTML({ title }: { title: string }): str;
   requestRenderingResult(): void;
-  getSize(test: string): FullSize;
+  getSize(): FullSize;
   getAliasSize(): AliasSize;
   testDictionaryWithAnyKey({ dict }: { dict: DictionaryWithAnyKey }): void;
 }

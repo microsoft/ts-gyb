@@ -3,6 +3,7 @@ export interface ParseConfiguration {
   predefinedTypes?: string[];
   defaultCustomTags?: Record<string, unknown>;
   dropInterfaceIPrefix?: boolean;
+  skipInvalidMethods?: boolean;
 }
 
 export interface RenderConfiguration {

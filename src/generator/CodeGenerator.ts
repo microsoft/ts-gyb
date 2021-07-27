@@ -25,14 +25,16 @@ export class CodeGenerator {
     predefinedTypes,
     defaultCustomTags,
     dropInterfaceIPrefix,
+    skipInvalidMethods,
   }: {
     tag: string;
     interfacePaths: string[];
     predefinedTypes: Set<string>;
     defaultCustomTags: Record<string, unknown>;
     dropInterfaceIPrefix: boolean;
+    skipInvalidMethods: boolean;
   }): void {
-    const parser = new Parser(interfacePaths, predefinedTypes, true);
+    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods);
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));
