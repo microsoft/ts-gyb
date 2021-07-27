@@ -129,9 +129,9 @@ export class ValueParser {
       return typeLiteralType;
     }
 
-    const arrayTypeKind = this.arrayTypeKindFromTypeNode(typeNode);
-    if (arrayTypeKind !== null) {
-      return arrayTypeKind;
+    const arrayType = this.arrayTypeKindFromTypeNode(typeNode);
+    if (arrayType !== null) {
+      return arrayType;
     }
 
     throw new ValueParserError(`type ${typeNode.getText()} is not supported`, 'Supproted types are: string, number, boolean, array, dictionary, object, interface and enum');
