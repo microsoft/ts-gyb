@@ -19,6 +19,7 @@ import {
   TupleType,
   isTupleType,
   EnumField,
+  isDictionaryType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 import { ValueParserError } from './ValueParserError';
@@ -238,7 +239,7 @@ export class ValueParser {
 
     const symbol = this.checker.getSymbolAtLocation(node.typeName);
     if (symbol === undefined) {
-      throw Error('Invalid reference type');
+      throw Error(`Reference type ${typeName} is invalid`);
     }
 
     const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
@@ -279,7 +280,7 @@ export class ValueParser {
 
     const declarations = symbol.getDeclarations();
     if (declarations === undefined || declarations.length !== 1) {
-      throw Error('Invalid declaration');
+      throw Error(`Invalid declaration for reference type ${symbol.name}`);
     }
 
     return declarations[0];
@@ -334,7 +335,7 @@ export class ValueParser {
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
     if (symbol === undefined) {
-      throw Error('Invalid interface type');
+      throw Error(`Invalid interface type ${name}`);
     }
 
     const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
@@ -397,7 +398,7 @@ export class ValueParser {
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
     if (symbol === undefined) {
-      throw Error('Invalid enum type');
+      throw Error(`Invalid enum type ${name}`);
     }
 
     const documentation = ts.displayPartsToString(symbol.getDocumentationComment(this.checker));
@@ -439,8 +440,7 @@ export class ValueParser {
     }
 
     if (!node.type) {
-      const { fileName } = node.getSourceFile();
-      throw Error(`invalid type in ${fileName}`);
+      throw Error(`Type ${node.name.getText()} is invalid`);
     }
 
     const name = node.name.getText();
@@ -497,7 +497,7 @@ export class ValueParser {
       if (ts.isEnumMember(referencedNode)) {
         const enumType = this.enumTypeKindFromType(referencedNode.parent);
         if (enumType === null) {
-          throw Error('Invalid enum member');
+          throw Error(`Invalid enum member ${typeName}`);
         }
         return {
           type: enumType,
@@ -522,7 +522,7 @@ export class ValueParser {
       const type = this.checker.getTypeAtLocation(extendingInterface);
       const declarations = type.symbol.getDeclarations();
       if (declarations === undefined || declarations.length !== 1) {
-        throw Error('Invalid decration');
+        throw Error(`Invalid decration of extended interface type ${type.symbol.name}`);
       }
       const declaration = declarations[0];
       const interfaceType = this.parseInterfaceType(declaration);
@@ -530,8 +530,8 @@ export class ValueParser {
       if (interfaceType === null) {
         return [];
       }
-      if (!isInterfaceType(interfaceType)) {
-        throw Error('Invalid extended type');
+      if (isDictionaryType(interfaceType)) {
+        throw new ValueParserError(`cannot extend dictionary type ${type.symbol.name}`, 'Only extending an interface is supported');
       }
 
       return interfaceType.members;

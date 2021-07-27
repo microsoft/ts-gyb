@@ -43,8 +43,7 @@ describe('ValueParser', () => {
 
   describe('Value types', () => {
     it('Not supported type', () => {
-      const valueTypeCode = 'void';
-      withTempValueParser(valueTypeCode, parseFunc => {
+      withTempValueParser('void', parseFunc => {
         expect(parseFunc).to.throw('type void is not supported');
       });
     });
@@ -55,9 +54,7 @@ describe('ValueParser', () => {
       });
     })
 
-    it('Predefined type', () => {
-      testValueType('predefined type', 'PredefinedType', { kind: ValueTypeKind.predefinedType, name: 'PredefinedType' }, new Set(['PredefinedType']));
-    })
+    testValueType('predefined type', 'PredefinedType', { kind: ValueTypeKind.predefinedType, name: 'PredefinedType' }, new Set(['PredefinedType']));
   });
 
   describe('Parse basic type', () => {
@@ -76,6 +73,14 @@ describe('ValueParser', () => {
     }
 
     interface ExtendedInterface extends InterfaceWithMembers {
+      booleanMember: boolean;
+    }
+
+    interface DictionaryInterface {
+      [key: string]: string;
+    }
+
+    interface ExtendedDictInterface extends DictionaryInterface {
       booleanMember: boolean;
     }
 
@@ -111,6 +116,12 @@ describe('ValueParser', () => {
       customTags: {},
     };
     testValueType('extended interface', 'ExtendedInterface', extendedInterfaceType, new Set(), interfacesCode);
+
+    it('Invalid extending of a dictionary type', () => {
+      withTempValueParser('ExtendedDictInterface', parseFunc => {
+        expect(parseFunc).to.throw('cannot extend dictionary type DictionaryInterface');
+      }, new Set(), interfacesCode);
+    });
 
     // TODO: Recursive interface is not handled yet
     // const recursiveInterfaceType: InterfaceType = {
@@ -218,6 +229,14 @@ describe('ValueParser', () => {
     // testValueType('number dictionary', '{ [key: number]: boolean }', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.number, valueType: booleanType });
     // TODO: Support record dictionary
     // testValueType('record string dictionary', 'Record<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
+    
+    const dictionaryCode = `
+    interface DictionaryInterface {
+      [key: string]: number;
+    }
+    `;
+
+    testValueType('string interface dictionary', 'DictionaryInterface', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: numberType }, new Set(), dictionaryCode);
   });
 
   describe('Parse optional type', () => {
@@ -249,23 +268,38 @@ describe('ValueParser', () => {
 
     testValueType('merged optional tuple union', '{ stringField: string } | { numberField: number } | null', optionalTupleType);
   });
+
+  describe('Parse alias type', () => {
+    const aliasTypesCode = `
+    type str = string;
+    type secondStr = str;
+    `;
+
+    testValueType('string alias', 'str', stringType, new Set(), aliasTypesCode);
+    testValueType('alias of string alias', 'secondStr', stringType, new Set(), aliasTypesCode);
+  });
 });
 
 function testValueType(name: string, valueTypeCode: string, type: ValueType, predefinedTypes: Set<string> = new Set(), customTypesCode: string = '') {
-  withTempValueParser(valueTypeCode, parseFunc => {
-    const valueType = parseFunc();
-
-    it(`Return ${name}`, () => {
+  it(`Return ${name}`, () => {
+    withTempValueParser(valueTypeCode, parseFunc => {
+      const valueType = parseFunc();
       expect(valueType.return).to.deep.equal(type);
-    })
+    }, predefinedTypes, customTypesCode);
+  })
 
-    it(`Return promise ${name}`, () => {
+  it(`Return promise ${name}`, () => {
+    withTempValueParser(valueTypeCode, parseFunc => {
+      const valueType = parseFunc();
       expect(valueType.promiseReturn).to.deep.equal(type);
-    })
+    }, predefinedTypes, customTypesCode);
+  })
 
-    it(`Parameter type ${name}`, () => {
+  it(`Parameter type ${name}`, () => {
+    withTempValueParser(valueTypeCode, parseFunc => {
+      const valueType = parseFunc();
       expect(valueType.parameter).to.deep.equal(type);
-    })
-  }, predefinedTypes, customTypesCode);
+    }, predefinedTypes, customTypesCode);
+  })
 }
 
