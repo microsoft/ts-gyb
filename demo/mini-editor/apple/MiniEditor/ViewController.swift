@@ -18,7 +18,7 @@ class ViewController: UIViewController {
     return webView
   }()
 
-  private lazy var editorBridge = IEditor(webView: webView)
+  private lazy var editorBridge = EditorBridge(webView: webView)
 
   override func viewDidLoad() {
     super.viewDidLoad()

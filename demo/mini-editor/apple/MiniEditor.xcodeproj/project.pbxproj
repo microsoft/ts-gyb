@@ -17,8 +17,8 @@
 		7232FE2326AEB0ED000C5376 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7232FE2226AEB0ED000C5376 /* WebKit.framework */; };
 		7232FE2526AEB5D6000C5376 /* Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FE2426AEB5D6000C5376 /* Toolbar.swift */; };
 		7232FE2726AEB831000C5376 /* ActionButtion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7232FE2626AEB831000C5376 /* ActionButtion.swift */; };
-		726EB1F826AFE5AB0008AF41 /* IEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726EB1F626AFE5AB0008AF41 /* IEditor.swift */; };
 		726EB1F926AFE5AB0008AF41 /* WebEditorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726EB1F726AFE5AB0008AF41 /* WebEditorTypes.swift */; };
+		726EB1FB26AFF36A0008AF41 /* EditorBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726EB1FA26AFF36A0008AF41 /* EditorBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,8 +35,8 @@
 		7232FE2226AEB0ED000C5376 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.3.sdk/System/iOSSupport/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
 		7232FE2426AEB5D6000C5376 /* Toolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toolbar.swift; sourceTree = "<group>"; };
 		7232FE2626AEB831000C5376 /* ActionButtion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionButtion.swift; sourceTree = "<group>"; };
-		726EB1F626AFE5AB0008AF41 /* IEditor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IEditor.swift; sourceTree = "<group>"; };
 		726EB1F726AFE5AB0008AF41 /* WebEditorTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebEditorTypes.swift; sourceTree = "<group>"; };
+		726EB1FA26AFF36A0008AF41 /* EditorBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditorBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,7 +106,7 @@
 		726EB1F526AFE5AB0008AF41 /* Generated */ = {
 			isa = PBXGroup;
 			children = (
-				726EB1F626AFE5AB0008AF41 /* IEditor.swift */,
+				726EB1FA26AFF36A0008AF41 /* EditorBridge.swift */,
 				726EB1F726AFE5AB0008AF41 /* WebEditorTypes.swift */,
 			);
 			path = Generated;
@@ -183,9 +183,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				7232FDF026AE9B30000C5376 /* ViewController.swift in Sources */,
+				726EB1FB26AFF36A0008AF41 /* EditorBridge.swift in Sources */,
 				726EB1F926AFE5AB0008AF41 /* WebEditorTypes.swift in Sources */,
 				7232FDEC26AE9B30000C5376 /* AppDelegate.swift in Sources */,
-				726EB1F826AFE5AB0008AF41 /* IEditor.swift in Sources */,
 				7232FDEE26AE9B30000C5376 /* SceneDelegate.swift in Sources */,
 				722DC0A126AFBB4B00945DC3 /* WebView.swift in Sources */,
 				7232FE2726AEB831000C5376 /* ActionButtion.swift in Sources */,

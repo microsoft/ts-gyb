@@ -2,6 +2,7 @@
 /**
  * @shouldExport true
  * @invokePath editor
+ * @overrideModuleName EditorBridge
  */
 export interface IEditor {
   toggleBold(): void;

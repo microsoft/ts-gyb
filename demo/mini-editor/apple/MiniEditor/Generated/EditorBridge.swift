@@ -7,7 +7,7 @@
 
 import WebKit
 
-public class IEditor {
+public class EditorBridge {
   weak var webView: WKWebView?
 
   private let jsonEncoder = JSONEncoder()
