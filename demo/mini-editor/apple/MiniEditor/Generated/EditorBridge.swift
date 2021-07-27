@@ -18,7 +18,6 @@ public class EditorBridge {
   }
 
   public func toggleBold(completion: ((Result<Void, Error>) -> Void)? = nil) {
-
     let javaScriptString = "editor.toggleBold" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
@@ -34,7 +33,6 @@ public class EditorBridge {
   }
 
   public func toggleItalic(completion: ((Result<Void, Error>) -> Void)? = nil) {
-
     let javaScriptString = "editor.toggleItalic" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
@@ -50,7 +48,6 @@ public class EditorBridge {
   }
 
   public func toggleUnderline(completion: ((Result<Void, Error>) -> Void)? = nil) {
-
     let javaScriptString = "editor.toggleUnderline" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
@@ -66,7 +63,6 @@ public class EditorBridge {
   }
 
   public func clear(completion: ((Result<Void, Error>) -> Void)? = nil) {
-
     let javaScriptString = "editor.clear" + "("  + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
@@ -91,7 +87,6 @@ public class EditorBridge {
       newLine: newLine
     )
     let argsString = String(data: try! jsonEncoder.encode(args), encoding: .utf8)!
-
     let javaScriptString = "editor.insertContent" + "(" + "\(argsString)" + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")

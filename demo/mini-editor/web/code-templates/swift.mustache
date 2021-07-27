@@ -37,7 +37,6 @@ public class {{moduleName}} {
     )
     let argsString = String(data: try! jsonEncoder.encode(args), encoding: .utf8)!
     {{/parameters.length}}
-
     let javaScriptString = "{{customTags.invokePath}}.{{methodName}}" + "(" {{#parameters.length}}+ "\(argsString)"{{/parameters.length}} + ")"
 
     print("[ts-codegen] evaluating: \(javaScriptString)")
