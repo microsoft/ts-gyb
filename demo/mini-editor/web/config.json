@@ -12,12 +12,12 @@
   "rendering": {
     "swift": {
       "templates": {
-        "api": "../../example-templates/swift-bridge.mustache"
+        "api": "code-templates/swift.mustache"
       },
       "outputDirectory": {
-        "api": "generated/swift"
+        "api": "../apple/MiniEditor/generated"
       },
-      "namedTypesTemplatePath": "../../example-templates/swift-named-types.mustache",
+      "namedTypesTemplatePath": "../../../example-templates/swift-named-types.mustache",
       "namedTypesOutputPath": "../apple/MiniEditor/Generated/WebEditorTypes.swift",
       "typeNameMap": {
         "CodeGen_Int": "Int"

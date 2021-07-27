@@ -18,6 +18,8 @@ class ViewController: UIViewController {
     return webView
   }()
 
+  private lazy var editorBridge = IEditor(webView: webView)
+
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view.
@@ -38,11 +40,23 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: ToolbarDelegate {
-  func toolbarDidToggleBold() {}
+  func toolbarDidToggleBold() {
+    editorBridge.toggleBold { [unowned self] result in
+      self.handleVoidResult(result)
+    }
+  }
 
-  func toolbarDidToggleItalic() {}
+  func toolbarDidToggleItalic() {
+    editorBridge.toggleItalic { [unowned self] result in
+      self.handleVoidResult(result)
+    }
+  }
 
-  func toolbarDidToggleUnderline() {}
+  func toolbarDidToggleUnderline() {
+    editorBridge.toggleUnderline { [unowned self] result in
+      self.handleVoidResult(result)
+    }
+  }
 }
 
 private extension ViewController {
@@ -51,5 +65,14 @@ private extension ViewController {
     let javaScriptContent = try! String(contentsOf: bundleURL, encoding: .utf8)
 
     webView.loadHTMLString(javaScriptContent, baseURL: nil)
+  }
+
+  func handleVoidResult(_ result: Result<Void, Error>) {
+    switch result {
+    case .success:
+      break
+    case .failure(let error):
+      assertionFailure("\(error)")
+    }
   }
 }

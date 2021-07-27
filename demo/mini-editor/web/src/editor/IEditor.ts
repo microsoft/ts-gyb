@@ -1,3 +1,8 @@
+
+/**
+ * @shouldExport true
+ * @invokePath editor
+ */
 export interface IEditor {
   toggleBold(): void;
   toggleItalic(): void;
