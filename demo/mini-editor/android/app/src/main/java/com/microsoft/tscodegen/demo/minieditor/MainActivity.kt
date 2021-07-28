@@ -2,21 +2,16 @@ package com.microsoft.tscodegen.demo.minieditor
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Base64
 import android.view.View
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.microsoft.tscodegen.demo.minieditor.generated.EditorBridge
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.util.*
-import kotlin.concurrent.schedule
 
 private const val BUNDLE_FILENAME = "bundle.html"
 
@@ -44,12 +39,6 @@ class MainActivity : AppCompatActivity() {
 
         val gson = GsonBuilder().create()
         bridge = EditorBridge(webView, gson)
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            bridge.insertContent("test", true) { result ->
-
-            }
-        }, 1500)
     }
 
     private fun convertStreamToString(inputStream: InputStream): String? {
