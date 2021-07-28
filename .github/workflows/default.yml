@@ -58,5 +58,4 @@ jobs:
       - name: Code generation for demo projects
         run: |
           npm run build
-          npm run start:example:basic
           npm run start:example:mini-editor
