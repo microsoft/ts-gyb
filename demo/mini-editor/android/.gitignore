@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# JavaScript bundle
+app/src/main/assets/bundle.html

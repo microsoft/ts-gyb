@@ -1,16 +1,55 @@
 package com.microsoft.tscodegen.demo.minieditor
 
-import androidx.appcompat.app.AppCompatActivity
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Base64
 import android.webkit.WebView
+import androidx.appcompat.app.AppCompatActivity
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+
+private const val BUNDLE_FILENAME = "bundle.html"
 
 class MainActivity : AppCompatActivity() {
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var webView = findViewById<WebView>(R.id.web_view)
-        webView.loadUrl("https://bing.com")
-//        webView.evaluateJavascript("sed");
+        val webView = findViewById<WebView>(R.id.web_view)
+
+        val inputStream = baseContext.assets.open(BUNDLE_FILENAME)
+        val htmlString = convertStreamToString(inputStream)!!
+
+        val settings = webView.settings
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
+        settings.loadWithOverviewMode = true
+
+        // Adjust from the official example: https://developer.android.com/guide/webapps/webview
+        val encodedHtml = Base64.encodeToString(htmlString.toByteArray(), Base64.NO_PADDING)
+        webView.loadData(encodedHtml, "text/html", "base64")
+    }
+
+    private fun convertStreamToString(inputStream: InputStream): String? {
+        val reader = BufferedReader(InputStreamReader(inputStream))
+        val stringBuilder = StringBuilder()
+        var line: String? = null
+        try {
+            while (reader.readLine().also { line = it } != null) {
+                stringBuilder.append(line).append('\n')
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                inputStream.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        return stringBuilder.toString()
     }
 }
