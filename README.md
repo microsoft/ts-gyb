@@ -1,18 +1,36 @@
-# Project
+# ts-codegen
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+ts-codegen is a multi-purpose code generation tool based on TypeScript interfaces. It was initially designed for generating interfacing code between web and mobile platforms in hybrid apps. With custom templates, it can generate code in any language for any use from TypeScript.
 
-As the maintainer of this project, please make a few updates:
+## Features
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+## Installation
+
+To use ts-codegen with an existing project managed by npm, it is recommended to install ts-codegen as a dev dependency:
+
+```bash
+npm install --save-dev @microsoft/ts-codegen
+```
+
+You can also install ts-codegen globally:
+
+```bash
+npm install --global @microsoft/ts-codegen
+```
+
+## Get Started
+
+## Demos
+
+### mini-editor
+
+[mini-editor](demo/mini-editor) is an iOS rich text editing app. Its editor is powered by web technology.
+
+## How it works
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
