@@ -30,8 +30,10 @@ To generate code for a TypeScript interface, add the JSDoc tag `@shouldExport tr
  */
 interface EditorSelection {
   getSelectionPath(): SelectionPath | null;
+
   // Function can have only one argument and it must be an object
   setSelection(args: { selectionPath: SelectionPath }): void;
+
   // Destructuring assignment is allowed
   setSelectionAtElement({ id, removeElement }: { id: string, removeElement?: boolean }): void;
 }
@@ -94,11 +96,15 @@ Generated code can be found at the output directory specified in the configurati
 
 ## Demos
 
-### iOS
+[mini-editor](demo/mini-editor) contains an iOS and an Android rich text editing app. Their editors are powered by the same TypeScript web project.
 
-[ios-mini-editor](demo/mini-editor) is an iOS rich text editing app with its editor powered by web technology.
+The web part provides some rich text formatting operations that can be invoked from iOS native. The operations are defined in [IEditor.ts](demo/mini-editor/web/src/editor/IEditor.ts). ts-codegen generates [EditorBridge.swift](demo/mini-editor/apple/MiniEditor/Generated/EditorBridge.swift) from that TypeScript interface.
 
-The web part is a TypeScript project which provides some rich text formatting operations that can be invoked from iOS native. The operations are defined in [IEditor.ts](demo/mini-editor/web/src/editor/IEditor.ts). ts-codegen generates [EditorBridge.swift](demo/mini-editor/apple/MiniEditor/Generated/EditorBridge.swift) from that TypeScript interface.
+## Documentation
+
+- [TypeScript Interface Guide](documentation/interface-guide.md)
+- [Template Guide](documentation/template-guide.md)
+- [Configuration Reference](documentation/configuration-reference.md)
 
 ## Contributing
 
