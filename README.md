@@ -20,7 +20,7 @@ npm install --global @microsoft/ts-codegen
 
 ## Get Started
 
-### Define TypeScript interfaces
+### 1. Define TypeScript interfaces
 
 To generate code for a TypeScript interface, add the JSDoc tag `@shouldExport true` to documentation of the interface.
 
@@ -39,7 +39,7 @@ interface EditorSelection {
 
 ts-codegen only handles method members like `methodName(): ReturnType;`. If a method needs to take in parameters, it must define one object argument. The type of the object can either be an interface or an object literal. For more information on how to write interfaces for ts-codegen, please refer to [TypeScript Interface Guide](documentation/interface-guide.md).
 
-### Provide templates
+### 2. Provide templates
 
 ts-codegen generates code from [mustache](http://mustache.github.io) templates. At least two templates are needed:
 
@@ -50,7 +50,7 @@ For generating boilerplate interfacing code between web and mobile platforms, a 
 
 Please refer to [Template Guide](documentation/template-guide.md) for all available variables, and [mustache Manual](http://mustache.github.io/mustache.5.html) for mustache template syntax.
 
-### Create a configuration file
+### 3. Create a configuration file
 
 Create a json configuration file in your project:
 
@@ -78,7 +78,7 @@ Create a json configuration file in your project:
 
 All paths are relative to the configuration file. For all supported options in the configuration file, please refere to [Configuration Reference](documentation/configuration-reference.md).
 
-### Run ts-codegen
+### 4. Run ts-codegen
 
 ```shell
 npx ts-codegen --config path/to/config.json
@@ -94,11 +94,11 @@ Generated code can be found at the output directory specified in the configurati
 
 ## Demos
 
-### mini-editor
+### iOS
 
-[mini-editor](demo/mini-editor) is an iOS rich text editing app. Its editor is powered by web technology.
+[ios-mini-editor](demo/mini-editor) is an iOS rich text editing app with its editor powered by web technology.
 
-## How it works
+The web part is a TypeScript project which provides some rich text formatting operations that can be invoked from iOS native. The operations are defined in [IEditor.ts](demo/mini-editor/web/src/editor/IEditor.ts). ts-codegen generates [EditorBridge.swift](demo/mini-editor/apple/MiniEditor/Generated/EditorBridge.swift) from that TypeScript interface.
 
 ## Contributing
 
