@@ -40,4 +40,11 @@ jobs:
         command: custom
         verbose: false
         customCommand: 'run build'
+
+    - task: Npm@1
+      displayName: 'run demo builds'
+      inputs:
+        command: custom
+        verbose: false
+        customCommand: 'npm run start:example:mini-editor'
         
