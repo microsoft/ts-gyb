@@ -29,19 +29,22 @@ interface {{moduleName}}Interface {
 
 open class {{moduleName}}(private val webView: WebView, private val gson: Gson) : {{moduleName}}Interface {
     {{#methods}}
-    override fun {{methodName}}({{{parametersDeclaration}}}{{#returnType}}{{#parametersDeclaration.length}}, {{/parametersDeclaration.length}}callback: ({{{returnType}}}) -> Void{{/returnType}}) {
+
+    {{#parameters.length}}
+    data class Args_{{methodName}} (
+        {{#parameters}}
+        val {{name}}: {{type}},
+        {{/parameters}}
+    )
+    {{/parameters.length}}
+    override fun {{methodName}}({{{parametersDeclaration}}}{{#returnType}}{{#parametersDeclaration.length}}, {{/parametersDeclaration.length}}callback: ({{{returnType}}}) -> Unit{{/returnType}}) {
         {{#parameters.length}}
-        class Args (
-            {{#parameters}}
-            val {{name}}: {{type}},
-            {{/parameters}}
-        )
-        val args = Args(
+        val args = Args_{{methodName}}(
             {{#parameters}}
             {{name}}{{^last}},{{/last}}
             {{/parameters}}
         )
-        val jsonString = gson.toJson(args, Args::class.java)
+        val jsonString = gson.toJson(args, Args_{{methodName}}::class.java)
         {{/parameters.length}}
         val javascriptString = "{{customTags.invokePath}}.{{methodName}}({{#parameters.length}}$jsonString{{/parameters.length}})"
         println("[ts-codegen] evaluating JavaScript: $javascriptString")
