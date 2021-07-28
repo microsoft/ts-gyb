@@ -44,4 +44,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation 'com.google.code.gson:gson:2.8.7'
+    implementation 'com.microsoft.design:fluent-system-icons:1.1.135@aar'
 }

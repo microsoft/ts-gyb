@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Base64
+import android.view.View
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
@@ -20,6 +21,8 @@ import kotlin.concurrent.schedule
 private const val BUNDLE_FILENAME = "bundle.html"
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var bridge: EditorBridge
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         webView.loadData(encodedHtml, "text/html", "base64")
 
         val gson = GsonBuilder().create()
-        val bridge = EditorBridge(webView, gson)
+        bridge = EditorBridge(webView, gson)
 
         Handler(Looper.getMainLooper()).postDelayed({
             bridge.insertContent("test", true) { result ->
@@ -67,5 +70,22 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return stringBuilder.toString()
+    }
+
+    fun onBoldButtonClick(view: View) {
+        bridge.toggleBold()
+    }
+
+    fun onItalicButtonClick(view: View) {
+        bridge.toggleItalic()
+    }
+    fun onUnderlineButtonClick(view: View) {
+        bridge.toggleUnderline()
+    }
+
+    fun onInsertContentButtonClick(view: View) {
+        bridge.insertContent("[inserted content]", true) { result ->
+            println("[ts-codegen] result: $result")
+        }
     }
 }

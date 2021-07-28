@@ -24,27 +24,49 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-        <Button
-            android:id="@+id/bold_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/bold"
-          />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/itaic_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/italic"
+            <ImageButton
+                android:id="@+id/bold_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onBoldButtonClick"
+                app:srcCompat="@drawable/ic_fluent_text_bold_16_regular" />
 
-            />
 
-        <Button
-            android:id="@+id/underline_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/underline"
-            />
+            <ImageButton
+                android:id="@+id/italic_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onItalicButtonClick"
+                app:srcCompat="@drawable/ic_fluent_text_italic_16_regular" />
+
+
+            <ImageButton
+                android:id="@+id/underline_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onUnderlineButtonClick"
+                app:srcCompat="@drawable/ic_fluent_text_underline_16_regular" />
+
+
+            <ImageButton
+                android:id="@+id/insert_content_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onInsertContentButtonClick"
+                app:srcCompat="@drawable/ic_fluent_add_16_regular" />
+
+
+        </LinearLayout>
     </Toolbar>
 
 
