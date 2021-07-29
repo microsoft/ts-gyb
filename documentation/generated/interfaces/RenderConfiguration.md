@@ -51,7 +51,7 @@ ___
 
 • **templates**: `Record`<`string`, `string`\>
 
-Scoped template file paths. The key is the scope name and the value is the templated file path.
+Scoped template file paths. The key is the scope name and the value is the template file path.
 If it is a relative path, it will be resolved based on the configuration file path.
 
 ___
