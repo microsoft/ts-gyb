@@ -9,13 +9,13 @@ ts-gyb is a multi-purpose code generation tool based on TypeScript interfaces. I
 To use ts-gyb with an existing project managed by npm, it is recommended to install ts-gyb as a dev dependency:
 
 ```shell
-npm install --save-dev @microsoft/ts-gyb
+npm install --save-dev ts-gyb
 ```
 
 You can also install ts-gyb globally:
 
 ```shell
-npm install --global @microsoft/ts-gyb
+npm install --global ts-gyb
 ```
 
 ## Get Started
