@@ -190,7 +190,7 @@ You can define some types as predefined. ts-gyb would treat these as known types
 
 This is helpful for working around types that not supported by TypeScript or ts-gyb. [Workarounds](#workarounds) section introduces some use cases for this type.
 
-Refer to [Predefined type configuration](configuration-reference.md#predefined-type) for how to configure predefined types.
+Refer to [Predefined Type](./predefined-type.md) for how to configure predefined types.
 
 ## Tags
 

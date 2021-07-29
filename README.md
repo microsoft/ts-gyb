@@ -84,7 +84,7 @@ Create a json configuration file in your project:
 }
 ```
 
-All paths are relative to the configuration file. For all supported options in the configuration file, please refere to [Configuration Reference](documentation/configuration-reference.md).
+All paths are relative to the configuration file. For all supported options in the configuration file, please refer to [Configuration Reference](documentation/generated/interfaces/Configuration.md).
 
 ### 4. Run ts-gyb
 
@@ -104,13 +104,13 @@ Generated code can be found at the output directory specified in the configurati
 
 [mini-editor](demo/mini-editor) contains an iOS and an Android rich text editing app. Their editors are powered by the same TypeScript web project.
 
-The web part provides some rich text formatting operations that can be invoked from iOS native. The operations are defined in [IEditor.ts](demo/mini-editor/web/src/editor/IEditor.ts). ts-gyb generates [EditorBridge.swift](demo/mini-editor/apple/MiniEditor/Generated/EditorBridge.swift) from that TypeScript interface.
+The web part provides some rich text formatting operations that can be invoked from native code (Kotlin/Swift). The operations are defined in [IEditor.ts](demo/mini-editor/web/src/editor/IEditor.ts). ts-gyb generates [EditorBridge.swift](demo/mini-editor/apple/MiniEditor/Generated/EditorBridge.swift) from that TypeScript interface.
 
 ## Documentation
 
 - [TypeScript Interface Guide](documentation/interface-guide.md)
 - [Template Guide](documentation/template-guide.md)
-- [Configuration Reference](documentation/configuration-reference.md)
+- [Configuration Reference](documentation/generated/interfaces/Configuration.md)
 
 ## Contributing
 
