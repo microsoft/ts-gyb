@@ -22,10 +22,11 @@ export interface ParseConfiguration {
   defaultCustomTags?: Record<string, unknown>;
   /**
    * Drop the `I` prefix for TypeScript interfaces.
+   * This only works for types used as method parameters or return value.
    */
   dropInterfaceIPrefix?: boolean;
   /**
-   * Skip the code generation for invalid methods. If `false`, the code generation will fail.
+   * Skip the code generation for invalid methods. If `false`, the code generation will fail when encounter an unsupported type.
    */
   skipInvalidMethods?: boolean;
 }
@@ -35,13 +36,15 @@ export interface ParseConfiguration {
  */
 export interface RenderConfiguration {
   /**
-   * Scoped templated file paths. The key is the scope name and the value is the templated file path.
+   * Scoped template file paths. The key is the scope name and the value is the templated file path.
    * If it is a relative path, it will be resolved based on the configuration file path.
    */
   templates: Record<string, string>;
   /**
-   * Scoped output file paths. The key is the scope name and the value is the output file path.
+   * Scoped output directories. The key is the scope name and the value is the output file path.
    * If it is a relative path, it will be resolved based on the configuration file path.
+   * 
+   * For example, `{ "api": "../ios/AppTarget/Generated" }`
    */
   outputDirectory: Record<string, string>;
   /**
