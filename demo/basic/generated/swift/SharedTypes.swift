@@ -1,5 +1,5 @@
 //
-//  Copyright 2013-2018 Microsoft Inc.
+//  Copyright (c) Microsoft Corporation. All rights reserved.
 //
 
 // swiftformat:disable redundantRawValues

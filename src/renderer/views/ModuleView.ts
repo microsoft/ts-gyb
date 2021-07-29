@@ -2,6 +2,7 @@ import { Module } from '../../types';
 import { ValueTransformer } from '../value-transformer/ValueTransformer';
 import { MethodView } from './MethodView';
 import { NamedTypeView } from './index';
+import { getDocumentationLines } from '../utils';
 
 export class ModuleView {
   constructor(
@@ -20,5 +21,9 @@ export class ModuleView {
 
   get customTags(): Record<string, unknown> {
     return this.module.customTags;
+  }
+
+  get documentationLines(): string[] {
+    return getDocumentationLines(this.module.documentation);
   }
 }
