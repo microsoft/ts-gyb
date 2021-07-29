@@ -46,7 +46,7 @@ ts-codegen only handles method members like `methodName(): ReturnType;`. If a me
 ts-codegen generates code from [mustache](http://mustache.github.io) templates. At least two templates are needed:
 
 - **Module template**: used to generate a file for every TypeScript interface
-- **Custom types template**: used to generate the file that hosts all TypeScript types found in method parameters or return types
+- **Custom type template**: used to generate the file that hosts all TypeScript types found in method parameters or return types
 
 For generating boilerplate interfacing code between web and mobile platforms, a good starting point is the [example templates](example-templates). You can copy the templates to your project and modify them according to your project's needs.
 
