@@ -48,7 +48,7 @@ jobs:
           npm run lint
 
   demo-codegen:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
