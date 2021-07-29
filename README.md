@@ -2,7 +2,13 @@
 
 ts-gyb is a multi-purpose code generation tool based on TypeScript interfaces. It was initially designed for generating boilerplate interfacing code between web and mobile platforms in hybrid apps. With custom templates, it can generate code for any use from TypeScript.
 
+GYB: Generate Your Boilerplate. Inspired by [swift/gyb.py](https://github.com/apple/swift/blob/main/utils/gyb.py).
+
 ## Features
+
+- Generate production ready and well documented code from TypeScript code
+- Support most of TypeScript syntax
+- Fully customizable template makes the generated code fit perfectly into any project
 
 ## Installation
 
