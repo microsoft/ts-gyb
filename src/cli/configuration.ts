@@ -70,8 +70,14 @@ export interface RenderConfiguration {
 /**
  * Language rendering configuration
  */
-interface LanguageRenderingConfiguration {
+export interface LanguageRenderingConfiguration {
+  /**
+   * Swift renderer configuration
+   */
   swift?: RenderConfiguration;
+  /**
+   * Kotlin renderer configuration
+   */
   kotlin?: RenderConfiguration;
 }
 
@@ -83,6 +89,7 @@ export interface Configuration {
    * Parser configuration
    */
   parsing: ParseConfiguration;
+
   /**
    * Code generation configuration for different languages
    */

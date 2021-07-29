@@ -23,6 +23,6 @@ ___
 
 ### rendering
 
-• **rendering**: `LanguageRenderingConfiguration`
+• **rendering**: [`LanguageRenderingConfiguration`](LanguageRenderingConfiguration.md)
 
 Code generation configuration for different languages
