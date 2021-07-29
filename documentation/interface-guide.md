@@ -215,7 +215,7 @@ interface InterfaceWithTags {
 
 ### Custom tags
 
-You can also define custom tags and use them in templates. Refer to [custom tags in template](template-guide.md#custom-tags) for how to use them.
+You can also define custom tags and use them in templates. Refer to [module in template](template-guide.md#module) for how to use them.
 
 ts-codegen would try to parse the value of custom tags via `JSON.parse()`. If failed, it would be passed as string.
 
