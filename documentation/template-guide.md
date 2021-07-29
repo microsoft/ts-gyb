@@ -4,13 +4,13 @@ ts-codegen uses [mustache](http://mustache.github.io) template to generate code.
 
 ## Required templates
 
-ts-codegen needs two templates: module template and named types template.
+ts-codegen needs two templates: module template and named type template.
 
 ### Module template
 
 ts-codegen uses this template to generate a file for every module. Typically, generated file includes a module class and all types used in the method parameters and return values of the module.
 
-### Named types template
+### Named type template
 
 When a TypeScript `interface` or an `enum` is used by more than one module, it is not suitable to place the generated type in any module file. ts-codegen uses this template to generate a single file that hosts all shared TypeScript types found in method parameters and return types.
 
@@ -21,7 +21,9 @@ ts-codegen defines some variables that can be directly used in templates.
 ### Variables in templates
 
 - **Module template**: this template has access to all properties of [`Module`](#module). For example, you can use `{{moduleName}}` to render the name of the module.
-- **Named types template**: this template has only one array variable of type [`NamedType`](#namedtype) which includes all named types. For example, use `{{#.}}{{typeName}}{{/.}}` to enumerate the array and get all type names.
+- **Named type template**: this template has only one array variable of type [`NamedType`](#namedtype) which includes all named types. For example, use `{{#.}}{{typeName}}{{/.}}` to enumerate the array and get all type names.
+
+Both `associatedTypes` in Module template and the variable of Named type template is an array of [`NamedType`](#namedtype). It is recommended to create a template to render a single `NamedType`, then import the template in other templates.
 
 ### Data structure
 

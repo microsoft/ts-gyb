@@ -39,7 +39,7 @@ interface EditorSelection {
 }
 ```
 
-ts-codegen only handles method members like `methodName(): ReturnType;`. If a method needs to take in parameters, it must define one object argument. The type of the object can either be an interface or an object literal. For more information on how to write interfaces for ts-codegen, please refer to [TypeScript Interface Guide](documentation/interface-guide.md).
+ts-codegen only handles method members like `methodName(): ReturnType;`. If a method needs to take in parameters, it must define one object argument. The type of this object can either be an interface or an object literal. For more information on how to write interfaces for ts-codegen, please refer to [TypeScript Interface Guide](documentation/interface-guide.md).
 
 ### 2. Provide templates
 
