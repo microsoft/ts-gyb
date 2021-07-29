@@ -20,14 +20,14 @@ describe('ValueParser', () => {
     it('Return void', () => {
       const methodCode = 'mockedMethod(): void;';
       withTempMethodParser(methodCode, parseFunc => {
-        expect(parseFunc()).to.deep.equal({ name: 'mockedMethod', parameters: [], returnType: null, documentation: '', });
+        expect(parseFunc()).to.deep.equal({ name: 'mockedMethod', parameters: [], returnType: null, isAsync: false, documentation: '', });
       })
     });
 
     it('Return promise void', () => {
       const methodCode = 'mockedMethod(): Promise<void>;';
       withTempMethodParser(methodCode, parseFunc => {
-        expect(parseFunc()).to.deep.equal({ name: 'mockedMethod', parameters: [], returnType: null, documentation: '', });
+        expect(parseFunc()).to.deep.equal({ name: 'mockedMethod', parameters: [], returnType: null, isAsync: true, documentation: '', });
       })
     });
   });
@@ -164,6 +164,11 @@ describe('ValueParser', () => {
     const enumsCode = `
     enum EmptyEnum {}
 
+    enum DefaultEnum {
+      a,
+      b,
+    }
+
     enum StringEnum {
       firstCase = 'firstCase',
       secondCase = 'secondCase',
@@ -182,6 +187,19 @@ describe('ValueParser', () => {
 
     const emptyEnumType: EnumType = { kind: ValueTypeKind.enumType, name: 'EmptyEnum', subType: EnumSubType.string, members: [], documentation: '', customTags: {} };
     testValueType('empty enum', 'EmptyEnum', emptyEnumType, new Set(), enumsCode);
+
+    const defaultEnumType: EnumType = {
+      kind: ValueTypeKind.enumType,
+      name: 'DefaultEnum',
+      subType: EnumSubType.number,
+      members: [
+        { key: 'a', value: 0, documentation: '' },
+        { key: 'b', value: 1, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    }
+    testValueType('default enum', 'DefaultEnum', defaultEnumType, new Set(), enumsCode);
 
     const stringEnumType: EnumType = {
       kind: ValueTypeKind.enumType,

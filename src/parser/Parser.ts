@@ -112,8 +112,9 @@ export class Parser {
     }
 
     let returnType: ValueType | null;
+    let isAsync: boolean;
     try {
-      returnType = this.valueParser.parseFunctionReturnType(node);
+      [returnType, isAsync] = this.valueParser.parseFunctionReturnType(node);
     } catch (error) {
       if (error instanceof ValueParserError) {
         throw new ParserError(node, `return type error: ${error.message}`, error.guide);
@@ -129,6 +130,7 @@ export class Parser {
       name: methodName,
       parameters,
       returnType,
+      isAsync,
       documentation,
     };
   }
