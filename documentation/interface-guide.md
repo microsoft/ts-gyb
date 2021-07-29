@@ -17,7 +17,7 @@ interface ModuleName {
 }
 ```
 
-> TypeScript allows you to implement a method in an interface as a function property. This requirement does not prevent you from using arrow functions in the implementation of the interface.
+> Tips: TypeScript allows you to implement a method in an interface as a function property. This requirement does not prevent you from using arrow functions in the implementation of the interface.
 
 ## Parameters
 
@@ -47,7 +47,7 @@ interface ModuleName {
 
 Refer to [Value types](#value-types) for allowed parameter types.
 
-> If your existing method uses multiple arguments, changing to destructuring assignment would be easier since no change is needed to the method body.
+> Tips: If your existing method uses multiple arguments, changing to destructuring assignment would be easier since no change is needed to the method body.
 
 ## Return type
 
@@ -65,7 +65,7 @@ Refer to [Value types](#value-types) for allowed types as return type.
 - `number`
 - `boolean`
 
-> TypeScript does not distinguish integer from float point number, and ts-codegen would map `number` to the default float point type in the target language. To map a value to integer, use [Predefined type](#predefined-type).
+> Tips: TypeScript does not distinguish integer from float point number, and ts-codegen would map `number` to the default float point type in the target language. To map a value to integer, refer to the guide in [Integer type](#integer-type).
 
 ### `interface` and object literal
 
@@ -79,7 +79,7 @@ When an interface extends another interface, all members of the parent interface
 
 #### Indexable types
 
-When an interface or an object literal contains an index member, it would be parsed as [Indexable types](https://www.typescriptlang.org/docs/handbook/interfaces.html#indexable-types) and be mapped to dictionary. ts-codegen only recognizes indexable types with only one index member. Currently the index type can only be `string`. The type of the value can be any type specified in [Value types](#value-types).
+When an interface or an object literal contains an index member, it would be parsed as [index signature](https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures) and be mapped to dictionary. ts-codegen only recognizes indexable types with only one index member. Currently the index type can only be `string`. The type of the value can be any type specified in [Value types](#value-types).
 
 ```typescript
 // allowed: indexable interface
@@ -166,12 +166,39 @@ string | number
 { stringField: string } | number
 ```
 
-### Alias type
+### Type alias
 
+TypeScript [Type alias](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases) is supported. The target type can be any type specified in [Value types](#value-types). Alias types would be parsed as its target type, and the alias name would be discarded, with only one exception -- object literal. Aliased object literal would be treated as an `interface`.
 
+```typescript
+// equivalent to string
+type str = string;
+
+// still equivalent to string
+type aliasedStr = str;
+
+// equivalent to FoobarInterface and name AliasedInterface would not be used
+type AliasedInterface = FoobarInterface
+
+// would be an interface. equivalent to interface AliasDefinedInterface { stringField: string }
+type AliasDefinedInterface = { stringField: string }
+```
 
 ### Predefined type
+
+You can define some types as predefined. ts-codegen would treat these as known types and would assume they exist in the generated code. You must ensure these types can be correctly referenced in your project when using generated code.
+
+This is helpful for working around types that not supported by TypeScript or ts-codegen. [Workarounds](#workarounds) section introduces some use cases for this type.
+
+Refer to [Predefined type configuration](configuration-reference.md#predefined-type) for how to configure predefined types.
 
 ## Tags
 
 ## Documentation
+
+## Workarounds
+
+### Integer type
+
+### Unsupported type
+

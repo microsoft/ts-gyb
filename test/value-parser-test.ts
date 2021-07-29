@@ -2,7 +2,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempMethodParser, withTempValueParser } from './utils';
 import { ParserError } from '../src/parser/ParserError';
-import { ArrayType, BasicType, BasicTypeValue, DictionaryKeyType, EnumSubType, EnumType, InterfaceType, OptionalType, TupleType, ValueType, ValueTypeKind } from '../src/types';
+import { BasicType, BasicTypeValue, DictionaryKeyType, EnumSubType, EnumType, InterfaceType, OptionalType, PredefinedType, TupleType, ValueType, ValueTypeKind } from '../src/types';
 
 const stringType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.string };
 const numberType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.number };
@@ -271,12 +271,44 @@ describe('ValueParser', () => {
 
   describe('Parse alias type', () => {
     const aliasTypesCode = `
+    interface ExampleInterface {
+      foobar: string;
+    }
+
     type str = string;
     type secondStr = str;
+    type CodeGenStr = string | { _brand: never };
+    type AliasInterface = ExampleInterface;
+    type AliasDefinedInterface = {
+      foobar: string,
+    };
     `;
+
+    const predefinedStringType: PredefinedType = { kind: ValueTypeKind.predefinedType, name: 'CodeGenStr' };
+    const aliasInterfaceType: InterfaceType = {
+      kind: ValueTypeKind.interfaceType,
+      name: 'ExampleInterface',
+      members: [
+        { name: 'foobar', type: stringType, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    };
+    const aliasDefinedInterfaceType: InterfaceType = {
+      kind: ValueTypeKind.interfaceType,
+      name: 'AliasDefinedInterface',
+      members: [
+        { name: 'foobar', type: stringType, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    };
 
     testValueType('string alias', 'str', stringType, new Set(), aliasTypesCode);
     testValueType('alias of string alias', 'secondStr', stringType, new Set(), aliasTypesCode);
+    testValueType('predefined string alias', 'CodeGenStr', predefinedStringType, new Set(['CodeGenStr']), aliasTypesCode);
+    testValueType('alias interface', 'AliasInterface', aliasInterfaceType, new Set(), aliasTypesCode);
+    testValueType('alias defined interface', 'AliasDefinedInterface', aliasDefinedInterfaceType, new Set(), aliasTypesCode);
   });
 });
 
