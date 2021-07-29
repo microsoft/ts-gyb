@@ -112,9 +112,23 @@ enum class StringEnum {
     @SerializedName("b") B
 }
 
-enum class DefaultEnum {
-    @SerializedName("c") C,
-    @SerializedName("d") D
+enum class DefaultEnum(val value: Int) {
+    C(0),
+    D(1);
+
+    companion object {
+        fun find(value: Int) = values().find { it.value == value }
+    }
+}
+
+class DefaultEnumTypeAdapter : JsonSerializer<DefaultEnum>, JsonDeserializer<DefaultEnum> {
+    override fun serialize(obj: DefaultEnum, type: Type, context: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(obj.value)
+    }
+
+    override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): DefaultEnum? {
+        return DefaultEnum.find(json.asInt)
+    }
 }
 
 data class BaseSize(
