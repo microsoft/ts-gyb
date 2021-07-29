@@ -1,7 +1,7 @@
 import path from 'path';
 import yargs from 'yargs';
 import { CodeGenerator, RenderingLanguage } from '../generator/CodeGenerator';
-import { Configuration } from './configuration';
+import { Configuration, normalizeConfiguration } from './configuration';
 
 const program = yargs(process.argv.slice(2));
 
@@ -9,10 +9,10 @@ const args = program.config().help().argv;
 
 function run(): void {
   const configPath = args.config as string;
-  const directory = path.dirname(configPath);
-  process.chdir(directory);
+  const projectDirectory = path.resolve(path.dirname(configPath));
+  process.chdir(projectDirectory);
 
-  const config = args as unknown as Configuration;
+  const config = normalizeConfiguration(args as unknown as Configuration, projectDirectory);
 
   const generator = new CodeGenerator();
   Object.entries(config.parsing.source).forEach(([tag, interfacePaths]) => {
