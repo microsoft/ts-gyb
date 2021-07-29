@@ -1,7 +1,14 @@
 {
   "name": "ts-gyb",
-  "version": "0.3.0",
+  "version": "0.4.1",
   "description": "Generate Native API based on TS interface",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/ts-gyb"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/microsoft/ts-gyb#readme",
+  "keywords": [],
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
@@ -25,9 +32,6 @@
     "dist/**/*.d.ts"
   ],
   "types": "index.d.ts",
-  "keywords": [],
-  "author": "",
-  "license": "private",
   "devDependencies": {
     "@types/chai": "^4.2.18",
     "@types/mocha": "^8.2.2",
