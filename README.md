@@ -1,21 +1,21 @@
-# ts-codegen
+# ts-gyb
 
-ts-codegen is a multi-purpose code generation tool based on TypeScript interfaces. It was initially designed for generating boilerplate interfacing code between web and mobile platforms in hybrid apps. With custom templates, it can generate code for any use from TypeScript.
+ts-gyb is a multi-purpose code generation tool based on TypeScript interfaces. It was initially designed for generating boilerplate interfacing code between web and mobile platforms in hybrid apps. With custom templates, it can generate code for any use from TypeScript.
 
 ## Features
 
 ## Installation
 
-To use ts-codegen with an existing project managed by npm, it is recommended to install ts-codegen as a dev dependency:
+To use ts-gyb with an existing project managed by npm, it is recommended to install ts-gyb as a dev dependency:
 
 ```shell
-npm install --save-dev @microsoft/ts-codegen
+npm install --save-dev @microsoft/ts-gyb
 ```
 
-You can also install ts-codegen globally:
+You can also install ts-gyb globally:
 
 ```shell
-npm install --global @microsoft/ts-codegen
+npm install --global @microsoft/ts-gyb
 ```
 
 ## Get Started
@@ -39,11 +39,11 @@ interface EditorSelection {
 }
 ```
 
-ts-codegen only handles method members like `methodName(): ReturnType;`. If a method needs to take in parameters, it must define one object argument. The type of this object can either be an interface or an object literal. For more information on how to write interfaces for ts-codegen, please refer to [TypeScript Interface Guide](documentation/interface-guide.md).
+ts-gyb only handles method members like `methodName(): ReturnType;`. If a method needs to take in parameters, it must define one object argument. The type of this object can either be an interface or an object literal. For more information on how to write interfaces for ts-gyb, please refer to [TypeScript Interface Guide](documentation/interface-guide.md).
 
 ### 2. Provide templates
 
-ts-codegen generates code from [mustache](http://mustache.github.io) templates. At least two templates are needed:
+ts-gyb generates code from [mustache](http://mustache.github.io) templates. At least two templates are needed:
 
 - **Module template**: used to generate a file for every TypeScript interface
 - **Custom type template**: used to generate the file that hosts all TypeScript types found in method parameters or return types
@@ -80,16 +80,16 @@ Create a json configuration file in your project:
 
 All paths are relative to the configuration file. For all supported options in the configuration file, please refere to [Configuration Reference](documentation/configuration-reference.md).
 
-### 4. Run ts-codegen
+### 4. Run ts-gyb
 
 ```shell
-npx ts-codegen --config path/to/config.json
+npx ts-gyb --config path/to/config.json
 ```
 
-Or if ts-codegen is installed globally:
+Or if ts-gyb is installed globally:
 
 ```shell
-ts-codegen --config path/to/config.json
+ts-gyb --config path/to/config.json
 ```
 
 Generated code can be found at the output directory specified in the configuration file.
@@ -98,7 +98,7 @@ Generated code can be found at the output directory specified in the configurati
 
 [mini-editor](demo/mini-editor) contains an iOS and an Android rich text editing app. Their editors are powered by the same TypeScript web project.
 
-The web part provides some rich text formatting operations that can be invoked from iOS native. The operations are defined in [IEditor.ts](demo/mini-editor/web/src/editor/IEditor.ts). ts-codegen generates [EditorBridge.swift](demo/mini-editor/apple/MiniEditor/Generated/EditorBridge.swift) from that TypeScript interface.
+The web part provides some rich text formatting operations that can be invoked from iOS native. The operations are defined in [IEditor.ts](demo/mini-editor/web/src/editor/IEditor.ts). ts-gyb generates [EditorBridge.swift](demo/mini-editor/apple/MiniEditor/Generated/EditorBridge.swift) from that TypeScript interface.
 
 ## Documentation
 

@@ -37,14 +37,14 @@ open class {{moduleName}}(private val webView: WebView, private val gson: Gson) 
         val jsonString = gson.toJson(args, Args_{{methodName}}::class.java)
         {{/parameters.length}}
         val javascriptString = "{{customTags.invokePath}}.{{methodName}}({{#parameters.length}}$jsonString{{/parameters.length}})"
-        println("[ts-codegen] evaluating JavaScript: $javascriptString")
+        println("[ts-gyb] evaluating JavaScript: $javascriptString")
         webView.evaluateJavascript(javascriptString){ evaluationResult -> 
             {{#returnType}} 
             val result = gson.fromJson(evaluationResult, {{{returnType}}}::class.java)
             callback(result)
             {{/returnType}}
             {{^returnType}}
-            println("[ts-codegen] JavaScript result: $evaluationResult")
+            println("[ts-gyb] JavaScript result: $evaluationResult")
             {{/returnType}}
         }
     }

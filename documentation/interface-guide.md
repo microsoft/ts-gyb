@@ -2,7 +2,7 @@
 
 ## Method definition
 
-ts-codegen only recognizes interface members defined as methods.
+ts-gyb only recognizes interface members defined as methods.
 
 ```typescript
 /**
@@ -51,7 +51,7 @@ Refer to [Value types](#value-types) for allowed parameter types.
 
 ## Return type
 
-Return type must be explicitly specified. When not provided, TypeScript would use `any` which is not supported by ts-codegen. Use `void` when the method does not return a value.
+Return type must be explicitly specified. When not provided, TypeScript would use `any` which is not supported by ts-gyb. Use `void` when the method does not return a value.
 
 Return type can be a `Promise`.
 
@@ -65,7 +65,7 @@ Refer to [Value types](#value-types) for allowed types as return type.
 - `number`
 - `boolean`
 
-> Tips: TypeScript does not distinguish integer from float point number, and ts-codegen would map `number` to the default float point type in the target language. To map a value to integer, refer to the guide in [Integer type](#integer-type).
+> Tips: TypeScript does not distinguish integer from float point number, and ts-gyb would map `number` to the default float point type in the target language. To map a value to integer, refer to the guide in [Integer type](#integer-type).
 
 ### `interface` and object literal
 
@@ -79,7 +79,7 @@ When an interface extends another interface, all members of the parent interface
 
 #### Indexable types
 
-When an interface or an object literal contains an index member, it would be parsed as [index signature](https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures) and be mapped to dictionary. ts-codegen only recognizes indexable types with only one index member. Currently the index type can only be `string`. The type of the value can be any type specified in [Value types](#value-types).
+When an interface or an object literal contains an index member, it would be parsed as [index signature](https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures) and be mapped to dictionary. ts-gyb only recognizes indexable types with only one index member. Currently the index type can only be `string`. The type of the value can be any type specified in [Value types](#value-types).
 
 ```typescript
 // allowed: indexable interface
@@ -186,20 +186,20 @@ type AliasDefinedInterface = { stringField: string }
 
 ### Predefined type
 
-You can define some types as predefined. ts-codegen would treat these as known types and would assume they exist in the generated code. You must ensure these types can be correctly referenced in your project when using generated code.
+You can define some types as predefined. ts-gyb would treat these as known types and would assume they exist in the generated code. You must ensure these types can be correctly referenced in your project when using generated code.
 
-This is helpful for working around types that not supported by TypeScript or ts-codegen. [Workarounds](#workarounds) section introduces some use cases for this type.
+This is helpful for working around types that not supported by TypeScript or ts-gyb. [Workarounds](#workarounds) section introduces some use cases for this type.
 
 Refer to [Predefined type configuration](configuration-reference.md#predefined-type) for how to configure predefined types.
 
 ## Tags
 
-ts-codegen parses tags in [JSDoc](https://jsdoc.app) documentation.
+ts-gyb parses tags in [JSDoc](https://jsdoc.app) documentation.
 
 ### Built-in tags
 
 - `@shouldExport`: Specify whether an `interface` should be exported. Set it to `true` to export.
-- `@overrideModuleName`: Change the name of the interface for ts-codegen. This is helpful for dropping the `I` prefix in TypeScript interface name.
+- `@overrideModuleName`: Change the name of the interface for ts-gyb. This is helpful for dropping the `I` prefix in TypeScript interface name.
 - `@overrideTypeName`: Similar to `@overrideModuleName`, this is used to override the name of custom types used in method parameters or return values.
 
 ```typescript
@@ -217,7 +217,7 @@ interface InterfaceWithTags {
 
 You can also define custom tags and use them in templates. Refer to [module in template](template-guide.md#module) for how to use them.
 
-ts-codegen would try to parse the value of custom tags via `JSON.parse()`. If failed, it would be passed as string.
+ts-gyb would try to parse the value of custom tags via `JSON.parse()`. If failed, it would be passed as string.
 
 ```typescript
 /**
@@ -233,7 +233,7 @@ interface InterfaceWithTags {
 
 ## JSDoc documentation
 
-ts-codegen would read the documentation comment from `interface` and `enum`, and their members. Documentation comment must be placed above all tags.
+ts-gyb would read the documentation comment from `interface` and `enum`, and their members. Documentation comment must be placed above all tags.
 
 ```typescript
 /**
@@ -254,7 +254,7 @@ interface InterfaceWithTags {
 
 TypeScript does not have an integer type. To generate methods with an integer as a parameter or return value, you can use the combination of [Type alias](#type-alias) and [Predefined type](#predefined-type).
 
-First, define an integer type as an alias to `number`. For basic types like `number`, `string` and `boolean`, the type alias must be branded. This is because [TypeScript interns certain types](https://github.com/microsoft/TypeScript/issues/28197#issuecomment-434027046), and ts-codegen cannot distinguish these types from the target types. Learn more about TypeScript type branding [here](https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d).
+First, define an integer type as an alias to `number`. For basic types like `number`, `string` and `boolean`, the type alias must be branded. This is because [TypeScript interns certain types](https://github.com/microsoft/TypeScript/issues/28197#issuecomment-434027046), and ts-gyb cannot distinguish these types from the target types. Learn more about TypeScript type branding [here](https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d).
 
 ```typescript
 type CodeGen_Int = number & { _intBrand: never }
