@@ -17,7 +17,7 @@
   },
   "main": "dist/index.js",
   "bin": {
-    "ts-codegen": "bin/ts-codegen"
+    "tscodegen": "bin/tscodegen"
   },
   "files": [
     "dist/**/*.js",
