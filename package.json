@@ -1,5 +1,5 @@
 {
-  "name": "tscodegen",
+  "name": "ts-gyb",
   "version": "0.3.0",
   "description": "Generate Native API based on TS interface",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "main": "dist/index.js",
   "bin": {
-    "tscodegen": "bin/tscodegen"
+    "ts-gyb": "bin/ts-gyb"
   },
   "files": [
     "dist/**/*.js",
