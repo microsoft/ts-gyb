@@ -5,10 +5,10 @@ import { normalizePath } from '../utils';
  */
 export interface ParseConfiguration {
   /**
-   * Scoped source file paths. The key is the scope name and the value is an array of the source file paths.
+   * Scoped source file paths. The key is the scope name and the value is an array of the source file paths. [Glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) are allowed.
    * If it is a relative path, it will be resolved based on the configuration file path.
    * 
-   * For example, `{ "api": ["src/api/IEditor.ts", "src/api/ILogger.ts"] }`
+   * For example, `{ "api": ["src/api/IEditor.ts", "src/bridge/*.ts"] }`
    */
   source: Record<string, string[]>;
   /**
