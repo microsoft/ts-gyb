@@ -15,7 +15,7 @@
         "api": "code-templates/swift.mustache"
       },
       "outputDirectory": {
-        "api": "../apple/MiniEditor/generated"
+        "api": "../apple/MiniEditor/Generated"
       },
       "namedTypesTemplatePath": "../../../example-templates/swift-named-types.mustache",
       "namedTypesOutputPath": "../apple/MiniEditor/Generated/WebEditorTypes.swift",
