@@ -9,6 +9,7 @@ export interface Method {
   name: string;
   parameters: Field[];
   returnType: ValueType | null;
+  isAsync: boolean;
   documentation: string;
 }
 
