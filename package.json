@@ -13,7 +13,8 @@
     "prettier:write": "prettier --write \"src/**/*.ts\"",
     "prettier:check": "prettier --check \"src/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix && npm run prettier:write",
-    "lint:ci": "npm run lint && npm run prettier:check"
+    "lint:ci": "npm run lint && npm run prettier:check",
+    "doc:gen:config": "typedoc --out documentation/generated src/cli/configuration.ts --disableSources && rm documentation/generated/modules.md && rm documentation/generated/README.md"
   },
   "main": "dist/index.js",
   "bin": {
@@ -44,6 +45,8 @@
     "mocha": "^8.4.0",
     "prettier": "^2.2.1",
     "ts-node": "^8.10.2",
+    "typedoc": "^0.21.4",
+    "typedoc-plugin-markdown": "^3.10.4",
     "uuid": "^8.3.2"
   },
   "dependencies": {
