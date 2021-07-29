@@ -277,7 +277,7 @@ describe('ValueParser', () => {
 
     type str = string;
     type secondStr = str;
-    type CodeGenStr = string | { _brand: never };
+    type CodeGenStr = string & { _intBrand: never };
     type AliasInterface = ExampleInterface;
     type AliasDefinedInterface = {
       foobar: string,

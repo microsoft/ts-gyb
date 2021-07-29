@@ -194,11 +194,89 @@ Refer to [Predefined type configuration](configuration-reference.md#predefined-t
 
 ## Tags
 
-## Documentation
+ts-codegen parses tags in [JSDoc](https://jsdoc.app) documentation.
+
+### Built-in tags
+
+- `@shouldExport`: Specify whether an `interface` should be exported. Set it to `true` to export.
+- `@overrideModuleName`: Change the name of the interface for ts-codegen. This is helpful for dropping the `I` prefix in TypeScript interface name.
+- `@overrideTypeName`: Similar to `@overrideModuleName`, this is used to override the name of custom types used in method parameters or return values.
+
+```typescript
+/**
+ * @shouldExport true
+ * @overrideModuleName ProperNamedInterface
+ */
+interface InterfaceWithTags {
+  // The name of the module would be `ProperNamedInterface` in generated code
+  ...
+}
+```
+
+### Custom tags
+
+You can also define custom tags and use them in templates. Refer to [custom tags in template](template-guide.md#custom-tags) for how to use them.
+
+ts-codegen would try to parse the value of custom tags via `JSON.parse()`. If failed, it would be passed as string.
+
+```typescript
+/**
+ * @shouldExport true
+ * @stringTag This would be a string
+ * @numberTag 0
+ * @objectTag { "jsonKey": "valid json value" }
+ */
+interface InterfaceWithTags {
+  ...
+}
+```
+
+## JSDoc documentation
+
+ts-codegen would read the documentation comment from `interface` and `enum`, and their members. Documentation comment must be placed above all tags.
+
+```typescript
+/**
+ * A description for this module
+ * @shouldExport true
+ */
+interface InterfaceWithTags {
+  /**
+  * A description for this method
+  */
+  methodName(): void;
+}
+```
 
 ## Workarounds
 
 ### Integer type
 
-### Unsupported type
+TypeScript does not have an integer type. To generate methods with an integer as a parameter or return value, you can use the combination of [Type alias](#type-alias) and [Predefined type](#predefined-type).
 
+First, define an integer type as an alias to `number`. For basic types like `number`, `string` and `boolean`, the type alias must be branded. This is because [TypeScript interns certain types](https://github.com/microsoft/TypeScript/issues/28197#issuecomment-434027046), and ts-codegen cannot distinguish these types from the target types. Learn more about TypeScript type branding [here](https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d).
+
+```typescript
+type CodeGen_Int = number & { _intBrand: never }
+```
+
+Then, add `CodeGen_Int` to `parsing.predefinedTypes` in the configuration file, and map the type name to the integer type in the target language using `rendering.language.typeNameMap`. Learn more about how to configure predefined types at [Predefined type configuration](configuration-reference.md#predefined-type).
+
+```json
+{
+  "parsing": {
+    ...
+    "predefinedTypes": [
+      "CodeGen_Int"
+    ]
+  },
+  "rendering": {
+    "swift": {
+      ...
+      "typeNameMap": {
+        "CodeGen_Int": "Int"
+      }
+    }
+  }
+}
+```

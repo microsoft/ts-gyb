@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 
-type CodeGen_Int = number | { _brand: never };
+type CodeGen_Int = number & { _intBrand: never };
 type str = string;
 type AliasSize = BaseSize;
 interface BaseSize {
