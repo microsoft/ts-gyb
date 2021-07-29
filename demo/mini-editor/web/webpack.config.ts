@@ -12,10 +12,12 @@ const webDistPath = path.resolve(__dirname, 'dist');
 const sourcePath = path.resolve(__dirname, 'src');
 
 const appleDistPath = path.resolve(__dirname, '..', 'apple/MiniEditor/Resources');
+const androidDistPath = path.resolve(__dirname, '..', 'android/app/src/main/assets');
 
 enum SupportedTarget {
   web = 'web',
   apple = 'apple',
+  android = 'android',
 }
 
 interface WebpackEnvironment {
@@ -26,7 +28,18 @@ interface WebpackEnvironment {
 function buildConfig(env: WebpackEnvironment): webpack.Configuration | webpack.WebpackOptionsNormalized {
   const isProductionBuild = process.env.NODE_ENV === 'production';
 
-  const distPath = env.target == SupportedTarget.web ? webDistPath : appleDistPath;
+  const distPath = function (): string {
+    switch (env.target) {
+      case SupportedTarget.web:
+        return webDistPath;
+      case SupportedTarget.apple:
+        return appleDistPath;
+      case SupportedTarget.android:
+        return androidDistPath;
+      default:
+        throw new Error(`Unsupported target: ${env.target}`);
+    }
+  }();
 
   return {
     mode: isProductionBuild ? 'production' : 'development',

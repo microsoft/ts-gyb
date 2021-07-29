@@ -1,0 +1,40 @@
+{{#custom}}
+data class {{typeName}}(
+    {{#members}}
+    @JvmField val {{name}}: {{type}},
+    {{/members}}
+    {{#staticMembers}}
+    @JvmField val {{name}}: {{type}} = {{{value}}},
+    {{/staticMembers}}
+)
+{{/custom}}
+{{#enum}}
+{{#isNumberType}}
+enum class {{typeName}}(val value: Int) {
+    {{#members}}
+    {{key}}({{{value}}}){{^last}},{{/last}}{{#last}};{{/last}}
+    {{/members}}
+
+    companion object {
+        fun find(value: Int) = values().find { it.value == value }
+    }
+}
+
+class {{typeName}}TypeAdapter : JsonSerializer<{{typeName}}>, JsonDeserializer<{{typeName}}> {
+    override fun serialize(obj: {{typeName}}, type: Type, context: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(obj.value)
+    }
+
+    override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): {{typeName}}? {
+        return {{typeName}}.find(json.asInt)
+    }
+}
+{{/isNumberType}}
+{{#isStringType}}
+enum class {{typeName}} {
+    {{#members}}
+    @SerializedName({{{value}}}) {{key}}{{^last}},{{/last}}
+    {{/members}}
+}
+{{/isStringType}}
+{{/enum}}
