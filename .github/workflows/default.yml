@@ -46,3 +46,16 @@ jobs:
           echo Linking basic-types into ./src
           ln -s $(pwd)/basic-types ./src/
           npm run lint
+
+  demo-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Code generation for demo projects
+        run: |
+          npm run build
+          npm run start:example:mini-editor
