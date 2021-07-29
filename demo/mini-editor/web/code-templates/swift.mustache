@@ -39,7 +39,7 @@ public class {{moduleName}} {
     {{/parameters.length}}
     let javaScriptString = "{{customTags.invokePath}}.{{methodName}}" + "(" {{#parameters.length}}+ "\(argsString)"{{/parameters.length}} + ")"
 
-    print("[ts-codegen] evaluating: \(javaScriptString)")
+    print("[ts-gyb] evaluating: \(javaScriptString)")
 
     webView?.evaluateJavaScript(javaScriptString) { {{#returnType}}[unowned self]{{/returnType}}evaluationResult, error in
       {{^returnType}}

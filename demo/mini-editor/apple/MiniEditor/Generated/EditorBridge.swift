@@ -20,7 +20,7 @@ public class EditorBridge {
   public func toggleBold(completion: ((Result<Void, Error>) -> Void)? = nil) {
     let javaScriptString = "editor.toggleBold" + "("  + ")"
 
-    print("[ts-codegen] evaluating: \(javaScriptString)")
+    print("[ts-gyb] evaluating: \(javaScriptString)")
 
     webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
@@ -35,7 +35,7 @@ public class EditorBridge {
   public func toggleItalic(completion: ((Result<Void, Error>) -> Void)? = nil) {
     let javaScriptString = "editor.toggleItalic" + "("  + ")"
 
-    print("[ts-codegen] evaluating: \(javaScriptString)")
+    print("[ts-gyb] evaluating: \(javaScriptString)")
 
     webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
@@ -50,7 +50,7 @@ public class EditorBridge {
   public func toggleUnderline(completion: ((Result<Void, Error>) -> Void)? = nil) {
     let javaScriptString = "editor.toggleUnderline" + "("  + ")"
 
-    print("[ts-codegen] evaluating: \(javaScriptString)")
+    print("[ts-gyb] evaluating: \(javaScriptString)")
 
     webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
@@ -65,7 +65,7 @@ public class EditorBridge {
   public func clear(completion: ((Result<Void, Error>) -> Void)? = nil) {
     let javaScriptString = "editor.clear" + "("  + ")"
 
-    print("[ts-codegen] evaluating: \(javaScriptString)")
+    print("[ts-gyb] evaluating: \(javaScriptString)")
 
     webView?.evaluateJavaScript(javaScriptString) { evaluationResult, error in
       guard let completion = completion else { return }
@@ -89,7 +89,7 @@ public class EditorBridge {
     let argsString = String(data: try! jsonEncoder.encode(args), encoding: .utf8)!
     let javaScriptString = "editor.insertContent" + "(" + "\(argsString)" + ")"
 
-    print("[ts-codegen] evaluating: \(javaScriptString)")
+    print("[ts-gyb] evaluating: \(javaScriptString)")
 
     webView?.evaluateJavaScript(javaScriptString) { [unowned self]evaluationResult, error in
       if let error = error {

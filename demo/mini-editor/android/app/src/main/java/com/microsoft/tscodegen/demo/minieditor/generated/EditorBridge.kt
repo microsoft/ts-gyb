@@ -23,33 +23,33 @@ open class EditorBridge(private val webView: WebView, private val gson: Gson) : 
 
     override fun toggleBold() {
         val javascriptString = "editor.toggleBold()"
-        println("[ts-codegen] evaluating JavaScript: $javascriptString")
+        println("[ts-gyb] evaluating JavaScript: $javascriptString")
         webView.evaluateJavascript(javascriptString){ evaluationResult -> 
-            println("[ts-codegen] JavaScript result: $evaluationResult")
+            println("[ts-gyb] JavaScript result: $evaluationResult")
         }
     }
 
     override fun toggleItalic() {
         val javascriptString = "editor.toggleItalic()"
-        println("[ts-codegen] evaluating JavaScript: $javascriptString")
+        println("[ts-gyb] evaluating JavaScript: $javascriptString")
         webView.evaluateJavascript(javascriptString){ evaluationResult -> 
-            println("[ts-codegen] JavaScript result: $evaluationResult")
+            println("[ts-gyb] JavaScript result: $evaluationResult")
         }
     }
 
     override fun toggleUnderline() {
         val javascriptString = "editor.toggleUnderline()"
-        println("[ts-codegen] evaluating JavaScript: $javascriptString")
+        println("[ts-gyb] evaluating JavaScript: $javascriptString")
         webView.evaluateJavascript(javascriptString){ evaluationResult -> 
-            println("[ts-codegen] JavaScript result: $evaluationResult")
+            println("[ts-gyb] JavaScript result: $evaluationResult")
         }
     }
 
     override fun clear() {
         val javascriptString = "editor.clear()"
-        println("[ts-codegen] evaluating JavaScript: $javascriptString")
+        println("[ts-gyb] evaluating JavaScript: $javascriptString")
         webView.evaluateJavascript(javascriptString){ evaluationResult -> 
-            println("[ts-codegen] JavaScript result: $evaluationResult")
+            println("[ts-gyb] JavaScript result: $evaluationResult")
         }
     }
 
@@ -64,7 +64,7 @@ open class EditorBridge(private val webView: WebView, private val gson: Gson) : 
         )
         val jsonString = gson.toJson(args, Args_insertContent::class.java)
         val javascriptString = "editor.insertContent($jsonString)"
-        println("[ts-codegen] evaluating JavaScript: $javascriptString")
+        println("[ts-gyb] evaluating JavaScript: $javascriptString")
         webView.evaluateJavascript(javascriptString){ evaluationResult -> 
             val result = gson.fromJson(evaluationResult, InsertContentResult::class.java)
             callback(result)

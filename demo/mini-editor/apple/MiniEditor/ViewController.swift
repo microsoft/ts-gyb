@@ -65,7 +65,7 @@ extension ViewController: ToolbarDelegate {
     ) { result in
       switch result {
       case .success(let contentString):
-        print("[ts-codegen] contentString after insertContent(): \(contentString)")
+        print("[ts-gyb] contentString after insertContent(): \(contentString)")
       case .failure(let error):
         assertionFailure("\(error)")
       }

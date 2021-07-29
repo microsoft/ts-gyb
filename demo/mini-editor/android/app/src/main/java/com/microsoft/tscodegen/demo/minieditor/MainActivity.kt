@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
     fun onInsertContentButtonClick(view: View) {
         bridge.insertContent("[inserted content]", true) { result ->
-            println("[ts-codegen] result: $result")
+            println("[ts-gyb] result: $result")
         }
     }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@olm/ts-codegen",
+  "name": "ts-gyb",
   "version": "0.3.0",
   "description": "Generate Native API based on TS interface",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "main": "dist/index.js",
   "bin": {
-    "ts-codegen": "bin/ts-codegen"
+    "ts-gyb": "bin/ts-gyb"
   },
   "files": [
     "dist/**/*.js",

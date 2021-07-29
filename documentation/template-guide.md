@@ -1,22 +1,22 @@
 # Template Guide
 
-ts-codegen uses [mustache](http://mustache.github.io) template to generate code. Refer to [mustache Manul](http://mustache.github.io/mustache.5.html) for supported syntax.
+ts-gyb uses [mustache](http://mustache.github.io) template to generate code. Refer to [mustache Manul](http://mustache.github.io/mustache.5.html) for supported syntax.
 
 ## Required templates
 
-ts-codegen needs two templates: module template and named type template.
+ts-gyb needs two templates: module template and named type template.
 
 ### Module template
 
-ts-codegen uses this template to generate a file for every module. Typically, generated file includes a module class and all types used in the method parameters and return values of the module.
+ts-gyb uses this template to generate a file for every module. Typically, generated file includes a module class and all types used in the method parameters and return values of the module.
 
 ### Named type template
 
-When a TypeScript `interface` or an `enum` is used by more than one module, it is not suitable to place the generated type in any module file. ts-codegen uses this template to generate a single file that hosts all shared TypeScript types found in method parameters and return types.
+When a TypeScript `interface` or an `enum` is used by more than one module, it is not suitable to place the generated type in any module file. ts-gyb uses this template to generate a single file that hosts all shared TypeScript types found in method parameters and return types.
 
 ## Variables
 
-ts-codegen defines some variables that can be directly used in templates.
+ts-gyb defines some variables that can be directly used in templates.
 
 ### Variables in templates
 
