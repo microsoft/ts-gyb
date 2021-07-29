@@ -1,7 +1,9 @@
 {
   "parsing": {
     "source": {
-      "api": ["src/editor/IEditor.ts"]
+      "api": [
+        "src/editor/IEditor.ts"
+      ]
     },
     "predefinedTypes": [
       "CodeGen_Int"
@@ -19,6 +21,19 @@
       },
       "namedTypesTemplatePath": "../../../example-templates/swift-named-types.mustache",
       "namedTypesOutputPath": "../apple/MiniEditor/Generated/WebEditorTypes.swift",
+      "typeNameMap": {
+        "CodeGen_Int": "Int"
+      }
+    },
+    "kotlin": {
+      "templates": {
+        "api": "code-templates/kotlin.mustache"
+      },
+      "outputDirectory": {
+        "api": "../android/app/src/main/java/com/microsoft/tscodegen/demo/minieditor/generated"
+      },
+      "namedTypesTemplatePath": "../../../example-templates/kotlin-named-type.mustache",
+      "namedTypesOutputPath": "../android/app/src/main/java/com/microsoft/tscodegen/demo/minieditor/generated/BridgeTypes.kt",
       "typeNameMap": {
         "CodeGen_Int": "Int"
       }

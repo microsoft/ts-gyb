@@ -1,10 +1,11 @@
 //
-//  Copyright 2013-2018 Microsoft Inc.
+//  Copyright (c) Microsoft Corporation. All rights reserved.
 //
 
 // swiftformat:disable redundantRawValues
 // Don't modify this file manually, it's auto generated.
 
+/// Documentation for module
 public class IHtmlApi {
   let jsExecutor: BridgeJSExecutor
 
@@ -108,9 +109,9 @@ public enum StringEnum: String, Codable {
   case b = "b"
 }
 
-public enum DefaultEnum: String, Codable {
-  case c = "c"
-  case d = "d"
+public enum DefaultEnum: Int, Codable {
+  case c = 0
+  case d = 1
 }
 
 public struct BaseSize: Codable {

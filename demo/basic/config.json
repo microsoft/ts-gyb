@@ -12,12 +12,12 @@
   "rendering": {
     "swift": {
       "templates": {
-        "api": "../example-templates/swift-bridge.mustache"
+        "api": "../../example-templates/swift-bridge.mustache"
       },
       "outputDirectory": {
         "api": "generated/swift"
       },
-      "namedTypesTemplatePath": "../example-templates/swift-named-types.mustache",
+      "namedTypesTemplatePath": "../../example-templates/swift-named-types.mustache",
       "namedTypesOutputPath": "generated/swift/SharedTypes.swift",
       "typeNameMap": {
         "CodeGen_Int": "Int"
@@ -25,12 +25,12 @@
     },
     "kotlin": {
       "templates": {
-        "api": "../example-templates/kotlin-bridge.mustache"
+        "api": "../../example-templates/kotlin-bridge.mustache"
       },
       "outputDirectory": {
         "api": "generated/kotlin"
       },
-      "namedTypesTemplatePath": "../example-templates/kotlin-named-types.mustache",
+      "namedTypesTemplatePath": "../../example-templates/kotlin-named-types.mustache",
       "namedTypesOutputPath": "generated/kotlin/BridgeTypes.kt",
       "typeNameMap": {
         "CodeGen_Int": "Int"
