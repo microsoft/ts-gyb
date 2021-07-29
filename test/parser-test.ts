@@ -46,6 +46,7 @@ describe('Parser', () => {
           name: 'mockedMethod',
           parameters: [],
           returnType: null,
+          isAsync: false,
           documentation: 'This is an example documentation for the method',
         }], 
         documentation: 'This is an example documentation for the module',

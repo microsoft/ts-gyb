@@ -27,7 +27,7 @@ import { ValueParserError } from './ValueParserError';
 export class ValueParser {
   constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
 
-  parseFunctionReturnType(methodSignature: ts.MethodSignature): ValueType | null {
+  parseFunctionReturnType(methodSignature: ts.MethodSignature): [ValueType | null, boolean] {
     if (methodSignature.type === undefined) {
       throw new ValueParserError(
         'no return type provided',
@@ -36,7 +36,7 @@ export class ValueParser {
     }
 
     if (methodSignature.type.kind === ts.SyntaxKind.VoidKeyword) {
-      return null;
+      return [null, false];
     }
 
     // Handle promise
@@ -47,13 +47,13 @@ export class ValueParser {
       const wrappedTypeNode = methodSignature.type.typeArguments[0];
 
       if (wrappedTypeNode.kind === ts.SyntaxKind.VoidKeyword) {
-        return null;
+        return [null, true];
       }
 
-      return this.valueTypeFromTypeNode(wrappedTypeNode);
+      return [this.valueTypeFromTypeNode(wrappedTypeNode), true];
     }
 
-    return this.valueTypeFromTypeNode(methodSignature.type);
+    return [this.valueTypeFromTypeNode(methodSignature.type), false];
   }
 
   parseFunctionParameterType(typeNode: ts.TypeNode): Field[] {
@@ -383,7 +383,7 @@ export class ValueParser {
         return;
       }
       const key = enumMember.name.getText();
-      let value: string | number = key;
+      let value: string | number = index;
       const subType = ((): EnumSubType => {
         if (enumMember.initializer) {
           const valueInitializer = enumMember.initializer;
@@ -396,7 +396,7 @@ export class ValueParser {
             return EnumSubType.number;
           }
         }
-        return EnumSubType.string;
+        return EnumSubType.number;
       })();
       if (index > 0 && enumSubType !== subType) {
         hasMultipleSubType = true;
