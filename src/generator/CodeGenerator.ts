@@ -119,6 +119,10 @@ export class CodeGenerator {
       throw Error('Named types not parsed. Run parseNamedTypes first.');
     }
 
+    if (this.namedTypes.sharedTypes.length === 0) {
+      return;
+    }
+
     const valueTransformer = this.getValueTransformer(language, typeNameMap);
 
     const namedTypesView = this.namedTypes.sharedTypes.map((namedType) =>
@@ -172,6 +176,10 @@ export class CodeGenerator {
   }
 
   private writeFile(content: string, outputDirectory: string, fileName: string): void {
+    if (!fs.existsSync(outputDirectory)) {
+      fs.mkdirSync(outputDirectory, { recursive: true });
+    }
+
     const filePath = path.join(outputDirectory, fileName);
     fs.writeFileSync(filePath, content);
   }
