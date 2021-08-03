@@ -245,6 +245,7 @@ describe('ValueParser', () => {
     // TODO: Support number dictionary
     // testValueType('number dictionary', '{ [key: number]: boolean }', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.number, valueType: booleanType });
     testValueType('record string dictionary', 'Record<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
+    testValueType('map string dictionary', 'Map<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
     
     const dictionaryCode = `
     interface DictionaryInterface {

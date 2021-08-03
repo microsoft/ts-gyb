@@ -310,7 +310,8 @@ export class ValueParser {
   }
 
   private parseRecordReferenceNode(referenceNode: ts.TypeReferenceNode): DictionaryType | null {
-    if (referenceNode.typeName.getText() !== 'Record') {
+    const typeName = referenceNode.typeName.getText();
+    if (typeName !== 'Record' && typeName !== 'Map') {
       return null;
     }
     if (referenceNode.typeArguments === undefined || referenceNode.typeArguments.length !== 2) {
