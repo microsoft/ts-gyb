@@ -18,7 +18,7 @@ jobs:
       - name: match-tag-to-package-version
         uses: geritol/match-tag-to-package-version@0.0.2
         env:
-          TAG_PREFIX: refs/tags/
+          TAG_PREFIX: refs/tags/v
       - run: npm install
       - run: npm version ${{ github.event.release.tag_name }}
       - run: npm run build
