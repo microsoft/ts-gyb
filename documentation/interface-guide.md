@@ -79,7 +79,7 @@ When an interface extends another interface, all members of the parent interface
 
 #### Indexable types
 
-When an interface or an object literal contains an index member, it would be parsed as [index signature](https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures) and be mapped to dictionary. ts-gyb only recognizes indexable types with only one index member. Currently the index type can only be `string`. The type of the value can be any type specified in [Value types](#value-types).
+When an interface or an object literal contains an index member, it would be parsed as [index signature](https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures) and be mapped to dictionary. ts-gyb only recognizes indexable object type and `Record` with only one index member. Currently the index type can only be `string`. The type of the value can be any type specified in [Value types](#value-types).
 
 ```typescript
 // allowed: indexable interface
@@ -89,6 +89,9 @@ interface StringKeyDictionary {
 
 // allowed: indexable object literal
 { [key: string]: number }
+
+// allowed: Record
+Record<string, number>
 
 // not allowed: more than one member.
 interface InvalidDictionary {
@@ -130,7 +133,7 @@ enum InvalidEnum {
 
 ### Array type
 
-Arries defined like `string[]` are supported. The element can be any type specified in [Value types](#value-types).
+Arries defined like `string[]` and `Array<number>` are supported. The element can be any type specified in [Value types](#value-types).
 
 ### Union type
 
