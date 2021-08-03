@@ -1,0 +1,28 @@
+name: Release Pipeline
+
+on:
+  release:
+    types: [published, prereleased]
+
+jobs:
+  npm-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: match-tag-to-package-version
+        uses: geritol/match-tag-to-package-version@0.0.2
+        env:
+          TAG_PREFIX: refs/tags/v
+      - run: npm install
+      - run: npm version ${{ github.event.release.tag_name }}
+      - run: npm run build
+      - run: npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
+      - run: npm publish --tag ${{ github.event.release.target_commitish }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
