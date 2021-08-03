@@ -237,16 +237,15 @@ describe('ValueParser', () => {
   describe('Parse array type', () => {
     testValueType('string array', 'string[]', { kind: ValueTypeKind.arrayType, elementType: stringType });
     testValueType('number array', 'number[]', { kind: ValueTypeKind.arrayType, elementType: numberType });
-    // TODO: Generic defined array is not supported
-    // testValueType('generic defined array', 'Array<string>', { kind: ValueTypeKind.arrayType, elementType: stringType });
+    testValueType('generic defined array', 'Array<string>', { kind: ValueTypeKind.arrayType, elementType: stringType });
   });
 
   describe('Parse dictionary type', () => {
     testValueType('string dictionary', '{ [key: string]: string }', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
     // TODO: Support number dictionary
     // testValueType('number dictionary', '{ [key: number]: boolean }', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.number, valueType: booleanType });
-    // TODO: Support record dictionary
-    // testValueType('record string dictionary', 'Record<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
+    testValueType('record string dictionary', 'Record<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
+    testValueType('map string dictionary', 'Map<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
     
     const dictionaryCode = `
     interface DictionaryInterface {
