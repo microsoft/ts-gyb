@@ -79,7 +79,7 @@ When an interface extends another interface, all members of the parent interface
 
 #### Indexable types
 
-When an interface or an object literal contains an index member, it would be parsed as [index signature](https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures) and be mapped to dictionary. ts-gyb only recognizes indexable object type, `Record` and `Map` with only one index member. Currently the index type can only be `string`. The type of the value can be any type specified in [Value types](#value-types).
+When an interface or an object literal contains an index member, it would be parsed as [index signature](https://www.typescriptlang.org/docs/handbook/2/objects.html#index-signatures) and be mapped to dictionary. ts-gyb only recognizes indexable object type, `Record` and `Map` with only one index member. The index type can only be `string` or `number`. The type of the value can be any type specified in [Value types](#value-types).
 
 ```typescript
 // allowed: indexable interface
@@ -91,7 +91,7 @@ interface StringKeyDictionary {
 { [key: string]: number }
 
 // allowed: Record
-Record<string, number>
+Record<number, number>
 
 // allowed: Map
 new Map<string, number>
