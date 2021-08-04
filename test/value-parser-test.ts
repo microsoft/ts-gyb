@@ -2,7 +2,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempMethodParser, withTempValueParser } from './utils';
 import { ParserError } from '../src/parser/ParserError';
-import { BasicType, BasicTypeValue, DictionaryKeyType, EnumSubType, EnumType, InterfaceType, OptionalType, PredefinedType, TupleType, ValueType, ValueTypeKind } from '../src/types';
+import { BasicType, BasicTypeValue, DictionaryKeyType, DictionaryType, EnumSubType, EnumType, InterfaceType, OptionalType, PredefinedType, TupleType, ValueType, ValueTypeKind } from '../src/types';
 
 const stringType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.string };
 const numberType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.number };
@@ -241,11 +241,15 @@ describe('ValueParser', () => {
   });
 
   describe('Parse dictionary type', () => {
-    testValueType('string dictionary', '{ [key: string]: string }', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
-    // TODO: Support number dictionary
-    // testValueType('number dictionary', '{ [key: number]: boolean }', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.number, valueType: booleanType });
-    testValueType('record string dictionary', 'Record<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
-    testValueType('map string dictionary', 'Map<string, string>', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType });
+    const stringDictionaryType: DictionaryType = { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: stringType };
+    testValueType('string dictionary', '{ [key: string]: string }', stringDictionaryType);
+    testValueType('record string dictionary', 'Record<string, string>', stringDictionaryType);
+    testValueType('map string dictionary', 'Map<string, string>', stringDictionaryType);
+
+    const numberDictionaryType: DictionaryType = { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.number, valueType: booleanType };
+    testValueType('number dictionary', '{ [key: number]: boolean }', numberDictionaryType);
+    testValueType('record number dictionary', 'Record<number, boolean>', numberDictionaryType);
+    testValueType('map number dictionary', 'Map<number, boolean>', numberDictionaryType);
     
     const dictionaryCode = `
     interface DictionaryInterface {
