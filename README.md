@@ -1,5 +1,8 @@
 # ts-gyb
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/microsoft/ts-gyb/CI)
+![npm](https://img.shields.io/npm/v/ts-gyb)
+
 ts-gyb is a multi-purpose code generation tool based on TypeScript interfaces. It was initially designed for generating boilerplate interfacing code between web and mobile platforms in hybrid apps. With custom templates, it can generate code for any use from TypeScript.
 
 GYB: Generate Your Boilerplate. Inspired by [swift/gyb.py](https://github.com/apple/swift/blob/main/utils/gyb.py).
