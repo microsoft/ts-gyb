@@ -20,6 +20,7 @@ import {
   isTupleType,
   EnumField,
   isDictionaryType,
+  isBasicType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 import { ValueParserError } from './ValueParserError';
@@ -232,6 +233,16 @@ export class ValueParser {
       return null;
     }
 
+    const arrayType = this.parseArraryReferenceNode(node);
+    if (arrayType !== null) {
+      return arrayType;
+    }
+
+    const dictionaryType = this.parseRecordAndMapReferenceNode(node);
+    if (dictionaryType !== null) {
+      return dictionaryType;
+    }
+
     const typeName = node.typeName.getText();
     const predefinedType = this.parsePredefinedType(typeName);
     if (predefinedType) {
@@ -281,6 +292,34 @@ export class ValueParser {
     }
 
     return valueType;
+  }
+
+  private parseArraryReferenceNode(referenceNode: ts.TypeReferenceNode): ArrayType | null {
+    if (referenceNode.typeName.getText() !== 'Array') {
+      return null;
+    }
+    if (referenceNode.typeArguments === undefined || referenceNode.typeArguments.length !== 1) {
+      return null;
+    }
+
+    const elementType = this.valueTypeFromTypeNode(referenceNode.typeArguments[0]);
+
+    return {
+      kind: ValueTypeKind.arrayType,
+      elementType,
+    };
+  }
+
+  private parseRecordAndMapReferenceNode(referenceNode: ts.TypeReferenceNode): DictionaryType | null {
+    const typeName = referenceNode.typeName.getText();
+    if (typeName !== 'Record' && typeName !== 'Map') {
+      return null;
+    }
+    if (referenceNode.typeArguments === undefined || referenceNode.typeArguments.length !== 2) {
+      return null;
+    }
+
+    return this.dictionaryTypeFromTypeNodes(referenceNode.typeArguments[0], referenceNode.typeArguments[1]);
   }
 
   private getReferencedTypeNode(referenceNode: ts.TypeReferenceNode): ts.Declaration {
@@ -435,7 +474,7 @@ export class ValueParser {
     };
   }
 
-  private parseIndexTypeNode(type: { members: ts.NodeArray<ts.TypeElement> }): DictionaryType | null {
+  private parseIndexTypeNode(type: ts.Node & { members: ts.NodeArray<ts.TypeElement> }): DictionaryType | null {
     if (type.members && type.members.length !== 1) {
       // Only support interface with one index signature, like { [key: string]: string }
       return null;
@@ -446,11 +485,38 @@ export class ValueParser {
       return null;
     }
 
-    const valueType = this.valueTypeFromNode(typeElement);
+    if (typeElement.parameters.length !== 1) {
+      throw Error(`Index type ${type.getText()} has none or multiple parameters. It is not a valid dictionary type`);
+    }
+    const keyNode = typeElement.parameters[0];
+    if (keyNode.type === undefined) {
+      throw Error(`Index type ${type.getText()} doesn't have type. It is not a valid dictionary type`);
+    }
+
+    return this.dictionaryTypeFromTypeNodes(keyNode.type, typeElement.type);
+  }
+
+  private dictionaryTypeFromTypeNodes(keyNode: ts.TypeNode, valueNode: ts.TypeNode): DictionaryType {
+    const keyType = this.valueTypeFromTypeNode(keyNode);
+
+    if (!isBasicType(keyType)) {
+      throw Error(`Key type kind ${keyType.kind} is not supported as key for dictionary`);
+    }
+    
+    let dictKey: DictionaryKeyType;
+    if (keyType.value === BasicTypeValue.string) {
+      dictKey = DictionaryKeyType.string;
+    } else if (keyType.value === BasicTypeValue.number) {
+      dictKey = DictionaryKeyType.number;
+    } else {
+      throw Error(`Key type ${keyType.value} is not supported as key for dictionary`);
+    }
+
+    const valueType = this.valueTypeFromTypeNode(valueNode);
 
     return {
       kind: ValueTypeKind.dictionaryType,
-      keyType: DictionaryKeyType.string,
+      keyType: dictKey,
       valueType,
     };
   }
@@ -513,7 +579,13 @@ export class ValueParser {
         return null;
       }
 
-      const referencedNode = this.getReferencedTypeNode(typeNode);
+      let referencedNode: ts.Declaration;
+      try {
+        referencedNode = this.getReferencedTypeNode(typeNode);
+      }
+      catch {
+        return null;
+      }
 
       if (ts.isEnumMember(referencedNode)) {
         const enumType = this.enumTypeKindFromType(referencedNode.parent);
