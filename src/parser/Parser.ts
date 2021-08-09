@@ -80,7 +80,7 @@ export class Parser {
             methods.push(method);
           }
         } else {
-          throw new ParserError(node, 'it is not valid method signature', 'Please define only methods');
+          throw new ParserError(node, 'it is not valid property signature or method signature', 'Please define only properties or methods');
         }
       } catch (error) {
         if (error instanceof ParserError) {

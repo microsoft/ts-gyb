@@ -20,7 +20,7 @@ describe('Parser', () => {
       `;
     withTempParser(sourceCode, parser => {
       const modules = parser.parse();
-      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', methods: [], documentation: '', customTags: {}}]);
+      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', members:[], methods: [], documentation: '', customTags: {}}]);
     });
   });
 
@@ -42,6 +42,7 @@ describe('Parser', () => {
       const modules = parser.parse();
       expect(modules).to.deep.equal([{
         name: 'MockedInterface', 
+        members: [],
         methods: [{
           name: 'mockedMethod',
           parameters: [],
@@ -61,12 +62,12 @@ describe('Parser', () => {
       * @shouldExport true
       */
       interface MockedInterface {
-        invalidProperty: string;
+        [foobar: string]: int;
       }
       `;
 
     withTempParser(sourceCode, parser => {
-      expect(() => parser.parse()).to.throw(ParserError).with.property('reason', 'it is not valid method signature');
+      expect(() => parser.parse()).to.throw(ParserError).with.property('reason', 'it is not valid property signature or method signature');
     });
   });
 
