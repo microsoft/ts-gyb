@@ -1,5 +1,6 @@
 export interface Module {
   name: string;
+  members: Field[];
   methods: Method[];
   documentation: string;
   customTags: Record<string, unknown>;
