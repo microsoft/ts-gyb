@@ -69,7 +69,7 @@ export class Parser {
 
     node.members.forEach(methodNode => {
       try {
-        if (ts.isPropertySignature(methodNode)) {
+        if (ts.isPropertySignature(methodNode) && !ts.isFunctionLike(methodNode.type)) {
           const field = this.valueParser.fieldFromTypeElement(methodNode);
           if (field !== null) {
             members.push(field);

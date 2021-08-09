@@ -2,13 +2,16 @@
 
 ## Method definition
 
-ts-gyb only recognizes interface members defined as methods.
+ts-gyb only recognizes interface properties and methods.
 
 ```typescript
 /**
  * @shouldExport true
  */
 interface ModuleName {
+  // allowed: property
+  thisIsAMember: string;
+
   // allowed: method
   thisIsAMethod(): void;
 

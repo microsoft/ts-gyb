@@ -2,6 +2,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempParser } from './utils';
 import { ParserError } from '../src/parser/ParserError';
+import { BasicTypeValue, ValueTypeKind } from '../src/types';
 
 describe('Parser', () => {
   it('shouldExport symbol', () => {
@@ -32,6 +33,10 @@ describe('Parser', () => {
       */
       interface MockedInterface {
         /**
+        * This is an example documentation for the member
+        */
+        mockedMember: string;
+        /**
         * This is an example documentation for the method
         */
         mockedMethod(): void;
@@ -42,7 +47,11 @@ describe('Parser', () => {
       const modules = parser.parse();
       expect(modules).to.deep.equal([{
         name: 'MockedInterface', 
-        members: [],
+        members: [{
+          name: 'mockedMember',
+          type: { kind: ValueTypeKind.basicType, value: BasicTypeValue.string },
+          documentation: 'This is an example documentation for the member',
+        }],
         methods: [{
           name: 'mockedMethod',
           parameters: [],
@@ -62,7 +71,7 @@ describe('Parser', () => {
       * @shouldExport true
       */
       interface MockedInterface {
-        [foobar: string]: int;
+        invalidProperty: () => void;
       }
       `;
 
