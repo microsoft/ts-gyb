@@ -29,6 +29,13 @@ export function serializeModule(module: Module, associatedTypes: NamedType[]): s
   return `${serializeDocumentation(module.documentation)}${documentationColor(customTags)}${keywordColor('Module')} ${
     module.name
   } {
+${module.members
+      .map((member) => `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member)}`)
+      .join('\n')
+      .split('\n')
+      .map((line) => `  ${line}`)
+      .join('\n')}
+
 ${module.methods
   .map((method) =>
     serializeMethod(method)
@@ -119,7 +126,7 @@ function serializeValueType(valueType: ValueType): string {
     return valueType.name;
   }
 
-  throw Error('Unhandled value type');
+  throw Error(`Unhandled value type ${JSON.stringify(valueType)}`);
 }
 
 function serializeStaticValue(value: Value, type: ValueType): string {

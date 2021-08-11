@@ -75,9 +75,12 @@ export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
 }
 
 function fetchRootTypes(module: Module): ValueType[] {
-  return module.methods.flatMap((method) =>
+  const typesInMembers = module.members.map((field) => field.type);
+  const typesInMethods = module.methods.flatMap((method) =>
     method.parameters.map((parameter) => parameter.type).concat(method.returnType ? [method.returnType] : [])
   );
+
+  return typesInMembers.concat(typesInMethods);
 }
 
 function recursiveVisitMembersType(
