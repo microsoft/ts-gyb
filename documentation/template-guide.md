@@ -30,6 +30,7 @@ Both `associatedTypes` in Module template and the variable of Named type templat
 #### `Module`
 
 - `moduleName`: the name of the module.
+- `members`: an array of [`Field`](#field). It includes all properties of the module.
 - `methods`: an array of [`Method`](#method).
 - `associatedTypes`: an array of [`NamedType`](#namedtype). This includes all types used only in this module.
 - `customTags`: an object of all custom defined values in module interface. Refer to [Custom tags](interface-guide.md#custom-tags) for how to define these tags. For example, you can access `@foobar { "key": "value" }` via `{{customTags.foobar.key}}`.
@@ -58,7 +59,7 @@ Both `associatedTypes` in Module template and the variable of Named type templat
 For interface type:
 
 - `typeName`: the name of the type.
-- `members`: an array of [`InterfaceMember`](#interfacemember). It includes all members of the interface type.
+- `members`: an array of [`Field`](#field). It includes all members of the interface type.
 - `documentationLines`: an array of documentation text divided to string lines. It is divided for easier use with mustache.
 
 For enum type:
@@ -67,10 +68,10 @@ For enum type:
 - `valueType`: a string to represent the type of the raw value of the enum.
 - `isNumberType`: a boolean to indicate whether this is a numeric enum.
 - `isStringType`: a boolean to indicate whether this is a string enum.
-- `members`: an array of [`EnumMember`](#interfacemember). It includes all members of the enum type.
+- `members`: an array of [`EnumMember`](#enummember). It includes all members of the enum type.
 - `documentationLines`: an array of documentation text divided to string lines. It is divided for easier use with mustache.
 
-#### `InterfaceMember`
+#### `Field`
 
 - `name`: the name of the interface member.
 - `type`: a string to represent the type of the member.

@@ -74,6 +74,34 @@ export class ValueParser {
     );
   }
 
+  fieldFromTypeElement(node: ts.TypeElement): Field | null {
+    if (!ts.isPropertySignature(node)) {
+      return null;
+    }
+
+    if (!node.type) {
+      throw Error(`Type ${node.name.getText()} is invalid`);
+    }
+
+    const name = node.name.getText();
+
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+
+    const staticValue = this.parseLiteralNode(node.type);
+    if (staticValue !== null) {
+      return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
+    }
+
+    const valueType = this.valueTypeFromNode(node);
+
+    return {
+      name,
+      type: valueType,
+      documentation,
+    };
+  }
+
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
     if (!ts.isTypeLiteralNode(typeNode)) {
       return null;
@@ -518,34 +546,6 @@ export class ValueParser {
       kind: ValueTypeKind.dictionaryType,
       keyType: dictKey,
       valueType,
-    };
-  }
-
-  private fieldFromTypeElement(node: ts.TypeElement): Field | null {
-    if (!ts.isPropertySignature(node)) {
-      return null;
-    }
-
-    if (!node.type) {
-      throw Error(`Type ${node.name.getText()} is invalid`);
-    }
-
-    const name = node.name.getText();
-
-    const symbol = this.checker.getSymbolAtLocation(node.name);
-    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
-
-    const staticValue = this.parseLiteralNode(node.type);
-    if (staticValue !== null) {
-      return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
-    }
-
-    const valueType = this.valueTypeFromNode(node);
-
-    return {
-      name,
-      type: valueType,
-      documentation,
     };
   }
 

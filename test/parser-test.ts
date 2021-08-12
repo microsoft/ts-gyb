@@ -2,6 +2,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempParser } from './utils';
 import { ParserError } from '../src/parser/ParserError';
+import { BasicTypeValue, ValueTypeKind } from '../src/types';
 
 describe('Parser', () => {
   it('shouldExport symbol', () => {
@@ -20,7 +21,7 @@ describe('Parser', () => {
       `;
     withTempParser(sourceCode, parser => {
       const modules = parser.parse();
-      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', methods: [], documentation: '', customTags: {}}]);
+      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', members:[], methods: [], documentation: '', customTags: {}}]);
     });
   });
 
@@ -32,6 +33,10 @@ describe('Parser', () => {
       */
       interface MockedInterface {
         /**
+        * This is an example documentation for the member
+        */
+        mockedMember: string;
+        /**
         * This is an example documentation for the method
         */
         mockedMethod(): void;
@@ -42,6 +47,11 @@ describe('Parser', () => {
       const modules = parser.parse();
       expect(modules).to.deep.equal([{
         name: 'MockedInterface', 
+        members: [{
+          name: 'mockedMember',
+          type: { kind: ValueTypeKind.basicType, value: BasicTypeValue.string },
+          documentation: 'This is an example documentation for the member',
+        }],
         methods: [{
           name: 'mockedMethod',
           parameters: [],
@@ -61,12 +71,12 @@ describe('Parser', () => {
       * @shouldExport true
       */
       interface MockedInterface {
-        invalidProperty: string;
+        invalidProperty: () => void;
       }
       `;
 
     withTempParser(sourceCode, parser => {
-      expect(() => parser.parse()).to.throw(ParserError).with.property('reason', 'it is not valid method signature');
+      expect(() => parser.parse()).to.throw(ParserError).with.property('reason', 'it is not valid property signature or method signature');
     });
   });
 

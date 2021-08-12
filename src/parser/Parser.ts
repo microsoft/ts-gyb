@@ -64,40 +64,49 @@ export class Parser {
 
     const interfaceName = jsDocTagsResult.overrideName ?? node.name.text;
 
-    const methods: Method[] = node.members
-      .map((methodNode) => {
-        try {
-          return this.methodFromNode(methodNode);
-        } catch (error) {
-          if (error instanceof ParserError) {
-            if (this.skipInvalidMethods) {
-              this.logger.warnSkippedNode(error.node, error.reason, error.guide);
-              return null;
-            }
+    const members: Field[] = [];
+    const methods: Method[] = [];
 
-            throw error;
+    node.members.forEach(methodNode => {
+      try {
+        if (ts.isPropertySignature(methodNode) && !ts.isFunctionLike(methodNode.type)) {
+          const field = this.valueParser.fieldFromTypeElement(methodNode);
+          if (field !== null) {
+            members.push(field);
+          }
+        } else if (ts.isMethodSignature(methodNode)) {
+          const method = this.methodFromNode(methodNode);
+          if (method !== null) {
+            methods.push(method);
+          }
+        } else {
+          throw new ParserError(node, 'it is not valid property signature or method signature', 'Please define only properties or methods');
+        }
+      } catch (error) {
+        if (error instanceof ParserError) {
+          if (this.skipInvalidMethods) {
+            this.logger.warnSkippedNode(error.node, error.reason, error.guide);
           }
 
           throw error;
         }
-      })
-      .filter((method): method is Method => method !== null);
+
+        throw error;
+      }
+    });
 
     const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
     return {
       name: interfaceName,
+      members,
       methods,
       documentation,
       customTags: jsDocTagsResult.customTags,
     };
   }
 
-  private methodFromNode(node: ts.Node): Method | null {
-    if (!ts.isMethodSignature(node)) {
-      throw new ParserError(node, 'it is not valid method signature', 'Please define only methods');
-    }
-
+  private methodFromNode(node: ts.MethodSignature): Method | null {
     const methodName = node.name.getText();
 
     let parameters: Field[];
