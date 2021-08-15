@@ -2,7 +2,7 @@ name: Release Pipeline
 
 on:
   release:
-    types: [published, prereleased]
+    types: [published]
 
 jobs:
   npm-release:
@@ -20,7 +20,6 @@ jobs:
         env:
           TAG_PREFIX: refs/tags/v
       - run: npm install
-      - run: npm version ${{ github.event.release.tag_name }}
       - run: npm run build
       - run: npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
       - run: npm publish --tag ${{ github.event.release.target_commitish }}
