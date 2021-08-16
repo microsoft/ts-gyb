@@ -25,6 +25,40 @@ describe('Parser', () => {
     });
   });
 
+  it('Two method syntax', () => {
+    const sourceCode = `
+      /**
+      * @shouldExport true
+      */
+      interface MockedInterface {
+        mockedMethod(): void;
+        mockedFunctionProperty: () => void;
+      }
+      `;
+    withTempParser(sourceCode, parser => {
+      const modules = parser.parse();
+      expect(modules).to.deep.equal([{
+        name: 'MockedInterface', 
+        members: [],
+        methods: [{
+          name: 'mockedMethod',
+          parameters: [],
+          returnType: null,
+          isAsync: false,
+          documentation: '',
+        }, {
+          name: 'mockedFunctionProperty',
+          parameters: [],
+          returnType: null,
+          isAsync: false,
+          documentation: '',
+        }], 
+        documentation: '',
+        customTags: {},
+      }]);
+    });
+  });
+
   it('Module and method documentation', () => {
     const sourceCode = `
       /**
@@ -71,7 +105,7 @@ describe('Parser', () => {
       * @shouldExport true
       */
       interface MockedInterface {
-        invalidProperty: () => void;
+        [foobar: string]: int;
       }
       `;
 
