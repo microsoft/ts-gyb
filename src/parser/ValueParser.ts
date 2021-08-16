@@ -28,7 +28,7 @@ import { ValueParserError } from './ValueParserError';
 export class ValueParser {
   constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
 
-  parseFunctionReturnType(methodSignature: ts.MethodSignature): [ValueType | null, boolean] {
+  parseFunctionReturnType(methodSignature: ts.SignatureDeclarationBase): [ValueType | null, boolean] {
     if (methodSignature.type === undefined) {
       throw new ValueParserError(
         'no return type provided',

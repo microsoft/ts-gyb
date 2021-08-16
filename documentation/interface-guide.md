@@ -15,7 +15,7 @@ interface ModuleName {
   // allowed: method
   thisIsAMethod(): void;
 
-  // not allowed: function property
+  // allowed: function property
   thisIsAProperty: () => void;
 }
 ```

@@ -69,10 +69,18 @@ export class Parser {
 
     node.members.forEach(methodNode => {
       try {
-        if (ts.isPropertySignature(methodNode) && !ts.isFunctionLike(methodNode.type)) {
-          const field = this.valueParser.fieldFromTypeElement(methodNode);
-          if (field !== null) {
-            members.push(field);
+        if (ts.isPropertySignature(methodNode)) {
+          if (methodNode.type !== undefined && ts.isFunctionTypeNode(methodNode.type)) {
+            const method = this.methodFromNode({ ...methodNode, type: methodNode.type });
+            if (method !== null) {
+              methods.push(method);
+            }
+          }
+          else {
+            const field = this.valueParser.fieldFromTypeElement(methodNode);
+            if (field !== null) {
+              members.push(field);
+            }
           }
         } else if (ts.isMethodSignature(methodNode)) {
           const method = this.methodFromNode(methodNode);
@@ -106,12 +114,20 @@ export class Parser {
     };
   }
 
-  private methodFromNode(node: ts.MethodSignature): Method | null {
+  private methodFromNode(node: ts.MethodSignature | ts.PropertySignature & { type: ts.SignatureDeclarationBase }): Method | null {
     const methodName = node.name.getText();
+
+    let signatureNode: ts.SignatureDeclarationBase;
+    if (ts.isMethodSignature(node)) {
+      signatureNode = node;
+    }
+    else {
+      signatureNode = node.type;
+    }
 
     let parameters: Field[];
     try {
-      parameters = this.fieldsFromParameters(node);
+      parameters = this.fieldsFromParameters(signatureNode);
     } catch (error) {
       if (error instanceof ValueParserError) {
         throw new ParserError(node, `parameters error: ${error.message}`, error.guide);
@@ -123,7 +139,7 @@ export class Parser {
     let returnType: ValueType | null;
     let isAsync: boolean;
     try {
-      [returnType, isAsync] = this.valueParser.parseFunctionReturnType(node);
+      [returnType, isAsync] = this.valueParser.parseFunctionReturnType(signatureNode);
     } catch (error) {
       if (error instanceof ValueParserError) {
         throw new ParserError(node, `return type error: ${error.message}`, error.guide);
@@ -144,7 +160,7 @@ export class Parser {
     };
   }
 
-  private fieldsFromParameters(methodSignature: ts.MethodSignature): Field[] {
+  private fieldsFromParameters(methodSignature: ts.SignatureDeclarationBase): Field[] {
     const parameterNodes = methodSignature.parameters;
 
     if (parameterNodes.length === 0) {
