@@ -19,7 +19,6 @@ import {
   TupleType,
   isTupleType,
   EnumField,
-  isDictionaryType,
   isBasicType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
