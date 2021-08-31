@@ -80,8 +80,13 @@ describe('ValueParser', () => {
       [key: string]: string;
     }
 
-    interface ExtendedDictInterface extends DictionaryInterface {
-      booleanMember: boolean;
+    interface InterfaceWithNeverMember {
+      stringMember: string;
+      neverMember: never;
+    }
+
+    interface ExtendedInterfaceWithNeverMember extends InterfaceWithMembers {
+      numberMember: never;
     }
 
     interface RecursiveInterface {
@@ -117,11 +122,27 @@ describe('ValueParser', () => {
     };
     testValueType('extended interface', 'ExtendedInterface', extendedInterfaceType, new Set(), interfacesCode);
 
-    it('Invalid extending of a dictionary type', () => {
-      withTempValueParser('ExtendedDictInterface', parseFunc => {
-        expect(parseFunc).to.throw('cannot extend dictionary type DictionaryInterface');
-      }, new Set(), interfacesCode);
-    });
+    const interfaceWithNeverMemberType: InterfaceType = {
+      kind: ValueTypeKind.interfaceType,
+      name: 'InterfaceWithNeverMember',
+      members: [
+        { name: 'stringMember', type: stringType, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    };
+    testValueType('interface with never member', 'InterfaceWithNeverMember', interfaceWithNeverMemberType, new Set(), interfacesCode);
+
+    const extendedInterfaceWithNeverMemberType: InterfaceType = {
+      kind: ValueTypeKind.interfaceType,
+      name: 'ExtendedInterfaceWithNeverMember',
+      members: [
+        { name: 'stringMember', type: stringType, documentation: '' },
+      ],
+      documentation: '',
+      customTags: {},
+    };
+    testValueType('extended interface with never member', 'ExtendedInterfaceWithNeverMember', extendedInterfaceWithNeverMemberType, new Set(), interfacesCode);
 
     // TODO: Recursive interface is not handled yet
     // const recursiveInterfaceType: InterfaceType = {

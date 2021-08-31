@@ -19,7 +19,6 @@ import {
   TupleType,
   isTupleType,
   EnumField,
-  isDictionaryType,
   isBasicType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
@@ -74,7 +73,7 @@ export class ValueParser {
     );
   }
 
-  fieldFromTypeElement(node: ts.TypeElement): Field | null {
+  fieldFromTypeElement(node: ts.Node): Field | null {
     if (!ts.isPropertySignature(node)) {
       return null;
     }
@@ -91,6 +90,10 @@ export class ValueParser {
     const staticValue = this.parseLiteralNode(node.type);
     if (staticValue !== null) {
       return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
+    }
+
+    if (node.type.kind === ts.SyntaxKind.NeverKeyword) {
+      return null;
     }
 
     const valueType = this.valueTypeFromNode(node);
@@ -112,8 +115,10 @@ export class ValueParser {
       return dictionaryType;
     }
 
-    const fields = typeNode.members
-      .map((member) => this.fieldFromTypeElement(member))
+    const fields = this.checker.getPropertiesOfType(this.checker.getTypeAtLocation(typeNode))
+      .map((symbol) => symbol.valueDeclaration)
+      .filter((declaration): declaration is ts.Declaration => declaration !== undefined)
+      .map((declaration) => this.fieldFromTypeElement(declaration))
       .filter((field): field is Field => field !== null);
 
     return {
@@ -409,14 +414,11 @@ export class ValueParser {
 
     const name = node.name.getText();
 
-    const members = node.members
-      .map((item) => this.fieldFromTypeElement(item))
+    const members = this.checker.getPropertiesOfType(this.checker.getTypeAtLocation(node))
+      .map((symbol) => symbol.valueDeclaration)
+      .filter((declaration): declaration is ts.Declaration => declaration !== undefined)
+      .map((declaration) => this.fieldFromTypeElement(declaration))
       .filter((field): field is Field => field !== null);
-
-    const membersInExtendingInterface = this.getExtendingMembersFromInterfaceDeclaration(node);
-    if (membersInExtendingInterface.length) {
-      members.push(...membersInExtendingInterface);
-    }
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
     if (symbol === undefined) {
@@ -600,37 +602,5 @@ export class ValueParser {
     }
 
     return null;
-  }
-
-  private getExtendingMembersFromInterfaceDeclaration(node: ts.InterfaceDeclaration): Field[] {
-    if (!node.heritageClauses?.length) {
-      return [];
-    }
-    const extendHeritageClause = node.heritageClauses.find((item) => item.token === ts.SyntaxKind.ExtendsKeyword);
-    if (!extendHeritageClause) {
-      return [];
-    }
-
-    return extendHeritageClause.types.flatMap((extendingInterface): Field[] => {
-      const type = this.checker.getTypeAtLocation(extendingInterface);
-      const declarations = type.symbol.getDeclarations();
-      if (declarations === undefined || declarations.length !== 1) {
-        throw Error(`Invalid decration of extended interface type ${type.symbol.name}`);
-      }
-      const declaration = declarations[0];
-      const interfaceType = this.parseInterfaceType(declaration);
-
-      if (interfaceType === null) {
-        return [];
-      }
-      if (isDictionaryType(interfaceType)) {
-        throw new ValueParserError(
-          `cannot extend dictionary type ${type.symbol.name}`,
-          'Only extending an interface is supported'
-        );
-      }
-
-      return interfaceType.members;
-    });
   }
 }
