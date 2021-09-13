@@ -1,4 +1,4 @@
-[@olm/ts-codegen](../README.md) / [Exports](../modules.md) / LanguageRenderingConfiguration
+[ts-gyb](../README.md) / [Exports](../modules.md) / LanguageRenderingConfiguration
 
 # Interface: LanguageRenderingConfiguration
 

@@ -1,4 +1,4 @@
-[@olm/ts-codegen](../README.md) / [Exports](../modules.md) / RenderConfiguration
+[ts-gyb](../README.md) / [Exports](../modules.md) / RenderConfiguration
 
 # Interface: RenderConfiguration
 
@@ -10,7 +10,7 @@ Renderer configuration
 
 - [namedTypesOutputPath](RenderConfiguration.md#namedtypesoutputpath)
 - [namedTypesTemplatePath](RenderConfiguration.md#namedtypestemplatepath)
-- [outputPath](RenderConfiguration.md#outputPath)
+- [outputPath](RenderConfiguration.md#outputpath)
 - [templates](RenderConfiguration.md#templates)
 - [typeNameMap](RenderConfiguration.md#typenamemap)
 
@@ -40,7 +40,8 @@ ___
 
 • **outputPath**: `Record`<`string`, `string`\>
 
-Scoped output directories. The key is the scope name and the value is the output file path.
+Scoped output directories or paths. The key is the scope name and the value is the output directory or file path.
+
 If it is a relative path, it will be resolved based on the configuration file path.
 
 For example, `{ "api": "../ios/AppTarget/Generated" }`

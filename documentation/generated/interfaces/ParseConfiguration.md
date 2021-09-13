@@ -1,4 +1,4 @@
-[@olm/ts-codegen](../README.md) / [Exports](../modules.md) / ParseConfiguration
+[ts-gyb](../README.md) / [Exports](../modules.md) / ParseConfiguration
 
 # Interface: ParseConfiguration
 
