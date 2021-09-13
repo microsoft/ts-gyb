@@ -20,7 +20,7 @@ ts-gyb defines some variables that can be directly used in templates.
 
 ### Variables in templates
 
-- **Module template**: this template has access to all properties of [`Module`](#module). For example, you can use `{{moduleName}}` to render the name of the module.
+- **Module template**: this template has access to all properties of [`Module`](#module). For example, you can use `{{moduleName}}` to render the name of the module. If the [`outputPath`](generated/interfaces/RenderConfiguration.md#outputPath) is a file, this template would have access to an array of `Module`.
 - **Named type template**: this template has only one array variable of type [`NamedType`](#namedtype) which includes all named types. For example, use `{{#.}}{{typeName}}{{/.}}` to enumerate the array and get all type names.
 
 Both `associatedTypes` in Module template and the variable of Named type template is an array of [`NamedType`](#namedtype). It is recommended to create a template to render a single `NamedType`, then import the template in other templates.

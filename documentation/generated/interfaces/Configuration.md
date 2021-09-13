@@ -1,4 +1,4 @@
-[@olm/ts-codegen](../README.md) / [Exports](../modules.md) / Configuration
+[ts-gyb](../README.md) / [Exports](../modules.md) / Configuration
 
 # Interface: Configuration
 

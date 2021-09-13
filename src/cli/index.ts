@@ -47,7 +47,7 @@ function run(): void {
       generator.renderModules({
         tag,
         language,
-        outputDirectory: renderingConfig.outputDirectory[tag],
+        outputPath: renderingConfig.outputPath[tag],
         moduleTemplatePath,
         typeNameMap: renderingConfig.typeNameMap ?? {},
       });

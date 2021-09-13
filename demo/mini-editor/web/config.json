@@ -16,7 +16,7 @@
       "templates": {
         "api": "code-templates/swift.mustache"
       },
-      "outputDirectory": {
+      "outputPath": {
         "api": "../apple/MiniEditor/Generated"
       },
       "namedTypesTemplatePath": "../../../example-templates/swift-named-types.mustache",
@@ -29,7 +29,7 @@
       "templates": {
         "api": "code-templates/kotlin.mustache"
       },
-      "outputDirectory": {
+      "outputPath": {
         "api": "../android/app/src/main/java/com/microsoft/tscodegen/demo/minieditor/generated"
       },
       "namedTypesTemplatePath": "../../../example-templates/kotlin-named-type.mustache",
