@@ -46,7 +46,7 @@ export interface RenderConfiguration {
    * 
    * For example, `{ "api": "../ios/AppTarget/Generated" }`
    */
-  outputDirectory: Record<string, string>;
+  outputPath: Record<string, string>;
   /**
    * Template path for named types. Must be a mustache template.
    * If it is a relative path, it will be resolved based on the configuration file path.
@@ -101,7 +101,7 @@ function normalizeRenderConfiguration(basePath: string, config?: RenderConfigura
     return config;
   }
   let { namedTypesTemplatePath, namedTypesOutputPath } = config;
-  const { templates, outputDirectory, typeNameMap } = config;
+  const { templates, outputPath, typeNameMap } = config;
 
   namedTypesOutputPath = normalizePath(namedTypesOutputPath, basePath);
   namedTypesTemplatePath = normalizePath(namedTypesTemplatePath, basePath);
@@ -110,13 +110,13 @@ function normalizeRenderConfiguration(basePath: string, config?: RenderConfigura
     templates[key] = normalizePath(templates[key], basePath);
   });
 
-  Object.keys(outputDirectory).forEach(key => {
-    outputDirectory[key] = normalizePath(outputDirectory[key], basePath);
+  Object.keys(outputPath).forEach(key => {
+    outputPath[key] = normalizePath(outputPath[key], basePath);
   });
 
   return {
     templates,
-    outputDirectory,
+    outputPath,
     namedTypesTemplatePath,
     namedTypesOutputPath,
     typeNameMap,

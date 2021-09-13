@@ -75,13 +75,13 @@ export class CodeGenerator {
   renderModules({
     tag,
     language,
-    outputDirectory,
+    outputPath,
     moduleTemplatePath,
     typeNameMap,
   }: {
     tag: string;
     language: RenderingLanguage;
-    outputDirectory: string;
+    outputPath: string;
     moduleTemplatePath: string;
     typeNameMap: Record<string, string>;
   }): void {
@@ -96,12 +96,22 @@ export class CodeGenerator {
     const { associatedTypes } = this.namedTypes;
     const valueTransformer = this.getValueTransformer(language, typeNameMap);
 
-    modules.forEach((module) => {
-      const moduleView = this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer);
-      const renderedCode = renderCode(moduleTemplatePath, moduleView);
+    const moduleViews = modules.map((module) => this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer));
 
-      this.writeFile(renderedCode, outputDirectory, `${moduleView.moduleName}${this.getFileExtension(language)}`);
-    });
+    if (path.extname(outputPath) === '') {
+      moduleViews.forEach((moduleView) => {
+        const renderedCode = renderCode(moduleTemplatePath, moduleView);
+
+        this.writeFile(renderedCode, outputPath, `${moduleView.moduleName}${this.getFileExtension(language)}`);
+      });
+    } else {
+      moduleViews.forEach((moduleView, index) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
+        (moduleView as any).last = index === moduleViews.length - 1;
+      });
+      const renderedCode = renderCode(moduleTemplatePath, moduleViews);
+      fs.writeFileSync(outputPath, renderedCode);
+    }
   }
 
   renderNamedTypes({
