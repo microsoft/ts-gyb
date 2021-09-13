@@ -99,6 +99,7 @@ export class CodeGenerator {
     const moduleViews = modules.map((module) => this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer));
 
     if (path.extname(outputPath) === '') {
+      // The path is a directory
       moduleViews.forEach((moduleView) => {
         const renderedCode = renderCode(moduleTemplatePath, moduleView);
 
@@ -106,7 +107,7 @@ export class CodeGenerator {
       });
     } else {
       moduleViews.forEach((moduleView, index) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
         (moduleView as any).last = index === moduleViews.length - 1;
       });
       const renderedCode = renderCode(moduleTemplatePath, moduleViews);
