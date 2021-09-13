@@ -41,7 +41,8 @@ export interface RenderConfiguration {
    */
   templates: Record<string, string>;
   /**
-   * Scoped output directories. The key is the scope name and the value is the output file path.
+   * Scoped output directories or paths. The key is the scope name and the value is the output directory or file path.
+   * 
    * If it is a relative path, it will be resolved based on the configuration file path.
    * 
    * For example, `{ "api": "../ios/AppTarget/Generated" }`

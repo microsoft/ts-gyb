@@ -77,7 +77,7 @@ Create a json configuration file in your project:
       "templates": {
         "default": "path/to/module-interface.mustache"
       },
-      "outputDirectory": {
+      "outputPath": {
         "default": "path/to/output/directory"
       },
       "namedTypesTemplatePath": "path/to/named-types.mustache",

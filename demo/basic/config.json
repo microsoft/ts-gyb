@@ -14,7 +14,7 @@
       "templates": {
         "api": "../../example-templates/swift-bridge.mustache"
       },
-      "outputDirectory": {
+      "outputPath": {
         "api": "generated/swift"
       },
       "namedTypesTemplatePath": "../../example-templates/swift-named-types.mustache",
@@ -27,7 +27,7 @@
       "templates": {
         "api": "../../example-templates/kotlin-bridge.mustache"
       },
-      "outputDirectory": {
+      "outputPath": {
         "api": "generated/kotlin"
       },
       "namedTypesTemplatePath": "../../example-templates/kotlin-named-types.mustache",
