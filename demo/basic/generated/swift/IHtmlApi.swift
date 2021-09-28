@@ -110,8 +110,8 @@ public enum StringEnum: String, Codable {
 }
 
 public enum DefaultEnum: Int, Codable {
-  case c = 0
-  case d = 1
+  case defaultValueC = 0
+  case defaultValueD = 1
 }
 
 public struct BaseSize: Codable {

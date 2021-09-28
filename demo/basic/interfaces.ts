@@ -26,8 +26,8 @@ enum NumEnum {
 }
 
 enum DefaultEnum {
-  c,
-  d,
+  defaultValueC,
+  defaultValueD,
 }
 
 /**
