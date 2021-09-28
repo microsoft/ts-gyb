@@ -121,9 +121,7 @@ export class KotlinValueTransformer implements ValueTransformer {
 
   convertEnumKey(text: string): string {
     return text
-      .replace(/\.?([A-Z]+)/g, (_, p1) => {
-        return '_' + p1;
-      })
+      .replace(/\.?([A-Z]+)/g, (_, p1: string) => `_${p1}`)
       .replace(/^_/, '')
       .toUpperCase();
   }
