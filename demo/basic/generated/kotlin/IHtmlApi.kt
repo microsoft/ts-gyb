@@ -113,8 +113,8 @@ enum class StringEnum {
 }
 
 enum class DefaultEnum(val value: Int) {
-    C(0),
-    D(1);
+    DEFAULT_VALUE_C(0),
+    DEFAULT_VALUE_D(1);
 
     companion object {
         fun find(value: Int) = values().find { it.value == value }
