@@ -29,7 +29,7 @@ interface IHtmlApiBridge {
     fun getHTML(title: String, callback: Callback<String>)
     fun requestRenderingResult()
     fun getSize(callback: Callback<OverriddenFullSize>)
-    fun getAliasSize(callback: Callback<BaseSize>)
+    fun getAliasSize(callback: Callback<JSBaseSize>)
     fun testDictionaryWithAnyKey(dict: Map<String, String>)
 }
 
@@ -65,8 +65,8 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
         executeJsForResponse(OverriddenFullSize::class.java, "getSize", callback)
     }
 
-    override fun getAliasSize(callback: Callback<BaseSize>) {
-        executeJsForResponse(BaseSize::class.java, "getAliasSize", callback)
+    override fun getAliasSize(callback: Callback<JSBaseSize>) {
+        executeJsForResponse(JSBaseSize::class.java, "getAliasSize", callback)
     }
 
     override fun testDictionaryWithAnyKey(dict: Map<String, String>) {
@@ -131,7 +131,7 @@ class DefaultEnumTypeAdapter : JsonSerializer<DefaultEnum>, JsonDeserializer<Def
     }
 }
 
-data class BaseSize(
+data class JSBaseSize(
     @JvmField val width: Float,
     @JvmField val height: Float,
 )

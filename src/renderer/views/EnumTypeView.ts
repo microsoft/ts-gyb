@@ -6,7 +6,7 @@ export class EnumTypeView {
   constructor(private enumType: EnumType, private valueTransformer: ValueTransformer) {}
 
   get typeName(): string {
-    return this.enumType.name;
+    return this.valueTransformer.convertTypeNameFromCustomMap(this.enumType.name);
   }
 
   get valueType(): string {
@@ -41,5 +41,9 @@ export class EnumTypeView {
 
   get documentationLines(): string[] {
     return getDocumentationLines(this.enumType.documentation);
+  }
+
+  get customTags(): Record<string, unknown> {
+    return this.enumType.customTags;
   }
 }

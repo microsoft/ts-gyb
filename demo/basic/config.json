@@ -33,7 +33,8 @@
       "namedTypesTemplatePath": "../../example-templates/kotlin-named-types.mustache",
       "namedTypesOutputPath": "generated/kotlin/BridgeTypes.kt",
       "typeNameMap": {
-        "CodeGen_Int": "Int"
+        "CodeGen_Int": "Int",
+        "BaseSize": "JSBaseSize"
       }
     }
   }

@@ -14,8 +14,7 @@ import {
 import { ValueTransformer } from './ValueTransformer';
 
 export class KotlinValueTransformer implements ValueTransformer {
-  constructor(private readonly predefinedTypes: Record<string, string>) {}
-
+  constructor(private readonly typeNameMap: Record<string, string>) {}
   convertValueType(valueType: ValueType): string {
     if (isBasicType(valueType)) {
       switch (valueType.value) {
@@ -31,11 +30,11 @@ export class KotlinValueTransformer implements ValueTransformer {
     }
 
     if (isInterfaceType(valueType)) {
-      return valueType.name;
+      return this.convertTypeNameFromCustomMap(valueType.name);
     }
 
     if (isEnumType(valueType)) {
-      return valueType.name;
+      return this.convertTypeNameFromCustomMap(valueType.name);
     }
 
     if (isArraryType(valueType)) {
@@ -63,7 +62,7 @@ export class KotlinValueTransformer implements ValueTransformer {
     }
 
     if (isPredefinedType(valueType)) {
-      return this.predefinedTypes[valueType.name] ?? valueType.name;
+      return this.typeNameMap[valueType.name] ?? valueType.name;
     }
 
     throw Error('Type not handled');
@@ -124,5 +123,9 @@ export class KotlinValueTransformer implements ValueTransformer {
       .replace(/\.?([A-Z]+)/g, (_, p1: string) => `_${p1}`)
       .replace(/^_/, '')
       .toUpperCase();
+  }
+
+  convertTypeNameFromCustomMap(name: string): string {
+    return this.typeNameMap[name] ?? name;
   }
 }
