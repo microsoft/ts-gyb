@@ -15,6 +15,7 @@ import { ValueTransformer } from './ValueTransformer';
 
 export class KotlinValueTransformer implements ValueTransformer {
   constructor(private readonly typeNameMap: Record<string, string>) {}
+
   convertValueType(valueType: ValueType): string {
     if (isBasicType(valueType)) {
       switch (valueType.value) {
