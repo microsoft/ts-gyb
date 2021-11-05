@@ -14,7 +14,7 @@ import {
 import { ValueTransformer } from './ValueTransformer';
 
 export class SwiftValueTransformer implements ValueTransformer {
-  constructor(private readonly predefinedTypes: Record<string, string>) {}
+  constructor(private readonly typeNameMap: Record<string, string>) {}
 
   convertValueType(valueType: ValueType): string {
     if (isBasicType(valueType)) {
@@ -31,11 +31,11 @@ export class SwiftValueTransformer implements ValueTransformer {
     }
 
     if (isInterfaceType(valueType)) {
-      return valueType.name;
+      return this.convertTypeNameFromCustomMap(valueType.name);
     }
 
     if (isEnumType(valueType)) {
-      return valueType.name;
+      return this.convertTypeNameFromCustomMap(valueType.name);
     }
 
     if (isArraryType(valueType)) {
@@ -63,7 +63,7 @@ export class SwiftValueTransformer implements ValueTransformer {
     }
 
     if (isPredefinedType(valueType)) {
-      return this.predefinedTypes[valueType.name] ?? valueType.name;
+      return this.typeNameMap[valueType.name] ?? valueType.name;
     }
 
     throw Error('Type not handled');
@@ -140,4 +140,9 @@ export class SwiftValueTransformer implements ValueTransformer {
 
     return text.slice(0, index).toLowerCase() + text.slice(index);
   }
+
+  convertTypeNameFromCustomMap(name: string): string {
+    return this.typeNameMap[name] ?? name;
+  }
+
 }

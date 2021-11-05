@@ -4,10 +4,13 @@ import { ValueTransformer } from '../value-transformer';
 
 export class InterfaceTypeView {
   constructor(
-    readonly typeName: string,
     private readonly interfaceType: InterfaceType,
     private readonly valueTransformer: ValueTransformer
   ) {}
+
+  get typeName(): string {
+    return this.valueTransformer.convertValueType(this.interfaceType);
+  }
 
   get members(): { name: string; type: string; documentationLines: string[]; last: boolean }[] {
     const members = this.interfaceType.members.filter((member) => member.staticValue === undefined);
@@ -39,5 +42,9 @@ export class InterfaceTypeView {
 
   get documentationLines(): string[] {
     return getDocumentationLines(this.interfaceType.documentation);
+  }
+
+  get customTags(): Record<string, unknown> {
+    return this.interfaceType.customTags;
   }
 }

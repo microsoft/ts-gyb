@@ -5,4 +5,5 @@ export interface ValueTransformer {
   convertNonOptionalValueType(valueType: ValueType): string;
   convertValue(value: Value, type: ValueType): string;
   convertEnumKey(text: string): string;
+  convertTypeNameFromCustomMap(name: string): string;
 }

@@ -157,7 +157,7 @@ export class CodeGenerator {
   private getNamedTypeView(namedType: NamedType, valueTransformer: ValueTransformer): NamedTypeView {
     let namedTypeView: NamedTypeView;
     if (isInterfaceType(namedType)) {
-      namedTypeView = new InterfaceTypeView(namedType.name, namedType, valueTransformer);
+      namedTypeView = new InterfaceTypeView(namedType, valueTransformer);
       namedTypeView.custom = true;
     } else {
       namedTypeView = new EnumTypeView(namedType, valueTransformer);
