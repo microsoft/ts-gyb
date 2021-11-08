@@ -14,13 +14,25 @@ import {
   ValueTypeKind,
 } from '../types';
 
+export const enum ValueTypeSource {
+  Field = 'Field',
+  Parameter = 'Parameter',
+  Return = 'Return',
+  Multiple = 'Multiple',
+}
+
 export type NamedType = InterfaceType | EnumType;
-export type NamedTypesResult = { associatedTypes: Record<string, NamedType[]>; sharedTypes: NamedType[] };
+export interface NamedTypeInfo {
+  type: NamedType;
+  source: ValueTypeSource;
+}
+
+export type NamedTypesResult = { associatedTypes: Record<string, NamedTypeInfo[]>; sharedTypes: NamedTypeInfo[] };
 
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
   modules
     .flatMap((module) => fetchRootTypes(module))
-    .forEach((valueType) => {
+    .forEach(([valueType,]) => {
       recursiveVisitMembersType(valueType, (namedType) => {
         if (!isInterfaceType(namedType)) {
           return;
@@ -32,10 +44,10 @@ export function dropIPrefixInCustomTypes(modules: Module[]): void {
 }
 
 export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
-  const typeMap: Record<string, { namedType: NamedType; associatedModules: Set<string> }> = {};
+  const typeMap: Record<string, { namedType: NamedType; source: ValueTypeSource; associatedModules: Set<string> }> = {};
 
   modules.forEach((module) => {
-    fetchRootTypes(module).forEach((valueType) => {
+    fetchRootTypes(module).forEach(([valueType, source]) => {
       recursiveVisitMembersType(valueType, (membersType, path) => {
         let namedType = membersType;
         if (isTupleType(namedType)) {
@@ -47,37 +59,41 @@ export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
         }
 
         if (typeMap[namedType.name] === undefined) {
-          typeMap[namedType.name] = { namedType, associatedModules: new Set() };
+          typeMap[namedType.name] = { namedType, source, associatedModules: new Set() };
         }
 
-        typeMap[namedType.name].associatedModules.add(module.name);
+        const existingResult = typeMap[namedType.name];
+        existingResult.associatedModules.add(module.name);
+        if ( existingResult.source !== source) {
+          existingResult.source = ValueTypeSource.Multiple;
+        }
       });
     });
   });
 
-  const associatedTypes: Record<string, NamedType[]> = {};
-  const sharedTypes: NamedType[] = [];
+  const associatedTypes: Record<string, NamedTypeInfo[]> = {};
+  const sharedTypes: NamedTypeInfo[] = [];
 
-  Object.values(typeMap).forEach(({ namedType, associatedModules }) => {
+  Object.values(typeMap).forEach(({ namedType, source, associatedModules }) => {
     if (associatedModules.size === 1) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const moduleName: string = associatedModules.values().next().value;
       if (associatedTypes[moduleName] === undefined) {
         associatedTypes[moduleName] = [];
       }
-      associatedTypes[moduleName].push(namedType);
+      associatedTypes[moduleName].push({ type: namedType, source });
     } else {
-      sharedTypes.push(namedType);
+      sharedTypes.push({ type: namedType, source });
     }
   });
 
   return { associatedTypes, sharedTypes };
 }
 
-function fetchRootTypes(module: Module): ValueType[] {
-  const typesInMembers = module.members.map((field) => field.type);
-  const typesInMethods = module.methods.flatMap((method) =>
-    method.parameters.map((parameter) => parameter.type).concat(method.returnType ? [method.returnType] : [])
+function fetchRootTypes(module: Module): [ValueType, ValueTypeSource][] {
+  const typesInMembers: [ValueType, ValueTypeSource][] = module.members.map((field) => [field.type, ValueTypeSource.Field]);
+  const typesInMethods: [ValueType, ValueTypeSource][] = module.methods.flatMap((method) =>
+    method.parameters.map((parameter): [ValueType, ValueTypeSource] => [parameter.type, ValueTypeSource.Parameter]).concat(method.returnType ? [[method.returnType, ValueTypeSource.Return]] : [])
   );
 
   return typesInMembers.concat(typesInMethods);

@@ -1,9 +1,14 @@
+import { ValueTypeSource } from '../../generator/named-types';
 import { EnumSubType, EnumType } from '../../types';
 import { getDocumentationLines } from '../utils';
 import { ValueTransformer } from '../value-transformer';
 
 export class EnumTypeView {
-  constructor(private enumType: EnumType, private valueTransformer: ValueTransformer) {}
+  constructor(
+    private readonly enumType: EnumType,
+    private readonly source: ValueTypeSource,
+    private readonly valueTransformer: ValueTransformer
+  ) {}
 
   get typeName(): string {
     return this.valueTransformer.convertTypeNameFromCustomMap(this.enumType.name);
@@ -45,5 +50,13 @@ export class EnumTypeView {
 
   get customTags(): Record<string, unknown> {
     return this.enumType.customTags;
+  }
+
+  get isOnlyFromParameter(): boolean {
+    return (this.source & ValueTypeSource.Parameter) === ValueTypeSource.Parameter;
+  }
+
+  get isOnlyFromReturn(): boolean {
+    return (this.source & ValueTypeSource.Return) === ValueTypeSource.Return;
   }
 }
