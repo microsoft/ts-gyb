@@ -67,7 +67,7 @@ export class Parser {
     const members: Field[] = [];
     const methods: Method[] = [];
 
-    node.members.forEach(methodNode => {
+    node.members.forEach((methodNode) => {
       try {
         if (ts.isPropertySignature(methodNode)) {
           if (methodNode.type !== undefined && ts.isFunctionTypeNode(methodNode.type)) {
@@ -75,8 +75,7 @@ export class Parser {
             if (method !== null) {
               methods.push(method);
             }
-          }
-          else {
+          } else {
             const field = this.valueParser.fieldFromTypeElement(methodNode);
             if (field !== null) {
               members.push(field);
@@ -88,7 +87,11 @@ export class Parser {
             methods.push(method);
           }
         } else {
-          throw new ParserError(node, 'it is not valid property signature or method signature', 'Please define only properties or methods');
+          throw new ParserError(
+            node,
+            'it is not valid property signature or method signature',
+            'Please define only properties or methods'
+          );
         }
       } catch (error) {
         if (error instanceof ParserError) {
@@ -114,14 +117,15 @@ export class Parser {
     };
   }
 
-  private methodFromNode(node: ts.MethodSignature | ts.PropertySignature & { type: ts.SignatureDeclarationBase }): Method | null {
+  private methodFromNode(
+    node: ts.MethodSignature | (ts.PropertySignature & { type: ts.SignatureDeclarationBase })
+  ): Method | null {
     const methodName = node.name.getText();
 
     let signatureNode: ts.SignatureDeclarationBase;
     if (ts.isMethodSignature(node)) {
       signatureNode = node;
-    }
-    else {
+    } else {
       signatureNode = node.type;
     }
 

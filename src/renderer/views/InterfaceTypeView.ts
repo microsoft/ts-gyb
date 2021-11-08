@@ -1,3 +1,4 @@
+import { ValueTypeSource } from '../../generator/named-types';
 import { InterfaceType } from '../../types';
 import { getDocumentationLines } from '../utils';
 import { ValueTransformer } from '../value-transformer';
@@ -5,6 +6,7 @@ import { ValueTransformer } from '../value-transformer';
 export class InterfaceTypeView {
   constructor(
     private readonly interfaceType: InterfaceType,
+    private readonly source: ValueTypeSource,
     private readonly valueTransformer: ValueTransformer
   ) {}
 
@@ -46,5 +48,13 @@ export class InterfaceTypeView {
 
   get customTags(): Record<string, unknown> {
     return this.interfaceType.customTags;
+  }
+
+  get isFromParameter(): boolean {
+    return (this.source & ValueTypeSource.Parameter) === ValueTypeSource.Parameter;
+  }
+
+  get isFromReturn(): boolean {
+    return (this.source & ValueTypeSource.Return) === ValueTypeSource.Return;
   }
 }

@@ -115,7 +115,8 @@ export class ValueParser {
       return dictionaryType;
     }
 
-    const fields = this.checker.getPropertiesOfType(this.checker.getTypeAtLocation(typeNode))
+    const fields = this.checker
+      .getPropertiesOfType(this.checker.getTypeAtLocation(typeNode))
       .map((symbol) => symbol.valueDeclaration)
       .filter((declaration): declaration is ts.Declaration => declaration !== undefined)
       .map((declaration) => this.fieldFromTypeElement(declaration))
@@ -414,7 +415,8 @@ export class ValueParser {
 
     const name = node.name.getText();
 
-    const members = this.checker.getPropertiesOfType(this.checker.getTypeAtLocation(node))
+    const members = this.checker
+      .getPropertiesOfType(this.checker.getTypeAtLocation(node))
       .map((symbol) => symbol.valueDeclaration)
       .filter((declaration): declaration is ts.Declaration => declaration !== undefined)
       .map((declaration) => this.fieldFromTypeElement(declaration))
@@ -532,7 +534,7 @@ export class ValueParser {
     if (!isBasicType(keyType)) {
       throw Error(`Key type kind ${keyType.kind} is not supported as key for dictionary`);
     }
-    
+
     let dictKey: DictionaryKeyType;
     if (keyType.value === BasicTypeValue.string) {
       dictKey = DictionaryKeyType.string;
@@ -584,8 +586,7 @@ export class ValueParser {
       let referencedNode: ts.Declaration;
       try {
         referencedNode = this.getReferencedTypeNode(typeNode);
-      }
-      catch {
+      } catch {
         return null;
       }
 

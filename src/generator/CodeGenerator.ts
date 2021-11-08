@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { dropIPrefixInCustomTypes, fetchNamedTypes, NamedType, NamedTypesResult } from './named-types';
+import { dropIPrefixInCustomTypes, fetchNamedTypes, NamedTypeInfo, NamedTypesResult } from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
 import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView } from '../renderer/views';
@@ -58,7 +58,14 @@ export class CodeGenerator {
 
     console.log('Modules:\n');
     console.log(
-      modules.map((module) => serializeModule(module, this.namedTypes?.associatedTypes[module.name] ?? [])).join('\n\n')
+      modules
+        .map((module) =>
+          serializeModule(
+            module,
+            (this.namedTypes?.associatedTypes[module.name] ?? []).map((associatedType) => associatedType.type)
+          )
+        )
+        .join('\n\n')
     );
     console.log();
   }
@@ -69,7 +76,7 @@ export class CodeGenerator {
     }
 
     console.log('Shared named types:\n');
-    console.log(this.namedTypes.sharedTypes.map((namedType) => serializeNamedType(namedType)).join('\n\n'));
+    console.log(this.namedTypes.sharedTypes.map((namedType) => serializeNamedType(namedType.type)).join('\n\n'));
   }
 
   renderModules({
@@ -96,7 +103,9 @@ export class CodeGenerator {
     const { associatedTypes } = this.namedTypes;
     const valueTransformer = this.getValueTransformer(language, typeNameMap);
 
-    const moduleViews = modules.map((module) => this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer));
+    const moduleViews = modules.map((module) =>
+      this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer)
+    );
 
     if (path.extname(outputPath) === '') {
       // The path is a directory
@@ -154,20 +163,24 @@ export class CodeGenerator {
     }
   }
 
-  private getNamedTypeView(namedType: NamedType, valueTransformer: ValueTransformer): NamedTypeView {
+  private getNamedTypeView(namedType: NamedTypeInfo, valueTransformer: ValueTransformer): NamedTypeView {
     let namedTypeView: NamedTypeView;
-    if (isInterfaceType(namedType)) {
-      namedTypeView = new InterfaceTypeView(namedType, valueTransformer);
+    if (isInterfaceType(namedType.type)) {
+      namedTypeView = new InterfaceTypeView(namedType.type, namedType.source, valueTransformer);
       namedTypeView.custom = true;
     } else {
-      namedTypeView = new EnumTypeView(namedType, valueTransformer);
+      namedTypeView = new EnumTypeView(namedType.type, namedType.source, valueTransformer);
       namedTypeView.enum = true;
     }
 
     return namedTypeView;
   }
 
-  private getModuleView(module: Module, associatedTypes: NamedType[], valueTransformer: ValueTransformer): ModuleView {
+  private getModuleView(
+    module: Module,
+    associatedTypes: NamedTypeInfo[],
+    valueTransformer: ValueTransformer
+  ): ModuleView {
     return new ModuleView(
       module,
       associatedTypes.map((associatedType) => this.getNamedTypeView(associatedType, valueTransformer)),

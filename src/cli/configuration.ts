@@ -7,7 +7,7 @@ export interface ParseConfiguration {
   /**
    * Scoped source file paths. The key is the scope name and the value is an array of the source file paths. [Glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) are allowed.
    * If it is a relative path, it will be resolved based on the configuration file path.
-   * 
+   *
    * For example, `{ "api": ["src/api/IEditor.ts", "src/bridge/*.ts"] }`
    */
   source: Record<string, string[]>;
@@ -17,7 +17,7 @@ export interface ParseConfiguration {
    */
   predefinedTypes?: string[];
   /**
-   * Custom tags for code generation in mustache and its default value. 
+   * Custom tags for code generation in mustache and its default value.
    */
   defaultCustomTags?: Record<string, unknown>;
   /**
@@ -42,16 +42,16 @@ export interface RenderConfiguration {
   templates: Record<string, string>;
   /**
    * Scoped output directories or paths. The key is the scope name and the value is the output directory or file path.
-   * 
+   *
    * If it is a relative path, it will be resolved based on the configuration file path.
-   * 
+   *
    * For example, `{ "api": "../ios/AppTarget/Generated" }`
    */
   outputPath: Record<string, string>;
   /**
    * Template path for named types. Must be a mustache template.
    * If it is a relative path, it will be resolved based on the configuration file path.
-   * 
+   *
    * For example, `code-templates/named-types.mustache`.
    */
   namedTypesTemplatePath: string;
@@ -62,7 +62,7 @@ export interface RenderConfiguration {
   namedTypesOutputPath: string;
   /**
    * The mapping from `predefinedTypes` to the existing types in the target language (Kotlin/Swift).
-   * 
+   *
    * For example, `{ "CodeGen_Int": "Int" }`.
    */
   typeNameMap?: Record<string, string>;
@@ -107,11 +107,11 @@ function normalizeRenderConfiguration(basePath: string, config?: RenderConfigura
   namedTypesOutputPath = normalizePath(namedTypesOutputPath, basePath);
   namedTypesTemplatePath = normalizePath(namedTypesTemplatePath, basePath);
 
-  Object.keys(templates).forEach(key => {
+  Object.keys(templates).forEach((key) => {
     templates[key] = normalizePath(templates[key], basePath);
   });
 
-  Object.keys(outputPath).forEach(key => {
+  Object.keys(outputPath).forEach((key) => {
     outputPath[key] = normalizePath(outputPath[key], basePath);
   });
 
