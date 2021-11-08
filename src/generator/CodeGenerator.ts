@@ -58,7 +58,14 @@ export class CodeGenerator {
 
     console.log('Modules:\n');
     console.log(
-      modules.map((module) => serializeModule(module, (this.namedTypes?.associatedTypes[module.name] ?? []).map((associatedType) => associatedType.type))).join('\n\n')
+      modules
+        .map((module) =>
+          serializeModule(
+            module,
+            (this.namedTypes?.associatedTypes[module.name] ?? []).map((associatedType) => associatedType.type)
+          )
+        )
+        .join('\n\n')
     );
     console.log();
   }
@@ -96,7 +103,9 @@ export class CodeGenerator {
     const { associatedTypes } = this.namedTypes;
     const valueTransformer = this.getValueTransformer(language, typeNameMap);
 
-    const moduleViews = modules.map((module) => this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer));
+    const moduleViews = modules.map((module) =>
+      this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer)
+    );
 
     if (path.extname(outputPath) === '') {
       // The path is a directory
@@ -167,7 +176,11 @@ export class CodeGenerator {
     return namedTypeView;
   }
 
-  private getModuleView(module: Module, associatedTypes: NamedTypeInfo[], valueTransformer: ValueTransformer): ModuleView {
+  private getModuleView(
+    module: Module,
+    associatedTypes: NamedTypeInfo[],
+    valueTransformer: ValueTransformer
+  ): ModuleView {
     return new ModuleView(
       module,
       associatedTypes.map((associatedType) => this.getNamedTypeView(associatedType, valueTransformer)),

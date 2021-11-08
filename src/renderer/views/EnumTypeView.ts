@@ -52,11 +52,11 @@ export class EnumTypeView {
     return this.enumType.customTags;
   }
 
-  get isOnlyFromParameter(): boolean {
+  get isFromParameter(): boolean {
     return (this.source & ValueTypeSource.Parameter) === ValueTypeSource.Parameter;
   }
 
-  get isOnlyFromReturn(): boolean {
+  get isFromReturn(): boolean {
     return (this.source & ValueTypeSource.Return) === ValueTypeSource.Return;
   }
 }

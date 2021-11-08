@@ -15,10 +15,9 @@ import {
 } from '../types';
 
 export const enum ValueTypeSource {
-  Field = 'Field',
-  Parameter = 'Parameter',
-  Return = 'Return',
-  Multiple = 'Multiple',
+  Field = 1 << 0,
+  Parameter = 1 << 1,
+  Return = 1 << 2,
 }
 
 export type NamedType = InterfaceType | EnumType;
@@ -32,7 +31,7 @@ export type NamedTypesResult = { associatedTypes: Record<string, NamedTypeInfo[]
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
   modules
     .flatMap((module) => fetchRootTypes(module))
-    .forEach(([valueType,]) => {
+    .forEach(([valueType]) => {
       recursiveVisitMembersType(valueType, (namedType) => {
         if (!isInterfaceType(namedType)) {
           return;
@@ -64,9 +63,7 @@ export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
 
         const existingResult = typeMap[namedType.name];
         existingResult.associatedModules.add(module.name);
-        if ( existingResult.source !== source) {
-          existingResult.source = ValueTypeSource.Multiple;
-        }
+        existingResult.source |= source;
       });
     });
   });
@@ -91,9 +88,14 @@ export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
 }
 
 function fetchRootTypes(module: Module): [ValueType, ValueTypeSource][] {
-  const typesInMembers: [ValueType, ValueTypeSource][] = module.members.map((field) => [field.type, ValueTypeSource.Field]);
+  const typesInMembers: [ValueType, ValueTypeSource][] = module.members.map((field) => [
+    field.type,
+    ValueTypeSource.Field,
+  ]);
   const typesInMethods: [ValueType, ValueTypeSource][] = module.methods.flatMap((method) =>
-    method.parameters.map((parameter): [ValueType, ValueTypeSource] => [parameter.type, ValueTypeSource.Parameter]).concat(method.returnType ? [[method.returnType, ValueTypeSource.Return]] : [])
+    method.parameters
+      .map((parameter): [ValueType, ValueTypeSource] => [parameter.type, ValueTypeSource.Parameter])
+      .concat(method.returnType ? [[method.returnType, ValueTypeSource.Return]] : [])
   );
 
   return typesInMembers.concat(typesInMethods);

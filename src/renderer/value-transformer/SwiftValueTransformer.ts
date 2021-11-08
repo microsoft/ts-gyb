@@ -144,5 +144,4 @@ export class SwiftValueTransformer implements ValueTransformer {
   convertTypeNameFromCustomMap(name: string): string {
     return this.typeNameMap[name] ?? name;
   }
-
 }

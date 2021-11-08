@@ -30,11 +30,11 @@ export function serializeModule(module: Module, associatedTypes: NamedType[]): s
     module.name
   } {
 ${module.members
-      .map((member) => `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member)}`)
-      .join('\n')
-      .split('\n')
-      .map((line) => `  ${line}`)
-      .join('\n')}
+  .map((member) => `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member)}`)
+  .join('\n')
+  .split('\n')
+  .map((line) => `  ${line}`)
+  .join('\n')}
 
 ${module.methods
   .map((method) =>
