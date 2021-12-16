@@ -45,7 +45,10 @@ function buildConfig(env: WebpackEnvironment): webpack.Configuration | webpack.W
     mode: isProductionBuild ? 'production' : 'development',
     entry: `${sourcePath}/main.ts`,
     devServer: {
-      contentBase: distPath,
+      static: {
+        directory: distPath,
+        serveIndex: true,
+      },
       compress: true,
       port: env.port ?? 9000,
     },
