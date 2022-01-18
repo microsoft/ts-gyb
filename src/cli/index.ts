@@ -14,7 +14,8 @@ function run(): void {
     .command('list-output', 'list all output files', (subprogram) => {
       subprogram
         .option('tag <tag>', { description: 'tag of the source files to list', type: 'string' })
-        .option('expand', { description: 'expand directories' });
+        .option('expand', { description: 'expand directories' })
+        .option('language', { description: 'language of the output files to list', choices: ['swift', 'kotlin'] });
     }, listOutput)
     .option('config', {
       describe: 'path to the configuration file',
