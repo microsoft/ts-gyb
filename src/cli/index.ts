@@ -1,9 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import yargs from 'yargs';
-import { glob } from 'glob';
 import { CodeGenerator, RenderingLanguage } from '../generator/CodeGenerator';
-import { Configuration, normalizeConfiguration } from './configuration';
+import { Configuration, normalizeConfiguration, RenderConfiguration } from './configuration';
 
 const program = yargs(process.argv.slice(2));
 
@@ -11,12 +10,12 @@ function run(): void {
   /* eslint-disable no-empty-function,@typescript-eslint/no-empty-function */
   program
     .scriptName('ts-gyb')
-    .command('gen', 'generate code from a configuration file', () => {}, generate)
-    .command('list-sources', 'list all available source files', (subprogram) => {
+    .command(['gen', '*'], 'generate code from a configuration file', () => {}, generate)
+    .command('list-output', 'list all output files', (subprogram) => {
       subprogram
         .option('tag <tag>', { description: 'tag of the source files to list', type: 'string' })
-        .option('expand', { description: 'expand globstar' });
-    }, listSources)
+        .option('expand', { description: 'expand directories' });
+    }, listOutput)
     .option('config', {
       describe: 'path to the configuration file',
       type: 'string',
@@ -79,27 +78,32 @@ function generate(args: { config: string }): void {
   });
 }
 
-function listSources(args: { config: string; tag?: string; expand: boolean }): void {
+function listOutput(args: { config: string; language?: 'swift' | 'kotlin'; expand: boolean }): void {
   const config = parseConfig(args.config);
 
   let files: string[];
-  if (args.tag !== undefined) {
-    if (config.parsing.source[args.tag] === undefined) {
-      throw new Error(`Tag ${args.tag} is not defined in the configuration file`);
+  if (args.language !== undefined) {
+    const renderingConfig = config.rendering[args.language];
+    if (renderingConfig === undefined) {
+      throw new Error(`Language ${args.language} is not defined in the configuration file`);
     }
-    files = config.parsing.source[args.tag];
+    files = Object.values(renderingConfig.outputPath);
   } else {
-    files = Object.values(config.parsing.source).flat();
+    files = Object.values(config.rendering).map((renderingConfig: RenderConfiguration) => Object.values(renderingConfig.outputPath)).flat();
   }
 
   files = files.map((file) => path.resolve(file));
-
   if (args.expand) {
-    files = files.flatMap((pattern) => glob.sync(pattern));
+    files = files.map((filePath) => {
+      if (!fs.lstatSync(filePath).isDirectory()) {
+        return filePath;
+      }
+
+      return fs.readdirSync(filePath).map((file) => path.join(filePath, file));
+    }).flat();
   }
 
   files = [...new Set(files)];
-
   console.log(files.join('\n'));
 }
 
