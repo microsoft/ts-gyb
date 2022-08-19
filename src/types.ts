@@ -57,12 +57,8 @@ export interface BasicType extends BaseValueType {
   value: BasicTypeValue;
 }
 
-export interface InterfaceType extends BaseValueType {
+export interface InterfaceType extends BaseValueType, Module {
   kind: ValueTypeKind.interfaceType;
-  name: string;
-  members: Field[];
-  documentation: string;
-  customTags: Record<string, unknown>;
 }
 
 export interface TupleType extends BaseValueType {

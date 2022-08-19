@@ -9,6 +9,7 @@ import {
   ValueTypeKind,
   EnumType,
   EnumSubType,
+  Method,
   NonEmptyType,
   isOptionalType,
   DictionaryType,
@@ -22,10 +23,11 @@ import {
   isBasicType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
+import { ParserLogger } from '../logger/ParserLogger';
 import { ValueParserError } from './ValueParserError';
 
 export class ValueParser {
-  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>) {}
+  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>, private readonly logger: ParserLogger, private readonly skipInvalidMethods: boolean) {}
 
   parseFunctionReturnType(methodSignature: ts.SignatureDeclarationBase): [ValueType | null, boolean] {
     if (methodSignature.type === undefined) {
@@ -56,7 +58,54 @@ export class ValueParser {
     return [this.valueTypeFromTypeNode(methodSignature.type), false];
   }
 
-  parseFunctionParameterType(typeNode: ts.TypeNode): Field[] {
+  private methodFromNode(
+    node: ts.MethodSignature | (ts.PropertySignature & { type: ts.SignatureDeclarationBase })
+  ): Method | null {
+    const methodName = node.name.getText();
+
+    let signatureNode: ts.SignatureDeclarationBase;
+    if (ts.isMethodSignature(node)) {
+      signatureNode = node;
+    } else {
+      signatureNode = node.type;
+    }
+
+    const parameters = this.fieldsFromParameters(signatureNode);
+
+    const [returnType, isAsync] = this.parseFunctionReturnType(signatureNode);
+
+    const symbol = this.checker.getSymbolAtLocation(node.name);
+    const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
+
+    return {
+      name: methodName,
+      parameters,
+      returnType,
+      isAsync,
+      documentation,
+    };
+  }
+
+  private fieldsFromParameters(methodSignature: ts.SignatureDeclarationBase): Field[] {
+    const parameterNodes = methodSignature.parameters;
+
+    if (parameterNodes.length === 0) {
+      return [];
+    }
+    if (parameterNodes.length > 1) {
+      throw new ValueParserError(
+        'it has multiple parameters',
+        'Methods should only have one property. Please use destructuring object for multiple parameters'
+      );
+    }
+
+    const parameterDeclaration = parameterNodes[0];
+    if (parameterDeclaration.type === undefined) {
+      return [];
+    }
+
+    const typeNode = parameterDeclaration.type;
+
     const typeLiteralType = this.parseTypeLiteralNode(typeNode);
     if (typeLiteralType !== null && isTupleType(typeLiteralType)) {
       return typeLiteralType.members;
@@ -315,12 +364,14 @@ export class ValueParser {
       valueType = {
         kind: ValueTypeKind.interfaceType,
         members: valueType.members,
+        methods: [],
         ...customType,
       };
     } else if (isOptionalType(valueType) && isTupleType(valueType.wrappedType)) {
       valueType.wrappedType = {
         kind: ValueTypeKind.interfaceType,
         members: valueType.wrappedType.members,
+        methods: [],
         ...customType,
       };
     }
@@ -403,7 +454,7 @@ export class ValueParser {
     return null;
   }
 
-  private parseInterfaceType(node: ts.Node): InterfaceType | DictionaryType | null {
+  parseInterfaceType(node: ts.Node): InterfaceType | DictionaryType | null {
     if (!ts.isInterfaceDeclaration(node)) {
       return null;
     }
@@ -415,12 +466,51 @@ export class ValueParser {
 
     const name = node.name.getText();
 
-    const members = this.checker
+    const members: Field[] = [];
+    const methods: Method[] = [];
+
+    const decrations = this.checker
       .getPropertiesOfType(this.checker.getTypeAtLocation(node))
       .map((symbol) => symbol.valueDeclaration)
-      .filter((declaration): declaration is ts.Declaration => declaration !== undefined)
-      .map((declaration) => this.fieldFromTypeElement(declaration))
-      .filter((field): field is Field => field !== null);
+      .filter((declaration): declaration is ts.Declaration => declaration !== undefined);
+
+    decrations.forEach((decrationNode) => {
+      try {
+        if (ts.isPropertySignature(decrationNode)) {
+          if (decrationNode.type !== undefined && ts.isFunctionTypeNode(decrationNode.type)) {
+            const method = this.methodFromNode({ ...decrationNode, type: decrationNode.type });
+            if (method !== null) {
+              methods.push(method);
+            }
+          } else {
+            const field = this.fieldFromTypeElement(decrationNode);
+            if (field !== null) {
+              members.push(field);
+            }
+          }
+        } else if (ts.isMethodSignature(decrationNode)) {
+          const method = this.methodFromNode(decrationNode);
+          if (method !== null) {
+            methods.push(method);
+          }
+        } else {
+          throw new ValueParserError(
+            'it is not valid property signature or method signature',
+            'Please define only properties or methods'
+          );
+        }
+      } catch (error) {
+        if (error instanceof ValueParserError) {
+          if (this.skipInvalidMethods) {
+            this.logger.warnSkippedNode(decrationNode, error.message, error.guide);
+          }
+
+          throw error;
+        }
+
+        throw error;
+      }
+    });
 
     const symbol = this.checker.getSymbolAtLocation(node.name);
     if (symbol === undefined) {
@@ -434,6 +524,7 @@ export class ValueParser {
       kind: ValueTypeKind.interfaceType,
       name: jsDocTagsResult.overrideName ?? name,
       members,
+      methods,
       documentation,
       customTags: jsDocTagsResult.customTags,
     };
