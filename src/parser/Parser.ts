@@ -12,7 +12,7 @@ export class Parser {
 
   private valueParser: ValueParser;
 
-  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods: boolean) {
+  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods = false, private readonly extendedInterfaces: Set<string> | undefined) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
     this.program = ts.createProgram({
       rootNames: filePaths,
@@ -53,7 +53,11 @@ export class Parser {
 
     const jsDocTagsResult = parseTypeJSDocTags(symbol);
 
-    if (!jsDocTagsResult.shouldExport) {
+    if (this.extendedInterfaces !== undefined) {
+      if (!(node.heritageClauses?.some((heritageClause) => heritageClause.types.some((type) => this.extendedInterfaces?.has(type.getText()))))) {
+        return null;
+      }
+    } else if (!jsDocTagsResult.shouldExport) {
       return null;
     }
 

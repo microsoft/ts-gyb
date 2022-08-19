@@ -26,6 +26,7 @@ export class CodeGenerator {
     defaultCustomTags,
     dropInterfaceIPrefix,
     skipInvalidMethods,
+    extendedInterfaces,
   }: {
     tag: string;
     interfacePaths: string[];
@@ -33,8 +34,9 @@ export class CodeGenerator {
     defaultCustomTags: Record<string, unknown>;
     dropInterfaceIPrefix: boolean;
     skipInvalidMethods: boolean;
+    extendedInterfaces: string[] | undefined;
   }): void {
-    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods);
+    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods, extendedInterfaces !== undefined ? new Set(extendedInterfaces) : undefined);
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));

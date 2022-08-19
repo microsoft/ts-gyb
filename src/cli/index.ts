@@ -31,21 +31,22 @@ function generate(args: { config: string }): void {
   const config = parseConfig(args.config);
 
   const generator = new CodeGenerator();
-  Object.entries(config.parsing.source).forEach(([tag, interfacePaths]) => {
+  Object.entries(config.parsing.targets).forEach(([tag, scope]) => {
     generator.parse({
       tag,
-      interfacePaths,
+      interfacePaths: scope.source,
       predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
       defaultCustomTags: config.parsing.defaultCustomTags ?? {},
       dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
       skipInvalidMethods: config.parsing.skipInvalidMethods ?? false,
+      extendedInterfaces: scope.extendedInterfaces,
     });
   });
 
   generator.parseNamedTypes();
   generator.printSharedNamedTypes();
 
-  Object.entries(config.parsing.source).forEach(([tag]) => {
+  Object.entries(config.parsing.targets).forEach(([tag]) => {
     generator.printModules({ tag });
   });
 
@@ -59,12 +60,12 @@ function generate(args: { config: string }): void {
       return;
     }
 
-    Object.entries(renderingConfig.templates).forEach(([tag, moduleTemplatePath]) => {
+    renderingConfig.renders.forEach((render) => {
       generator.renderModules({
-        tag,
+        tag: render.target,
         language,
-        outputPath: renderingConfig.outputPath[tag],
-        moduleTemplatePath,
+        outputPath: render.outputPath,
+        moduleTemplatePath: render.template,
         typeNameMap: renderingConfig.typeNameMap ?? {},
       });
     });
@@ -87,9 +88,9 @@ function listOutput(args: { config: string; language?: 'swift' | 'kotlin'; expan
     if (renderingConfig === undefined) {
       throw new Error(`Language ${args.language} is not defined in the configuration file`);
     }
-    files = Object.values(renderingConfig.outputPath).concat(renderingConfig.namedTypesOutputPath);
+    files = renderingConfig.renders.map((render) => render.outputPath);
   } else {
-    files = Object.values(config.rendering).map((renderingConfig: RenderConfiguration) => Object.values(renderingConfig.outputPath).concat(renderingConfig.namedTypesOutputPath)).flat();
+    files = Object.values(config.rendering).flatMap((renderingConfig: RenderConfiguration) => renderingConfig.renders.map((render) => render.outputPath));
   }
 
   files = files.map((file) => path.resolve(file));

@@ -1,16 +1,21 @@
 import { normalizePath } from '../utils';
 
-/**
- * Parser configuration
- */
-export interface ParseConfiguration {
+export interface TargetParseConfiguration {
   /**
    * Scoped source file paths. The key is the scope name and the value is an array of the source file paths. [Glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) are allowed.
    * If it is a relative path, it will be resolved based on the configuration file path.
    *
    * For example, `{ "api": ["src/api/IEditor.ts", "src/bridge/*.ts"] }`
    */
-  source: Record<string, string[]>;
+  source: string[];
+
+  extendedInterfaces?: string[];
+}
+
+/**
+ * Parser configuration
+ */
+export interface ParseConfiguration {
   /**
    * Names for pre-defined types.
    * For example, `CodeGen_Int` for mapping for `number` to integers.
@@ -29,17 +34,16 @@ export interface ParseConfiguration {
    * Skip the code generation for invalid methods. If `false`, the code generation will fail when encounter an unsupported type.
    */
   skipInvalidMethods?: boolean;
+  targets: Record<string, TargetParseConfiguration>;
 }
 
-/**
- * Renderer configuration
- */
-export interface RenderConfiguration {
+export interface TargetRenderConfiguration {
+  target: string;
   /**
    * Scoped template file paths. The key is the scope name and the value is the template file path.
    * If it is a relative path, it will be resolved based on the configuration file path.
    */
-  templates: Record<string, string>;
+  template: string;
   /**
    * Scoped output directories or paths. The key is the scope name and the value is the output directory or file path.
    *
@@ -47,7 +51,15 @@ export interface RenderConfiguration {
    *
    * For example, `{ "api": "../ios/AppTarget/Generated" }`
    */
-  outputPath: Record<string, string>;
+  outputPath: string;
+}
+
+/**
+ * Renderer configuration
+ */
+export interface RenderConfiguration {
+  renders: TargetRenderConfiguration[];
+  
   /**
    * Template path for named types. Must be a mustache template.
    * If it is a relative path, it will be resolved based on the configuration file path.
@@ -102,22 +114,18 @@ function normalizeRenderConfiguration(basePath: string, config?: RenderConfigura
     return config;
   }
   let { namedTypesTemplatePath, namedTypesOutputPath } = config;
-  const { templates, outputPath, typeNameMap } = config;
+  const { renders, typeNameMap } = config;
 
   namedTypesOutputPath = normalizePath(namedTypesOutputPath, basePath);
   namedTypesTemplatePath = normalizePath(namedTypesTemplatePath, basePath);
 
-  Object.keys(templates).forEach((key) => {
-    templates[key] = normalizePath(templates[key], basePath);
-  });
-
-  Object.keys(outputPath).forEach((key) => {
-    outputPath[key] = normalizePath(outputPath[key], basePath);
+  renders.forEach((render) => {
+    render.template = normalizePath(render.template, basePath);
+    render.outputPath = normalizePath(render.outputPath, basePath);
   });
 
   return {
-    templates,
-    outputPath,
+    renders,
     namedTypesTemplatePath,
     namedTypesOutputPath,
     typeNameMap,
@@ -126,7 +134,7 @@ function normalizeRenderConfiguration(basePath: string, config?: RenderConfigura
 
 export function normalizeConfiguration(config: Configuration, basePath: string): Configuration {
   const { parsing, rendering } = config;
-  const { source, predefinedTypes, defaultCustomTags, dropInterfaceIPrefix, skipInvalidMethods } = parsing;
+  const { targets, predefinedTypes, defaultCustomTags, dropInterfaceIPrefix, skipInvalidMethods } = parsing;
   let { swift: swiftConfig, kotlin: kotlinConfig } = rendering;
 
   swiftConfig = normalizeRenderConfiguration(basePath, swiftConfig);
@@ -134,7 +142,7 @@ export function normalizeConfiguration(config: Configuration, basePath: string):
 
   return {
     parsing: {
-      source,
+      targets,
       predefinedTypes,
       defaultCustomTags,
       dropInterfaceIPrefix,
