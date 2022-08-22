@@ -87,9 +87,9 @@ function listOutput(args: { config: string; language?: 'swift' | 'kotlin'; expan
     if (renderingConfig === undefined) {
       throw new Error(`Language ${args.language} is not defined in the configuration file`);
     }
-    files = Object.values(renderingConfig.outputPath);
+    files = Object.values(renderingConfig.outputPath).concat(renderingConfig.namedTypesOutputPath);
   } else {
-    files = Object.values(config.rendering).map((renderingConfig: RenderConfiguration) => Object.values(renderingConfig.outputPath)).flat();
+    files = Object.values(config.rendering).map((renderingConfig: RenderConfiguration) => Object.values(renderingConfig.outputPath).concat(renderingConfig.namedTypesOutputPath)).flat();
   }
 
   files = files.map((file) => path.resolve(file));
