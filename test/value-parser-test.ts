@@ -94,7 +94,7 @@ describe('ValueParser', () => {
     }
     `;
 
-    const emptyInterfaceType: InterfaceType = { kind: ValueTypeKind.interfaceType, name: 'EmptyInterface', members: [], documentation: '', customTags: {} };
+    const emptyInterfaceType: InterfaceType = { kind: ValueTypeKind.interfaceType, name: 'EmptyInterface', members: [], methods: [], documentation: '', customTags: {} };
     testValueType('empty interface', 'EmptyInterface', emptyInterfaceType, new Set(), interfacesCode);
 
     const interfaceWithMembersType: InterfaceType = {
@@ -104,6 +104,7 @@ describe('ValueParser', () => {
         { name: 'stringMember', type: stringType, documentation: '' },
         { name: 'numberMember', type: numberType, documentation: '' },
       ],
+      methods: [],
       documentation: '',
       customTags: {},
     };
@@ -117,6 +118,7 @@ describe('ValueParser', () => {
         { name: 'stringMember', type: stringType, documentation: '' },
         { name: 'numberMember', type: numberType, documentation: '' },
       ],
+      methods: [],
       documentation: '',
       customTags: {},
     };
@@ -128,6 +130,7 @@ describe('ValueParser', () => {
       members: [
         { name: 'stringMember', type: stringType, documentation: '' },
       ],
+      methods: [],
       documentation: '',
       customTags: {},
     };
@@ -139,6 +142,7 @@ describe('ValueParser', () => {
       members: [
         { name: 'stringMember', type: stringType, documentation: '' },
       ],
+      methods: [],
       documentation: '',
       customTags: {},
     };
@@ -333,6 +337,7 @@ describe('ValueParser', () => {
       members: [
         { name: 'foobar', type: stringType, documentation: '' },
       ],
+      methods: [],
       documentation: '',
       customTags: {},
     };
@@ -342,6 +347,7 @@ describe('ValueParser', () => {
       members: [
         { name: 'foobar', type: stringType, documentation: '' },
       ],
+      methods: [],
       documentation: '',
       customTags: {},
     };
