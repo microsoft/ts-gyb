@@ -59,7 +59,13 @@ export class Parser {
 
     const result = this.valueParser.parseInterfaceType(node);
     if (result && isInterfaceType(result)) {
-      return result;
+      return {
+        name: result.name,
+        members: result.members,
+        methods: result.methods,
+        documentation: result.documentation,
+        customTags: result.customTags,
+      };
     }
 
     return null;

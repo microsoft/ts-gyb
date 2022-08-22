@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempParser } from './utils';
-import { ParserError } from '../src/parser/ParserError';
+import { ValueParserError } from '../src/parser/ValueParserError';
 import { BasicTypeValue, ValueTypeKind } from '../src/types';
 
 describe('Parser', () => {
@@ -110,7 +110,7 @@ describe('Parser', () => {
       `;
 
     withTempParser(sourceCode, parser => {
-      expect(() => parser.parse()).to.throw(ParserError).with.property('reason', 'it is not valid property signature or method signature');
+      expect(() => parser.parse()).to.throw(ValueParserError).with.property('message', 'it is not valid property signature or method signature');
     });
   });
 
@@ -125,7 +125,7 @@ describe('Parser', () => {
       `;
 
     withTempParser(sourceCode, parser => {
-      expect(() => parser.parse()).to.throw(ParserError).with.property('reason', 'it has multiple parameters');
+      expect(() => parser.parse()).to.throw(ValueParserError).with.property('message', 'it has multiple parameters');
     });
   });
 });

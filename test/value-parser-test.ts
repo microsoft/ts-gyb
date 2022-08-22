@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempMethodParser, withTempValueParser } from './utils';
-import { ParserError } from '../src/parser/ParserError';
+import { ValueParserError } from '../src/parser/ValueParserError';
 import { BasicType, BasicTypeValue, DictionaryKeyType, DictionaryType, EnumSubType, EnumType, InterfaceType, OptionalType, PredefinedType, TupleType, ValueType, ValueTypeKind } from '../src/types';
 
 const stringType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.string };
@@ -13,7 +13,7 @@ describe('ValueParser', () => {
     it('Empty return', () => {
       const methodCode = 'mockedMethod();';
       withTempMethodParser(methodCode, parseFunc => {
-        expect(parseFunc).to.throw(ParserError).with.property('reason', 'return type error: no return type provided');
+        expect(parseFunc).to.throw(ValueParserError).with.property('message', 'return type error: no return type provided');
       })
     });
 
@@ -36,7 +36,7 @@ describe('ValueParser', () => {
     it('Invalid parameters type', () => {
       const methodCode = 'mockedMethod(invalidArgs: string);';
       withTempMethodParser(methodCode, parseFunc => {
-        expect(parseFunc).to.throw(ParserError).with.property('reason', 'parameters error: parameters type string is not supported');
+        expect(parseFunc).to.throw(ValueParserError).with.property('message', 'parameters error: parameters type string is not supported');
       });
     });
   });
