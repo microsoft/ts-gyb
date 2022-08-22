@@ -99,21 +99,6 @@ describe('Parser', () => {
     });
   });
 
-  it('Unsupported method definition', () => {
-    const sourceCode = `
-      /**
-      * @shouldExport true
-      */
-      interface MockedInterface {
-        [foobar: string]: int;
-      }
-      `;
-
-    withTempParser(sourceCode, parser => {
-      expect(() => parser.parse()).to.throw(ValueParserError).with.property('message', 'it is not valid property signature or method signature');
-    });
-  });
-
   it('Multiple parameters', () => {
     const sourceCode = `
       /**
