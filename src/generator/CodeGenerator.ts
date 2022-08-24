@@ -8,6 +8,7 @@ import { serializeModule, serializeNamedType } from '../serializers';
 import { isInterfaceType, Module } from '../types';
 import { applyDefaultCustomTags } from './utils';
 import { ValueTransformer, SwiftValueTransformer, KotlinValueTransformer } from '../renderer/value-transformer';
+import { Configuration } from '../configuration';
 
 export enum RenderingLanguage {
   Swift = 'Swift',
@@ -18,6 +19,55 @@ export class CodeGenerator {
   private modulesMap: Record<string, Module[]> = {};
 
   private namedTypes?: NamedTypesResult;
+
+  generate(config: Configuration): void {
+    Object.entries(config.parsing.targets).forEach(([tag, scope]) => {
+      this.parse({
+        tag,
+        interfacePaths: scope.source,
+        predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
+        defaultCustomTags: config.parsing.defaultCustomTags ?? {},
+        dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
+        skipInvalidMethods: config.parsing.skipInvalidMethods ?? false,
+        extendedInterfaces: scope.extendedInterfaces,
+      });
+    });
+
+    this.parseNamedTypes();
+    this.printSharedNamedTypes();
+
+    Object.entries(config.parsing.targets).forEach(([tag]) => {
+      this.printModules({ tag });
+    });
+
+    const languageRenderingConfigs = [
+      { language: RenderingLanguage.Swift, renderingConfig: config.rendering.swift },
+      { language: RenderingLanguage.Kotlin, renderingConfig: config.rendering.kotlin },
+    ];
+
+    languageRenderingConfigs.forEach(({ language, renderingConfig }) => {
+      if (renderingConfig === undefined) {
+        return;
+      }
+
+      renderingConfig.renders.forEach((render) => {
+        this.renderModules({
+          tag: render.target,
+          language,
+          outputPath: render.outputPath,
+          moduleTemplatePath: render.template,
+          typeNameMap: renderingConfig.typeNameMap ?? {},
+        });
+      });
+
+      this.renderNamedTypes({
+        language,
+        namedTypesTemplatePath: renderingConfig.namedTypesTemplatePath,
+        namedTypesOutputPath: renderingConfig.namedTypesOutputPath,
+        typeNameMap: renderingConfig.typeNameMap ?? {},
+      });
+    });
+  }
 
   parse({
     tag,
