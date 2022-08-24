@@ -21,7 +21,14 @@ describe('Parser', () => {
       `;
     withTempParser(sourceCode, parser => {
       const modules = parser.parse();
-      expect(modules).to.deep.equal([{name: 'ExportTrueInterface', members:[], methods: [], documentation: '', customTags: {}}]);
+      expect(modules).to.deep.equal([{
+        name: 'ExportTrueInterface',
+        members:[],
+        methods: [],
+        extendedInterfaces: [],
+        documentation: '',
+        customTags: {}
+      }]);
     });
   });
 
@@ -53,6 +60,7 @@ describe('Parser', () => {
           isAsync: false,
           documentation: '',
         }], 
+        extendedInterfaces: [],
         documentation: '',
         customTags: {},
       }]);
@@ -93,6 +101,7 @@ describe('Parser', () => {
           isAsync: false,
           documentation: 'This is an example documentation for the method',
         }], 
+        extendedInterfaces: [],
         documentation: 'This is an example documentation for the module',
         customTags: {},
       }]);
