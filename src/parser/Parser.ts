@@ -51,10 +51,12 @@ export class Parser {
       throw Error('Invalid module node');
     }
 
+    const extendedInterfaces = node.heritageClauses?.flatMap((heritageClause) => heritageClause.types.map((type) => type.getText())) ?? [];
+
     const jsDocTagsResult = parseTypeJSDocTags(symbol);
 
     if (this.extendedInterfaces !== undefined) {
-      if (!(node.heritageClauses?.some((heritageClause) => heritageClause.types.some((type) => this.extendedInterfaces?.has(type.getText()))))) {
+      if (!(extendedInterfaces.some((extendedInterface) => this.extendedInterfaces?.has(extendedInterface)))) {
         return null;
       }
     } else if (!jsDocTagsResult.shouldExport) {
@@ -68,6 +70,7 @@ export class Parser {
         members: result.members,
         methods: result.methods,
         documentation: result.documentation,
+        extendedInterfaces,
         customTags: result.customTags,
       };
     }
