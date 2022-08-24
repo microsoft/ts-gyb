@@ -2,13 +2,16 @@ import { normalizePath } from '../utils';
 
 export interface TargetParseConfiguration {
   /**
-   * Scoped source file paths. The key is the scope name and the value is an array of the source file paths. [Glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) are allowed.
+   * Source file paths. [Glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) are allowed.
    * If it is a relative path, it will be resolved based on the configuration file path.
    *
-   * For example, `{ "api": ["src/api/IEditor.ts", "src/bridge/*.ts"] }`
+   * For example, `["src/api/IEditor.ts", "src/bridge/*.ts"]`
    */
   source: string[];
-
+  /**
+   * Interface names for detecting exported modules. If defined, only interfaces that extends the specified interfaces will be parsed.
+   * If not defined, interfaces with JSDoc tag `@shouldExport true` would be parsed
+   */
   extendedInterfaces?: string[];
 }
 
@@ -16,6 +19,10 @@ export interface TargetParseConfiguration {
  * Parser configuration
  */
 export interface ParseConfiguration {
+  /**
+   * Target parse configuration.
+   */
+  targets: Record<string, TargetParseConfiguration>;
   /**
    * Names for pre-defined types.
    * For example, `CodeGen_Int` for mapping for `number` to integers.
@@ -34,22 +41,21 @@ export interface ParseConfiguration {
    * Skip the code generation for invalid methods. If `false`, the code generation will fail when encounter an unsupported type.
    */
   skipInvalidMethods?: boolean;
-  targets: Record<string, TargetParseConfiguration>;
 }
 
 export interface TargetRenderConfiguration {
+  /**
+   * Name of the target to be rendered. Targets are defined in `parsing.targets`.
+   */
   target: string;
   /**
-   * Scoped template file paths. The key is the scope name and the value is the template file path.
-   * If it is a relative path, it will be resolved based on the configuration file path.
+   * Template file paths. If it is a relative path, it will be resolved based on the configuration file path.
    */
   template: string;
   /**
-   * Scoped output directories or paths. The key is the scope name and the value is the output directory or file path.
+   * Output directories or paths. If it is a relative path, it will be resolved based on the configuration file path.
    *
-   * If it is a relative path, it will be resolved based on the configuration file path.
-   *
-   * For example, `{ "api": "../ios/AppTarget/Generated" }`
+   * For example, `"../ios/AppTarget/Generated"`
    */
   outputPath: string;
 }
@@ -58,6 +64,9 @@ export interface TargetRenderConfiguration {
  * Renderer configuration
  */
 export interface RenderConfiguration {
+  /**
+   * A list of render configurations.
+   */
   renders: TargetRenderConfiguration[];
   
   /**
