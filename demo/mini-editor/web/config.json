@@ -1,9 +1,9 @@
 {
   "parsing": {
-    "source": {
-      "api": [
-        "src/editor/IEditor.ts"
-      ]
+    "targets": {
+      "api": {
+        "source": ["src/editor/IEditor.ts"]
+      }
     },
     "predefinedTypes": [
       "CodeGen_Int"
@@ -13,12 +13,13 @@
   },
   "rendering": {
     "swift": {
-      "templates": {
-        "api": "code-templates/swift.mustache"
-      },
-      "outputPath": {
-        "api": "../apple/MiniEditor/Generated"
-      },
+      "renders": [
+        {
+          "target": "api",
+          "template": "code-templates/swift.mustache",
+          "outputPath": "../apple/MiniEditor/Generated"
+        }
+      ],
       "namedTypesTemplatePath": "../../../example-templates/swift-named-types.mustache",
       "namedTypesOutputPath": "../apple/MiniEditor/Generated/WebEditorTypes.swift",
       "typeNameMap": {
@@ -26,12 +27,13 @@
       }
     },
     "kotlin": {
-      "templates": {
-        "api": "code-templates/kotlin.mustache"
-      },
-      "outputPath": {
-        "api": "../android/app/src/main/java/com/microsoft/tscodegen/demo/minieditor/generated"
-      },
+      "renders": [
+        {
+          "target": "api",
+          "template": "code-templates/kotlin.mustache",
+          "outputPath": "../android/app/src/main/java/com/microsoft/tscodegen/demo/minieditor/generated"
+        }
+      ],
       "namedTypesTemplatePath": "../../../example-templates/kotlin-named-type.mustache",
       "namedTypesOutputPath": "../android/app/src/main/java/com/microsoft/tscodegen/demo/minieditor/generated/BridgeTypes.kt",
       "typeNameMap": {
