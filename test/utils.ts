@@ -3,7 +3,7 @@ import os from 'os';
 import path from 'path';
 import { v4 as UUID } from 'uuid';
 import { Parser } from '../src/parser/Parser';
-import {ParserError} from '../src/parser/ParserError';
+import { ValueParserError } from '../src/parser/ValueParserError';
 import { Method, ValueType } from '../src/types';
 
 export function withTempParser(sourceCode: string, handler: (parser: Parser) => void, predefinedTypes: Set<string> = new Set()): void {
@@ -75,8 +75,8 @@ export function withTempValueParser(
           parameter: module.methods[2].parameters[0].type,
         }
       } catch (error) {
-        if (error instanceof ParserError) {
-          throw error.reason.replace('parameters error: ', '').replace('return type error: ', '');
+        if (error instanceof ValueParserError) {
+          throw error.message.replace('parameters error: ', '').replace('return type error: ', '');
         }
 
         throw error
