@@ -68,18 +68,21 @@ Create a json configuration file in your project:
 ```json
 {
   "parsing": {
-    "source": {
-      "default": ["path/to/interfaces.ts"]
+    "targets": {
+      "default": {
+        "source": ["path/to/interfaces.ts"]
+      }
     }
   },
   "rendering": {
     "swift": {
-      "templates": {
-        "default": "path/to/module-interface.mustache"
-      },
-      "outputPath": {
-        "default": "path/to/output/directory"
-      },
+      "renders": [
+        {
+          "target": "default",
+          "templates": "path/to/module-interface.mustache",
+          "outputPath": "path/to/output/directory"
+        }
+      ],
       "namedTypesTemplatePath": "path/to/named-types.mustache",
       "namedTypesOutputPath": "path/to/output/directory/SharedTypes.swift"
     }
