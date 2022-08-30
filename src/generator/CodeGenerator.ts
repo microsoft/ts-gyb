@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { dropIPrefixInCustomTypes, extractSharedTypes, NamedTypeInfo, ParsedModule, ParsedTarget, parseTarget } from './named-types';
+import { dropIPrefixInCustomTypes, extractTargetsSharedTypes, NamedTypeInfo, ParsedModule, ParsedTarget, parseTarget } from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
 import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView } from '../renderer/views';
@@ -42,8 +42,8 @@ export class CodeGenerator {
     return parseTarget(modules);
   }
 
-  extractSharedTypes(targets: ParsedTarget[]): NamedTypeInfo[] {
-    return extractSharedTypes(targets);
+  extractTargetsSharedTypes(targets: ParsedTarget[]): NamedTypeInfo[] {
+    return extractTargetsSharedTypes(targets);
   }
 
   printTarget(modules: ParsedModule[]): void {

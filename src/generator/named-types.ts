@@ -63,7 +63,7 @@ export function parseTarget(modules: Module[]): ParsedTarget {
   };
 }
 
-export function extractSharedTypes(targets: ParsedTarget[]): NamedTypeInfo[] {
+export function extractTargetsSharedTypes(targets: ParsedTarget[]): NamedTypeInfo[] {
   const typeTargetsMap: Record<string, [NamedTypeInfo, Set<ParsedTarget>]> = {};
 
   targets.forEach((target) => {

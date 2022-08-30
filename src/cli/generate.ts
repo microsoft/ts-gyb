@@ -15,7 +15,7 @@ export function generateWithConfig(config: Configuration): void {
       .map(([target, targetConfig]) => ([target, generator.parseTarget(targetConfig.source, targetConfig.exportedInterfaceBases !== undefined ? new Set(targetConfig.exportedInterfaceBases) : undefined)]))
   );
 
-  let sharedTypes = generator.extractSharedTypes(Object.values(namedTargets));
+  let sharedTypes = generator.extractTargetsSharedTypes(Object.values(namedTargets));
   sharedTypes = sharedTypes.concat(Object.values(namedTargets).flatMap((target) => target.sharedTypes));
   generator.printSharedTypes(sharedTypes);
 
