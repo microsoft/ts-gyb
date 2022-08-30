@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import yargs from 'yargs';
-import { CodeGenerator, RenderingLanguage } from '../generator/CodeGenerator';
-import { Configuration, normalizeConfiguration, RenderConfiguration } from './configuration';
+import { CodeGenerator } from '../generator/CodeGenerator';
+import { Configuration, normalizeConfiguration, RenderConfiguration } from '../configuration';
 
 const program = yargs(process.argv.slice(2));
 
@@ -31,51 +31,7 @@ function generate(args: { config: string }): void {
   const config = parseConfig(args.config);
 
   const generator = new CodeGenerator();
-  Object.entries(config.parsing.source).forEach(([tag, interfacePaths]) => {
-    generator.parse({
-      tag,
-      interfacePaths,
-      predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
-      defaultCustomTags: config.parsing.defaultCustomTags ?? {},
-      dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
-      skipInvalidMethods: config.parsing.skipInvalidMethods ?? false,
-    });
-  });
-
-  generator.parseNamedTypes();
-  generator.printSharedNamedTypes();
-
-  Object.entries(config.parsing.source).forEach(([tag]) => {
-    generator.printModules({ tag });
-  });
-
-  const languageRenderingConfigs = [
-    { language: RenderingLanguage.Swift, renderingConfig: config.rendering.swift },
-    { language: RenderingLanguage.Kotlin, renderingConfig: config.rendering.kotlin },
-  ];
-
-  languageRenderingConfigs.forEach(({ language, renderingConfig }) => {
-    if (renderingConfig === undefined) {
-      return;
-    }
-
-    Object.entries(renderingConfig.templates).forEach(([tag, moduleTemplatePath]) => {
-      generator.renderModules({
-        tag,
-        language,
-        outputPath: renderingConfig.outputPath[tag],
-        moduleTemplatePath,
-        typeNameMap: renderingConfig.typeNameMap ?? {},
-      });
-    });
-
-    generator.renderNamedTypes({
-      language,
-      namedTypesTemplatePath: renderingConfig.namedTypesTemplatePath,
-      namedTypesOutputPath: renderingConfig.namedTypesOutputPath,
-      typeNameMap: renderingConfig.typeNameMap ?? {},
-    });
-  });
+  generator.generate(config);
 }
 
 function listOutput(args: { config: string; language?: 'swift' | 'kotlin'; expand: boolean }): void {
@@ -87,9 +43,9 @@ function listOutput(args: { config: string; language?: 'swift' | 'kotlin'; expan
     if (renderingConfig === undefined) {
       throw new Error(`Language ${args.language} is not defined in the configuration file`);
     }
-    files = Object.values(renderingConfig.outputPath).concat(renderingConfig.namedTypesOutputPath);
+    files = renderingConfig.renders.map((render) => render.outputPath);
   } else {
-    files = Object.values(config.rendering).map((renderingConfig: RenderConfiguration) => Object.values(renderingConfig.outputPath).concat(renderingConfig.namedTypesOutputPath)).flat();
+    files = Object.values(config.rendering).flatMap((renderingConfig: RenderConfiguration) => renderingConfig.renders.map((render) => render.outputPath));
   }
 
   files = files.map((file) => path.resolve(file));

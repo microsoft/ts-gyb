@@ -1,7 +1,9 @@
 {
   "parsing": {
-    "source": {
-      "api": ["interfaces.ts"]
+    "targets": {
+      "api": {
+        "source": ["interfaces.ts"]
+      }
     },
     "predefinedTypes": [
       "CodeGen_Int"
@@ -11,12 +13,13 @@
   },
   "rendering": {
     "swift": {
-      "templates": {
-        "api": "../../example-templates/swift-bridge.mustache"
-      },
-      "outputPath": {
-        "api": "generated/swift"
-      },
+      "renders": [
+        {
+          "target": "api",
+          "template": "../../example-templates/swift-bridge.mustache",
+          "outputPath": "generated/swift"
+        }
+      ],
       "namedTypesTemplatePath": "../../example-templates/swift-named-types.mustache",
       "namedTypesOutputPath": "generated/swift/SharedTypes.swift",
       "typeNameMap": {
@@ -24,12 +27,13 @@
       }
     },
     "kotlin": {
-      "templates": {
-        "api": "../../example-templates/kotlin-bridge.mustache"
-      },
-      "outputPath": {
-        "api": "generated/kotlin"
-      },
+      "renders": [
+        {
+          "target": "api",
+          "template": "../../example-templates/kotlin-bridge.mustache",
+          "outputPath": "generated/kotlin"
+        }
+      ],
       "namedTypesTemplatePath": "../../example-templates/kotlin-named-types.mustache",
       "namedTypesOutputPath": "generated/kotlin/BridgeTypes.kt",
       "typeNameMap": {

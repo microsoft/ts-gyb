@@ -12,7 +12,7 @@ export class Parser {
 
   private valueParser: ValueParser;
 
-  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods: boolean) {
+  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods = false, private readonly exportedInterfaceBases: Set<string> | undefined) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
     this.program = ts.createProgram({
       rootNames: filePaths,
@@ -51,9 +51,15 @@ export class Parser {
       throw Error('Invalid module node');
     }
 
+    const exportedInterfaceBases = node.heritageClauses?.flatMap((heritageClause) => heritageClause.types.map((type) => type.getText())) ?? [];
+
     const jsDocTagsResult = parseTypeJSDocTags(symbol);
 
-    if (!jsDocTagsResult.shouldExport) {
+    if (this.exportedInterfaceBases !== undefined) {
+      if (!(exportedInterfaceBases.some((extendedInterface) => this.exportedInterfaceBases?.has(extendedInterface)))) {
+        return null;
+      }
+    } else if (!jsDocTagsResult.shouldExport) {
       return null;
     }
 
@@ -64,6 +70,7 @@ export class Parser {
         members: result.members,
         methods: result.methods,
         documentation: result.documentation,
+        exportedInterfaceBases,
         customTags: result.customTags,
       };
     }

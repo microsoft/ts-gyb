@@ -30,6 +30,10 @@ export class ModuleView {
     return this.module.methods.map((method) => new MethodView(method, this.valueTransformer));
   }
 
+  get exportedInterfaceBases(): Record<string, boolean> {
+    return Object.fromEntries(this.module.exportedInterfaceBases.map((extendedInterface) => [extendedInterface, true]));
+  }
+
   get customTags(): Record<string, unknown> {
     return this.module.customTags;
   }

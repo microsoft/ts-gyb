@@ -8,6 +8,7 @@ import { serializeModule, serializeNamedType } from '../serializers';
 import { isInterfaceType, Module } from '../types';
 import { applyDefaultCustomTags } from './utils';
 import { ValueTransformer, SwiftValueTransformer, KotlinValueTransformer } from '../renderer/value-transformer';
+import { Configuration } from '../configuration';
 
 export enum RenderingLanguage {
   Swift = 'Swift',
@@ -19,6 +20,55 @@ export class CodeGenerator {
 
   private namedTypes?: NamedTypesResult;
 
+  generate(config: Configuration): void {
+    Object.entries(config.parsing.targets).forEach(([tag, target]) => {
+      this.parse({
+        tag,
+        interfacePaths: target.source,
+        predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
+        defaultCustomTags: config.parsing.defaultCustomTags ?? {},
+        dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
+        skipInvalidMethods: config.parsing.skipInvalidMethods ?? false,
+        exportedInterfaceBases: target.exportedInterfaceBases,
+      });
+    });
+
+    this.parseNamedTypes();
+    this.printSharedNamedTypes();
+
+    Object.entries(config.parsing.targets).forEach(([tag]) => {
+      this.printModules({ tag });
+    });
+
+    const languageRenderingConfigs = [
+      { language: RenderingLanguage.Swift, renderingConfig: config.rendering.swift },
+      { language: RenderingLanguage.Kotlin, renderingConfig: config.rendering.kotlin },
+    ];
+
+    languageRenderingConfigs.forEach(({ language, renderingConfig }) => {
+      if (renderingConfig === undefined) {
+        return;
+      }
+
+      renderingConfig.renders.forEach((render) => {
+        this.renderModules({
+          tag: render.target,
+          language,
+          outputPath: render.outputPath,
+          moduleTemplatePath: render.template,
+          typeNameMap: renderingConfig.typeNameMap ?? {},
+        });
+      });
+
+      this.renderNamedTypes({
+        language,
+        namedTypesTemplatePath: renderingConfig.namedTypesTemplatePath,
+        namedTypesOutputPath: renderingConfig.namedTypesOutputPath,
+        typeNameMap: renderingConfig.typeNameMap ?? {},
+      });
+    });
+  }
+
   parse({
     tag,
     interfacePaths,
@@ -26,6 +76,7 @@ export class CodeGenerator {
     defaultCustomTags,
     dropInterfaceIPrefix,
     skipInvalidMethods,
+    exportedInterfaceBases,
   }: {
     tag: string;
     interfacePaths: string[];
@@ -33,8 +84,9 @@ export class CodeGenerator {
     defaultCustomTags: Record<string, unknown>;
     dropInterfaceIPrefix: boolean;
     skipInvalidMethods: boolean;
+    exportedInterfaceBases: string[] | undefined;
   }): void {
-    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods);
+    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods, exportedInterfaceBases !== undefined ? new Set(exportedInterfaceBases) : undefined);
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));
