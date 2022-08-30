@@ -3,7 +3,7 @@ export interface Module {
   members: Field[];
   methods: Method[];
   documentation: string;
-  extendedInterfaces: string[];
+  exportedInterfaceBases: string[];
   customTags: Record<string, unknown>;
 }
 
@@ -58,7 +58,7 @@ export interface BasicType extends BaseValueType {
   value: BasicTypeValue;
 }
 
-export interface InterfaceType extends BaseValueType, Omit<Module, 'extendedInterfaces'> {
+export interface InterfaceType extends BaseValueType, Omit<Module, 'exportedInterfaceBases'> {
   kind: ValueTypeKind.interfaceType;
 }
 

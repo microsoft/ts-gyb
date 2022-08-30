@@ -12,7 +12,7 @@ export class Parser {
 
   private valueParser: ValueParser;
 
-  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods = false, private readonly extendedInterfaces: Set<string> | undefined) {
+  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods = false, private readonly exportedInterfaceBases: Set<string> | undefined) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
     this.program = ts.createProgram({
       rootNames: filePaths,
@@ -51,12 +51,12 @@ export class Parser {
       throw Error('Invalid module node');
     }
 
-    const extendedInterfaces = node.heritageClauses?.flatMap((heritageClause) => heritageClause.types.map((type) => type.getText())) ?? [];
+    const exportedInterfaceBases = node.heritageClauses?.flatMap((heritageClause) => heritageClause.types.map((type) => type.getText())) ?? [];
 
     const jsDocTagsResult = parseTypeJSDocTags(symbol);
 
-    if (this.extendedInterfaces !== undefined) {
-      if (!(extendedInterfaces.some((extendedInterface) => this.extendedInterfaces?.has(extendedInterface)))) {
+    if (this.exportedInterfaceBases !== undefined) {
+      if (!(exportedInterfaceBases.some((extendedInterface) => this.exportedInterfaceBases?.has(extendedInterface)))) {
         return null;
       }
     } else if (!jsDocTagsResult.shouldExport) {
@@ -70,7 +70,7 @@ export class Parser {
         members: result.members,
         methods: result.methods,
         documentation: result.documentation,
-        extendedInterfaces,
+        exportedInterfaceBases,
         customTags: result.customTags,
       };
     }

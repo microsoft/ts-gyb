@@ -16,7 +16,7 @@ export interface TargetParseConfiguration {
    * interface SomeInterface extends ExportedInterface {}
    * ```
    */
-  extendedInterfaces?: string[];
+  exportedInterfaceBases?: string[];
 }
 
 /**

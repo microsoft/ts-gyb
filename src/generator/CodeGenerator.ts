@@ -21,15 +21,15 @@ export class CodeGenerator {
   private namedTypes?: NamedTypesResult;
 
   generate(config: Configuration): void {
-    Object.entries(config.parsing.targets).forEach(([tag, scope]) => {
+    Object.entries(config.parsing.targets).forEach(([tag, target]) => {
       this.parse({
         tag,
-        interfacePaths: scope.source,
+        interfacePaths: target.source,
         predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
         defaultCustomTags: config.parsing.defaultCustomTags ?? {},
         dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
         skipInvalidMethods: config.parsing.skipInvalidMethods ?? false,
-        extendedInterfaces: scope.extendedInterfaces,
+        exportedInterfaceBases: target.exportedInterfaceBases,
       });
     });
 
@@ -76,7 +76,7 @@ export class CodeGenerator {
     defaultCustomTags,
     dropInterfaceIPrefix,
     skipInvalidMethods,
-    extendedInterfaces,
+    exportedInterfaceBases,
   }: {
     tag: string;
     interfacePaths: string[];
@@ -84,9 +84,9 @@ export class CodeGenerator {
     defaultCustomTags: Record<string, unknown>;
     dropInterfaceIPrefix: boolean;
     skipInvalidMethods: boolean;
-    extendedInterfaces: string[] | undefined;
+    exportedInterfaceBases: string[] | undefined;
   }): void {
-    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods, extendedInterfaces !== undefined ? new Set(extendedInterfaces) : undefined);
+    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods, exportedInterfaceBases !== undefined ? new Set(exportedInterfaceBases) : undefined);
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));

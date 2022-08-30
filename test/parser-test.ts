@@ -25,7 +25,7 @@ describe('Parser', () => {
         name: 'ExportTrueInterface',
         members:[],
         methods: [],
-        extendedInterfaces: [],
+        exportedInterfaceBases: [],
         documentation: '',
         customTags: {}
       }]);
@@ -60,7 +60,7 @@ describe('Parser', () => {
           isAsync: false,
           documentation: '',
         }], 
-        extendedInterfaces: [],
+        exportedInterfaceBases: [],
         documentation: '',
         customTags: {},
       }]);
@@ -101,7 +101,7 @@ describe('Parser', () => {
           isAsync: false,
           documentation: 'This is an example documentation for the method',
         }], 
-        extendedInterfaces: [],
+        exportedInterfaceBases: [],
         documentation: 'This is an example documentation for the module',
         customTags: {},
       }]);
