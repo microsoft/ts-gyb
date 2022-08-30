@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import yargs from 'yargs';
-import { CodeGenerator } from '../generator/CodeGenerator';
 import { Configuration, normalizeConfiguration, RenderConfiguration } from '../configuration';
+import { generateWithConfig } from './generate';
 
 const program = yargs(process.argv.slice(2));
 
@@ -30,8 +30,7 @@ function run(): void {
 function generate(args: { config: string }): void {
   const config = parseConfig(args.config);
 
-  const generator = new CodeGenerator();
-  generator.generate(config);
+  generateWithConfig(config);
 }
 
 function listOutput(args: { config: string; language?: 'swift' | 'kotlin'; expand: boolean }): void {
