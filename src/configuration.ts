@@ -10,7 +10,11 @@ export interface TargetParseConfiguration {
   source: string[];
   /**
    * Interface names for detecting exported modules. If defined, only interfaces that extends the specified interfaces will be parsed.
-   * If not defined, interfaces with JSDoc tag `@shouldExport true` would be parsed
+   * If not defined, interfaces with JSDoc tag `@shouldExport true` would be parsed.
+   * For example, set it to `["ExportedInterface"]`, all such interfaces would be exported:
+   * ```ts
+   * interface SomeInterface extends ExportedInterface {}
+   * ```
    */
   extendedInterfaces?: string[];
 }
