@@ -26,6 +26,15 @@ export interface NamedTypeInfo {
   source: ValueTypeSource;
 }
 
+export interface ParsedModule extends Module {
+  associatedTypes: NamedTypeInfo[];
+}
+
+export interface ParsedTarget {
+  modules: ParsedModule[];
+  sharedTypes: NamedTypeInfo[];
+}
+
 export type NamedTypesResult = { associatedTypes: Record<string, NamedTypeInfo[]>; sharedTypes: NamedTypeInfo[] };
 
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
@@ -42,7 +51,49 @@ export function dropIPrefixInCustomTypes(modules: Module[]): void {
     });
 }
 
-export function fetchNamedTypes(modules: Module[]): NamedTypesResult {
+export function parseTarget(modules: Module[]): ParsedTarget {
+  const namedTypes = fetchNamedTypes(modules);
+
+  return {
+    modules: modules.map((module) => ({
+      ...module,
+      associatedTypes: namedTypes.associatedTypes[module.name] ?? [],
+    })),
+    sharedTypes: namedTypes.sharedTypes,
+  };
+}
+
+export function extractSharedTypes(targets: ParsedTarget[]): NamedTypeInfo[] {
+  const typeTargetsMap: Record<string, [NamedTypeInfo, Set<ParsedTarget>]> = {};
+
+  targets.forEach((target) => {
+    target.modules
+      .flatMap((module) => module.associatedTypes)
+      .concat(target.sharedTypes)
+      .forEach((typeInfo) => {
+        const existingValue = typeTargetsMap[typeInfo.type.name] ?? [typeInfo, new Set()];
+        existingValue[1].add(target);
+        typeTargetsMap[typeInfo.type.name] = existingValue;
+      });
+  });
+
+  const sharedTypes = Object.entries(typeTargetsMap)
+    .filter(([, [, targetSet]]) => targetSet.size > 1)
+    .map(([, [namedType,]]) => namedType);
+
+  const sharedTypeNames = new Set(sharedTypes.map(({ type }) => type.name));
+
+  targets.forEach((target) => {
+    target.modules.forEach((module) => {
+      module.associatedTypes = module.associatedTypes.filter((typeInfo) => !sharedTypeNames.has(typeInfo.type.name));
+    });
+    target.sharedTypes = target.sharedTypes.filter((typeInfo) => !sharedTypeNames.has(typeInfo.type.name));
+  });
+
+  return sharedTypes;
+}
+
+function fetchNamedTypes(modules: Module[]): NamedTypesResult {
   const typeMap: Record<string, { namedType: NamedType; source: ValueTypeSource; associatedModules: Set<string> }> = {};
 
   modules.forEach((module) => {

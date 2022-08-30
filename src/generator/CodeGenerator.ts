@@ -1,120 +1,59 @@
 import fs from 'fs';
 import path from 'path';
-import { dropIPrefixInCustomTypes, fetchNamedTypes, NamedTypeInfo, NamedTypesResult } from './named-types';
+import { dropIPrefixInCustomTypes, extractSharedTypes, NamedTypeInfo, ParsedModule, ParsedTarget, parseTarget } from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
 import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView } from '../renderer/views';
 import { serializeModule, serializeNamedType } from '../serializers';
-import { isInterfaceType, Module } from '../types';
+import { isInterfaceType } from '../types';
 import { applyDefaultCustomTags } from './utils';
 import { ValueTransformer, SwiftValueTransformer, KotlinValueTransformer } from '../renderer/value-transformer';
-import { Configuration } from '../configuration';
 
 export enum RenderingLanguage {
   Swift = 'Swift',
   Kotlin = 'Kotlin',
 }
 
+export interface RenderOptions {
+  language: RenderingLanguage;
+  outputPath: string;
+  templatePath: string;
+  typeNameMap: Record<string, string>;
+}
+
 export class CodeGenerator {
-  private modulesMap: Record<string, Module[]> = {};
+  constructor(
+    private readonly predefinedTypes: Set<string>,
+    private readonly defaultCustomTags: Record<string, unknown>,
+    private readonly skipInvalidMethods: boolean,
+    private readonly dropInterfaceIPrefix: boolean,
+  ) {}
 
-  private namedTypes?: NamedTypesResult;
-
-  generate(config: Configuration): void {
-    Object.entries(config.parsing.targets).forEach(([tag, target]) => {
-      this.parse({
-        tag,
-        interfacePaths: target.source,
-        predefinedTypes: new Set(config.parsing.predefinedTypes ?? []),
-        defaultCustomTags: config.parsing.defaultCustomTags ?? {},
-        dropInterfaceIPrefix: config.parsing.dropInterfaceIPrefix ?? false,
-        skipInvalidMethods: config.parsing.skipInvalidMethods ?? false,
-        exportedInterfaceBases: target.exportedInterfaceBases,
-      });
-    });
-
-    this.parseNamedTypes();
-    this.printSharedNamedTypes();
-
-    Object.entries(config.parsing.targets).forEach(([tag]) => {
-      this.printModules({ tag });
-    });
-
-    const languageRenderingConfigs = [
-      { language: RenderingLanguage.Swift, renderingConfig: config.rendering.swift },
-      { language: RenderingLanguage.Kotlin, renderingConfig: config.rendering.kotlin },
-    ];
-
-    languageRenderingConfigs.forEach(({ language, renderingConfig }) => {
-      if (renderingConfig === undefined) {
-        return;
-      }
-
-      renderingConfig.renders.forEach((render) => {
-        this.renderModules({
-          tag: render.target,
-          language,
-          outputPath: render.outputPath,
-          moduleTemplatePath: render.template,
-          typeNameMap: renderingConfig.typeNameMap ?? {},
-        });
-      });
-
-      this.renderNamedTypes({
-        language,
-        namedTypesTemplatePath: renderingConfig.namedTypesTemplatePath,
-        namedTypesOutputPath: renderingConfig.namedTypesOutputPath,
-        typeNameMap: renderingConfig.typeNameMap ?? {},
-      });
-    });
-  }
-
-  parse({
-    tag,
-    interfacePaths,
-    predefinedTypes,
-    defaultCustomTags,
-    dropInterfaceIPrefix,
-    skipInvalidMethods,
-    exportedInterfaceBases,
-  }: {
-    tag: string;
-    interfacePaths: string[];
-    predefinedTypes: Set<string>;
-    defaultCustomTags: Record<string, unknown>;
-    dropInterfaceIPrefix: boolean;
-    skipInvalidMethods: boolean;
-    exportedInterfaceBases: string[] | undefined;
-  }): void {
-    const parser = new Parser(interfacePaths, predefinedTypes, skipInvalidMethods, exportedInterfaceBases !== undefined ? new Set(exportedInterfaceBases) : undefined);
+  parseTarget(interfacePaths: string[], exportedInterfaceBases?: Set<string>): ParsedTarget {
+    const parser = new Parser(interfacePaths, this.predefinedTypes, this.skipInvalidMethods, exportedInterfaceBases);
     const modules = parser.parse();
 
-    modules.forEach((module) => applyDefaultCustomTags(module, defaultCustomTags));
+    modules.forEach((module) => applyDefaultCustomTags(module, this.defaultCustomTags));
 
-    if (dropInterfaceIPrefix) {
+    if (this.dropInterfaceIPrefix) {
       dropIPrefixInCustomTypes(modules);
     }
 
-    this.modulesMap[tag] = modules;
+    return parseTarget(modules);
   }
 
-  parseNamedTypes(): void {
-    this.namedTypes = fetchNamedTypes(Object.values(this.modulesMap).flatMap((modules) => modules));
+  extractSharedTypes(targets: ParsedTarget[]): NamedTypeInfo[] {
+    return extractSharedTypes(targets);
   }
 
-  printModules({ tag }: { tag: string }): void {
-    const modules = this.modulesMap[tag];
-    if (modules === undefined) {
-      throw Error('Modules not parsed. Run parse first.');
-    }
-
+  printTarget(modules: ParsedModule[]): void {
     console.log('Modules:\n');
     console.log(
       modules
         .map((module) =>
           serializeModule(
             module,
-            (this.namedTypes?.associatedTypes[module.name] ?? []).map((associatedType) => associatedType.type)
+            module.associatedTypes.map((associatedType) => associatedType.type)
           )
         )
         .join('\n\n')
@@ -122,86 +61,43 @@ export class CodeGenerator {
     console.log();
   }
 
-  printSharedNamedTypes(): void {
-    if (this.namedTypes === undefined) {
-      throw Error('Named types not parsed. Run parseNamedTypes first.');
-    }
-
+  printSharedTypes(sharedTypes: NamedTypeInfo[]): void {
     console.log('Shared named types:\n');
-    console.log(this.namedTypes.sharedTypes.map((namedType) => serializeNamedType(namedType.type)).join('\n\n'));
+    console.log(sharedTypes.map((namedType) => serializeNamedType(namedType.type)).join('\n\n'));
   }
 
-  renderModules({
-    tag,
-    language,
-    outputPath,
-    moduleTemplatePath,
-    typeNameMap,
-  }: {
-    tag: string;
-    language: RenderingLanguage;
-    outputPath: string;
-    moduleTemplatePath: string;
-    typeNameMap: Record<string, string>;
-  }): void {
-    const modules = this.modulesMap[tag];
-    if (modules === undefined) {
-      throw Error('Modules not parsed. Run parse first.');
-    }
-    if (this.namedTypes === undefined) {
-      throw Error('Named types not parsed. Run parseNamedTypes first.');
-    }
-
-    const { associatedTypes } = this.namedTypes;
-    const valueTransformer = this.getValueTransformer(language, typeNameMap);
+  renderModules(modules: ParsedModule[], options: RenderOptions): void {
+    const valueTransformer = this.getValueTransformer(options.language, options.typeNameMap);
 
     const moduleViews = modules.map((module) =>
-      this.getModuleView(module, associatedTypes[module.name] ?? [], valueTransformer)
+      this.getModuleView(module, valueTransformer)
     );
 
-    if (path.extname(outputPath) === '') {
+    if (path.extname(options.outputPath) === '') {
       // The path is a directory
       moduleViews.forEach((moduleView) => {
-        const renderedCode = renderCode(moduleTemplatePath, moduleView);
+        const renderedCode = renderCode(options.templatePath, moduleView);
 
-        this.writeFile(renderedCode, outputPath, `${moduleView.moduleName}${this.getFileExtension(language)}`);
+        this.writeFile(renderedCode, path.join(options.outputPath, `${moduleView.moduleName}${this.getFileExtension(options.language)}`));
       });
     } else {
       moduleViews.forEach((moduleView, index) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
         (moduleView as any).last = index === moduleViews.length - 1;
       });
-      const renderedCode = renderCode(moduleTemplatePath, moduleViews);
-      fs.writeFileSync(outputPath, renderedCode);
+      const renderedCode = renderCode(options.templatePath, moduleViews);
+      this.writeFile(renderedCode, options.outputPath);
     }
   }
 
-  renderNamedTypes({
-    language,
-    namedTypesTemplatePath,
-    namedTypesOutputPath,
-    typeNameMap,
-  }: {
-    language: RenderingLanguage;
-    namedTypesTemplatePath: string;
-    namedTypesOutputPath: string;
-    typeNameMap: Record<string, string>;
-  }): void {
-    if (this.namedTypes === undefined) {
-      throw Error('Named types not parsed. Run parseNamedTypes first.');
-    }
+  renderNamedTypes(sharedTypes: NamedTypeInfo[], options: RenderOptions): void {
+    const valueTransformer = this.getValueTransformer(options.language, options.typeNameMap);
 
-    if (this.namedTypes.sharedTypes.length === 0) {
-      return;
-    }
-
-    const valueTransformer = this.getValueTransformer(language, typeNameMap);
-
-    const namedTypesView = this.namedTypes.sharedTypes.map((namedType) =>
+    const namedTypesView = sharedTypes.map((namedType) =>
       this.getNamedTypeView(namedType, valueTransformer)
     );
-    const renderedCode = renderCode(namedTypesTemplatePath, namedTypesView);
-    fs.writeFileSync(namedTypesOutputPath, renderedCode);
+    const renderedCode = renderCode(options.templatePath, namedTypesView);
+    this.writeFile(renderedCode, options.outputPath);
   }
 
   private getFileExtension(language: RenderingLanguage): string {
@@ -229,13 +125,12 @@ export class CodeGenerator {
   }
 
   private getModuleView(
-    module: Module,
-    associatedTypes: NamedTypeInfo[],
+    module: ParsedModule,
     valueTransformer: ValueTransformer
   ): ModuleView {
     return new ModuleView(
       module,
-      associatedTypes.map((associatedType) => this.getNamedTypeView(associatedType, valueTransformer)),
+      module.associatedTypes.map((associatedType) => this.getNamedTypeView(associatedType, valueTransformer)),
       valueTransformer
     );
   }
@@ -251,12 +146,12 @@ export class CodeGenerator {
     }
   }
 
-  private writeFile(content: string, outputDirectory: string, fileName: string): void {
-    if (!fs.existsSync(outputDirectory)) {
-      fs.mkdirSync(outputDirectory, { recursive: true });
+  private writeFile(content: string, filePath: string): void {
+    const directory = path.dirname(filePath);
+    if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory, { recursive: true });
     }
 
-    const filePath = path.join(outputDirectory, fileName);
     fs.writeFileSync(filePath, content);
   }
 }
