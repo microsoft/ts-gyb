@@ -1,6 +1,6 @@
 {
   "name": "ts-gyb",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Generate Native API based on TS interface",
   "repository": {
     "type": "git",
