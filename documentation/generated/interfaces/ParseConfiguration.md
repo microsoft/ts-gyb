@@ -50,11 +50,34 @@ Skip the code generation for invalid methods. If `false`, the code generation wi
 
 ___
 
-### source
+### targets
 
-• **source**: `Record`<`string`, `string`[]\>
+• **targets**: `{"source", "exportedInterfaceBases", "tsconfigPath"}`
 
-Scoped source file paths. The key is the scope name and the value is an array of the source file paths. [Glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) are allowed.
+Describe the target interfaces to be parsed, including the below properties:
+
+#### source
+
+• **source**: `string[]`
+
+Scoped source file paths. The array of the source file paths for one target. [Glob patterns](https://en.wikipedia.org/wiki/Glob_(programming)) are allowed.
 If it is a relative path, it will be resolved based on the configuration file path.
 
-For example, `{ "api": ["src/api/IEditor.ts", "src/bridge/*.ts"] }`
+For example, `["src/api/IEditor.ts", "src/bridge/*.ts"]`
+
+#### exportedInterfaceBases
+
+• `Optional` **exportedInterfaceBases**: `string`[]
+
+Interface names for detecting exported modules. If defined, only interfaces that extends the specified interfaces will be parsed.
+If not defined, interfaces with JSDoc tag `@shouldExport true` would be parsed.
+For example, set it to `["ExportedInterface"]`, all such interfaces would be exported:
+```ts
+interface SomeInterface extends ExportedInterface {}
+```
+
+#### tsconfigPath
+
+• `Optional` **tsconfigPath**: `string`
+
+Path to the tsconfig.json file. If not defined, the default tsconfig.json file will be used.
