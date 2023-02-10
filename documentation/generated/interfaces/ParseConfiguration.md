@@ -52,9 +52,9 @@ ___
 
 ### targets
 
-• **targets**: `{"source", "exportedInterfaceBases", "tsconfigPath"}`
+• **targets**: `Record<string, {"source", "exportedInterfaceBases", "tsconfigPath"}>`
 
-Describe the target interfaces to be parsed, including the below properties:
+Describe the target interfaces to be parsed, the key is the name of the target, and the value is an object including the below properties:
 
 #### source
 
