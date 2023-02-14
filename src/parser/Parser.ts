@@ -1,5 +1,6 @@
 import ts from 'typescript';
 import { glob } from 'glob';
+import path from 'path';
 import { Module, isInterfaceType } from '../types';
 import { ValueParser } from './ValueParser';
 import { parseTypeJSDocTags } from './utils';
@@ -12,12 +13,27 @@ export class Parser {
 
   private valueParser: ValueParser;
 
-  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods = false, private readonly exportedInterfaceBases: Set<string> | undefined) {
+  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods = false, private readonly exportedInterfaceBases: Set<string> | undefined, tsconfigPath: string | undefined) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
-    this.program = ts.createProgram({
-      rootNames: filePaths,
-      options: {},
-    });
+
+    if (tsconfigPath !== undefined) {
+      const basePath = path.parse(tsconfigPath).dir;
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      const { config } = ts.readConfigFile(tsconfigPath, ts.sys.readFile);
+      const { options, projectReferences, errors } = ts.parseJsonConfigFileContent(config, ts.sys, basePath);
+      this.program = ts.createProgram({
+        rootNames: filePaths,
+        options,
+        configFileParsingDiagnostics: errors,
+        projectReferences,
+      });
+    } else {
+      this.program = ts.createProgram({
+        rootNames: filePaths,
+        options: {},
+      });
+    }
+  
     this.checker = this.program.getTypeChecker();
     this.valueParser = new ValueParser(this.checker, predefinedTypes, new ParserLogger(this.checker), skipInvalidMethods);
   }

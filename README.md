@@ -70,7 +70,8 @@ Create a json configuration file in your project:
   "parsing": {
     "targets": {
       "default": {
-        "source": ["path/to/interfaces.ts"]
+        "source": ["path/to/interfaces.ts"],
+        "tsconfigPath": "path/to/tsconfigPath"
       }
     }
   },

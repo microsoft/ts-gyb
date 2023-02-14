@@ -11,7 +11,7 @@ export function withTempParser(sourceCode: string, handler: (parser: Parser) => 
   const filePath = path.join(tempPath, `${UUID()}.ts`);
   fs.writeFileSync(filePath, sourceCode);
 
-  const parser = new Parser([filePath], predefinedTypes, false, undefined);
+  const parser = new Parser([filePath], predefinedTypes, false, undefined, undefined);
   handler(parser);
 
   fs.rmdirSync(tempPath, { recursive: true });
