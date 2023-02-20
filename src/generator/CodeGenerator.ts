@@ -29,8 +29,8 @@ export class CodeGenerator {
     private readonly dropInterfaceIPrefix: boolean,
   ) {}
 
-  parseTarget(interfacePaths: string[], exportedInterfaceBases?: Set<string>): ParsedTarget {
-    const parser = new Parser(interfacePaths, this.predefinedTypes, this.skipInvalidMethods, exportedInterfaceBases);
+  parseTarget(interfacePaths: string[], exportedInterfaceBases?: Set<string>, tsconfigPath?: string): ParsedTarget {
+    const parser = new Parser(interfacePaths, this.predefinedTypes, this.skipInvalidMethods, exportedInterfaceBases, tsconfigPath);
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, this.defaultCustomTags));
