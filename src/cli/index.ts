@@ -11,11 +11,16 @@ function run(): void {
   program
     .scriptName('ts-gyb')
     .command(['gen', '*'], 'generate code from a configuration file', () => {}, generate)
-    .command('list-output', 'list all output files', (subprogram) => {
-      subprogram
-        .option('language', { description: 'language of the output files to list', choices: ['swift', 'kotlin'] })
-        .option('expand', { description: 'expand directories' });
-    }, listOutput)
+    .command(
+      'list-output',
+      'list all output files',
+      (subprogram) => {
+        subprogram
+          .option('language', { description: 'language of the output files to list', choices: ['swift', 'kotlin'] })
+          .option('expand', { description: 'expand directories' });
+      },
+      listOutput
+    )
     .option('config', {
       describe: 'path to the configuration file',
       type: 'string',
@@ -44,18 +49,22 @@ function listOutput(args: { config: string; language?: 'swift' | 'kotlin'; expan
     }
     files = renderingConfig.renders.map((render) => render.outputPath);
   } else {
-    files = Object.values(config.rendering).flatMap((renderingConfig: RenderConfiguration) => renderingConfig.renders.map((render) => render.outputPath));
+    files = Object.values(config.rendering).flatMap((renderingConfig: RenderConfiguration) =>
+      renderingConfig.renders.map((render) => render.outputPath)
+    );
   }
 
   files = files.map((file) => path.resolve(file));
   if (args.expand) {
-    files = files.map((filePath) => {
-      if (!fs.lstatSync(filePath).isDirectory()) {
-        return filePath;
-      }
+    files = files
+      .map((filePath) => {
+        if (!fs.lstatSync(filePath).isDirectory()) {
+          return filePath;
+        }
 
-      return fs.readdirSync(filePath).map((file) => path.join(filePath, file));
-    }).flat();
+        return fs.readdirSync(filePath).map((file) => path.join(filePath, file));
+      })
+      .flat();
   }
 
   files = [...new Set(files)];

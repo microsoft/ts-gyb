@@ -1,6 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import { dropIPrefixInCustomTypes, extractTargetsSharedTypes, NamedTypeInfo, ParsedModule, ParsedTarget, parseTarget } from './named-types';
+import {
+  dropIPrefixInCustomTypes,
+  extractTargetsSharedTypes,
+  NamedTypeInfo,
+  ParsedModule,
+  ParsedTarget,
+  parseTarget,
+} from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
 import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView } from '../renderer/views';
@@ -26,11 +33,17 @@ export class CodeGenerator {
     private readonly predefinedTypes: Set<string>,
     private readonly defaultCustomTags: Record<string, unknown>,
     private readonly skipInvalidMethods: boolean,
-    private readonly dropInterfaceIPrefix: boolean,
+    private readonly dropInterfaceIPrefix: boolean
   ) {}
 
   parseTarget(interfacePaths: string[], exportedInterfaceBases?: Set<string>, tsconfigPath?: string): ParsedTarget {
-    const parser = new Parser(interfacePaths, this.predefinedTypes, this.skipInvalidMethods, exportedInterfaceBases, tsconfigPath);
+    const parser = new Parser(
+      interfacePaths,
+      this.predefinedTypes,
+      this.skipInvalidMethods,
+      exportedInterfaceBases,
+      tsconfigPath
+    );
     const modules = parser.parse();
 
     modules.forEach((module) => applyDefaultCustomTags(module, this.defaultCustomTags));
@@ -69,16 +82,17 @@ export class CodeGenerator {
   renderModules(modules: ParsedModule[], options: RenderOptions): void {
     const valueTransformer = this.getValueTransformer(options.language, options.typeNameMap);
 
-    const moduleViews = modules.map((module) =>
-      this.getModuleView(module, valueTransformer)
-    );
+    const moduleViews = modules.map((module) => this.getModuleView(module, valueTransformer));
 
     if (path.extname(options.outputPath) === '') {
       // The path is a directory
       moduleViews.forEach((moduleView) => {
         const renderedCode = renderCode(options.templatePath, moduleView);
 
-        this.writeFile(renderedCode, path.join(options.outputPath, `${moduleView.moduleName}${this.getFileExtension(options.language)}`));
+        this.writeFile(
+          renderedCode,
+          path.join(options.outputPath, `${moduleView.moduleName}${this.getFileExtension(options.language)}`)
+        );
       });
     } else {
       moduleViews.forEach((moduleView, index) => {
@@ -93,9 +107,7 @@ export class CodeGenerator {
   renderNamedTypes(sharedTypes: NamedTypeInfo[], options: RenderOptions): void {
     const valueTransformer = this.getValueTransformer(options.language, options.typeNameMap);
 
-    const namedTypesView = sharedTypes.map((namedType) =>
-      this.getNamedTypeView(namedType, valueTransformer)
-    );
+    const namedTypesView = sharedTypes.map((namedType) => this.getNamedTypeView(namedType, valueTransformer));
     const renderedCode = renderCode(options.templatePath, namedTypesView);
     this.writeFile(renderedCode, options.outputPath);
   }
@@ -124,10 +136,7 @@ export class CodeGenerator {
     return namedTypeView;
   }
 
-  private getModuleView(
-    module: ParsedModule,
-    valueTransformer: ValueTransformer
-  ): ModuleView {
+  private getModuleView(module: ParsedModule, valueTransformer: ValueTransformer): ModuleView {
     return new ModuleView(
       module,
       module.associatedTypes.map((associatedType) => this.getNamedTypeView(associatedType, valueTransformer)),

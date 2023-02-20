@@ -27,7 +27,12 @@ import { ParserLogger } from '../logger/ParserLogger';
 import { ValueParserError } from './ValueParserError';
 
 export class ValueParser {
-  constructor(private readonly checker: ts.TypeChecker, private readonly predefinedTypes: Set<string>, private readonly logger: ParserLogger, private readonly skipInvalidMethods: boolean) {}
+  constructor(
+    private readonly checker: ts.TypeChecker,
+    private readonly predefinedTypes: Set<string>,
+    private readonly logger: ParserLogger,
+    private readonly skipInvalidMethods: boolean
+  ) {}
 
   parseFunctionReturnType(methodSignature: ts.SignatureDeclarationBase): [ValueType | null, boolean] {
     if (methodSignature.type === undefined) {

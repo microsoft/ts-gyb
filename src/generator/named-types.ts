@@ -79,7 +79,7 @@ export function extractTargetsSharedTypes(targets: ParsedTarget[]): NamedTypeInf
 
   const sharedTypes = Object.entries(typeTargetsMap)
     .filter(([, [, targetSet]]) => targetSet.size > 1)
-    .map(([, [namedType,]]) => namedType);
+    .map(([, [namedType]]) => namedType);
 
   const sharedTypeNames = new Set(sharedTypes.map(({ type }) => type.name));
 

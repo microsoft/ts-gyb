@@ -76,7 +76,7 @@ export interface RenderConfiguration {
    * A list of render configurations.
    */
   renders: TargetRenderConfiguration[];
-  
+
   /**
    * Template path for named types. Must be a mustache template.
    * If it is a relative path, it will be resolved based on the configuration file path.
