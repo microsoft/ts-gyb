@@ -13,7 +13,13 @@ export class Parser {
 
   private valueParser: ValueParser;
 
-  constructor(globPatterns: string[], predefinedTypes: Set<string>, skipInvalidMethods = false, private readonly exportedInterfaceBases: Set<string> | undefined, tsconfigPath: string | undefined) {
+  constructor(
+    globPatterns: string[],
+    predefinedTypes: Set<string>,
+    skipInvalidMethods = false,
+    private readonly exportedInterfaceBases: Set<string> | undefined,
+    tsconfigPath: string | undefined
+  ) {
     const filePaths = globPatterns.flatMap((pattern) => glob.sync(pattern));
 
     if (tsconfigPath !== undefined) {
@@ -33,9 +39,14 @@ export class Parser {
         options: {},
       });
     }
-  
+
     this.checker = this.program.getTypeChecker();
-    this.valueParser = new ValueParser(this.checker, predefinedTypes, new ParserLogger(this.checker), skipInvalidMethods);
+    this.valueParser = new ValueParser(
+      this.checker,
+      predefinedTypes,
+      new ParserLogger(this.checker),
+      skipInvalidMethods
+    );
   }
 
   parse(): Module[] {
@@ -67,12 +78,13 @@ export class Parser {
       throw Error('Invalid module node');
     }
 
-    const exportedInterfaceBases = node.heritageClauses?.flatMap((heritageClause) => heritageClause.types.map((type) => type.getText())) ?? [];
+    const exportedInterfaceBases =
+      node.heritageClauses?.flatMap((heritageClause) => heritageClause.types.map((type) => type.getText())) ?? [];
 
     const jsDocTagsResult = parseTypeJSDocTags(symbol);
 
     if (this.exportedInterfaceBases !== undefined) {
-      if (!(exportedInterfaceBases.some((extendedInterface) => this.exportedInterfaceBases?.has(extendedInterface)))) {
+      if (!exportedInterfaceBases.some((extendedInterface) => this.exportedInterfaceBases?.has(extendedInterface))) {
         return null;
       }
     } else if (!jsDocTagsResult.shouldExport) {

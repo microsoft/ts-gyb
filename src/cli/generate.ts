@@ -11,15 +11,14 @@ export function generateWithConfig(config: Configuration): void {
   );
 
   const namedTargets = Object.fromEntries(
-    Object.entries(config.parsing.targets)
-      .map(([target, targetConfig]) => ([
-        target,
-        generator.parseTarget(
-          targetConfig.source, 
-          targetConfig.exportedInterfaceBases !== undefined ? new Set(targetConfig.exportedInterfaceBases) : undefined,
-          targetConfig.tsconfigPath
-          )
-        ]))
+    Object.entries(config.parsing.targets).map(([target, targetConfig]) => [
+      target,
+      generator.parseTarget(
+        targetConfig.source,
+        targetConfig.exportedInterfaceBases !== undefined ? new Set(targetConfig.exportedInterfaceBases) : undefined,
+        targetConfig.tsconfigPath
+      ),
+    ])
   );
 
   let sharedTypes = generator.extractTargetsSharedTypes(Object.values(namedTargets));
