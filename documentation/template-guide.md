@@ -1,6 +1,6 @@
 # Template Guide
 
-ts-gyb uses [mustache](http://mustache.github.io) template to generate code. Refer to [mustache Manul](http://mustache.github.io/mustache.5.html) for supported syntax.
+ts-gyb uses [mustache](http://mustache.github.io) template to generate code. Refer to [mustache Manual](http://mustache.github.io/mustache.5.html) for supported syntax.
 
 ## Required templates
 
