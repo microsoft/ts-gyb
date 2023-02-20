@@ -17,6 +17,10 @@ export interface TargetParseConfiguration {
    * ```
    */
   exportedInterfaceBases?: string[];
+  /**
+   * Provide a specific path for the `tsconfig.json` file.
+   */
+  tsconfigPath?: string;
 }
 
 /**
