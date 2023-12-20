@@ -1,5 +1,5 @@
 import { Method } from '../../types';
-import { uniqueNameAsMethodParameter, uniqueNameAsMethodReturnType } from '../../utils';
+import { uniquePathWithMethodParameter, uniquePathWithMethodReturnType } from '../../utils';
 import { getDocumentationLines } from '../utils';
 import { ValueTransformer } from '../value-transformer';
 
@@ -23,7 +23,7 @@ export class MethodView {
       name: parameter.name,
       type: this.valueTransformer.convertValueType(
         parameter.type,
-        uniqueNameAsMethodParameter(this.ownerName, this.methodName, parameter.name)
+        uniquePathWithMethodParameter(this.ownerName, this.methodName, parameter.name)
       ),
       last: index === this.method.parameters.length - 1,
     }));
@@ -36,7 +36,7 @@ export class MethodView {
 
     return this.valueTransformer.convertValueType(
       this.method.returnType,
-      uniqueNameAsMethodReturnType(this.ownerName, this.methodName)
+      uniquePathWithMethodReturnType(this.ownerName, this.methodName)
     );
   }
 
@@ -47,7 +47,7 @@ export class MethodView {
 
     return this.valueTransformer.convertNonOptionalValueType(
       this.method.returnType,
-      uniqueNameAsMethodReturnType(this.ownerName, this.methodName)
+      uniquePathWithMethodReturnType(this.ownerName, this.methodName)
     );
   }
 

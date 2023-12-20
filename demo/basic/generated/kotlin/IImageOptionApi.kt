@@ -20,6 +20,7 @@ interface IImageOptionApiBridge {
     fun getSourceOfImageWithID(id: String, callback: Callback<String?>)
     fun getImageDataList(callback: Callback<String>)
     fun getContentBoundsOfElementWithID(id: String, callback: Callback<String?>)
+    fun getSize(callback: Callback<OverriddenFullSize>)
 }
 
 open class IImageOptionApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson, "imageOption"), IImageOptionApiBridge {
@@ -50,5 +51,9 @@ open class IImageOptionApiBridge(editor: WebEditor, gson: Gson) : JsBridge(edito
         executeJsForResponse(String::class.java, "getContentBoundsOfElementWithID", callback, mapOf(
             "id" to id
         ))
+    }
+
+    override fun getSize(callback: Callback<OverriddenFullSize>) {
+        executeJsForResponse(OverriddenFullSize::class.java, "getSize", callback)
     }
 }

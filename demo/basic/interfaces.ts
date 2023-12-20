@@ -46,6 +46,7 @@ interface FullSize extends BaseSize, CustomSize {
   defEnum: DefaultEnum;
   stringUnion1: 'A1' | 'B1';
   numUnion1: 11 | 21;
+  foo: { stringField: string } | { numberField: number };
 }
 
 interface DictionaryWithAnyKey {
@@ -85,4 +86,5 @@ export interface IImageOptionApi {
   getSourceOfImageWithID({ id }: { id: string }): string | null;
   getImageDataList(): string;
   getContentBoundsOfElementWithID({ id }: { id: string }): string | null;
+  getSize(): FullSize;
 }

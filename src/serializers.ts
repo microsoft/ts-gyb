@@ -15,7 +15,7 @@ import {
   Value,
   isUnionType,
 } from './types';
-import { uniqueNameAsMember, uniqueNameAsMethodParameter, uniqueNameAsMethodReturnType } from './utils';
+import { uniquePathWithMember, uniquePathWithMethodParameter, uniquePathWithMethodReturnType } from './utils';
 
 const keywordColor = chalk.green;
 const identifierColor = chalk.blue;
@@ -98,7 +98,7 @@ ${namedType.members
 function serializeMethod(method: Method, ownerName: string): string {
   const serializedReturnType =
     method.returnType !== null
-      ? `: ${typeColor(serializeValueType(method.returnType, uniqueNameAsMethodReturnType(ownerName, method.name)))}`
+      ? `: ${typeColor(serializeValueType(method.returnType, uniquePathWithMethodReturnType(ownerName, method.name)))}`
       : '';
   return `${serializeDocumentation(method.documentation)}${keywordColor('func')} ${identifierColor(
     method.name
@@ -106,7 +106,7 @@ function serializeMethod(method: Method, ownerName: string): string {
     .map(
       (parameter) =>
         `${parameter.name}: ${typeColor(
-          serializeValueType(parameter.type, uniqueNameAsMethodParameter(ownerName, method.name, parameter.name))
+          serializeValueType(parameter.type, uniquePathWithMethodParameter(ownerName, method.name, parameter.name))
         )}`
     )
     .join(', ')})${serializedReturnType}`;
@@ -116,7 +116,7 @@ function serializeField(field: Field, ownerName: string): string {
   const staticValue =
     field.staticValue !== undefined ? ` = ${serializeStaticValue(field.staticValue, field.type)}` : '';
   return `${identifierColor(field.name)}: ${typeColor(
-    serializeValueType(field.type, uniqueNameAsMember(ownerName, field.name))
+    serializeValueType(field.type, uniquePathWithMember(ownerName, field.name))
   )}${staticValue}`;
 }
 

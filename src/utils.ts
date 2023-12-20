@@ -25,15 +25,15 @@ export function normalizePath(currentPath: string, basePath: string): string {
   return result;
 }
 
-export function uniqueNameAsMember(ownerName: string, memberName: string): string {
-  return `${capitalize(ownerName)}${capitalize(memberName)}`;
+export function uniquePathWithMember(ownerName: string, memberName: string): string {
+  return `${capitalize(ownerName)}Members${capitalize(memberName)}Type`;
 }
 
-export function uniqueNameAsMethodParameter(ownerName: string, methodName: string, parameterName: string): string {
+export function uniquePathWithMethodParameter(ownerName: string, methodName: string, parameterName: string): string {
   return `${capitalize(ownerName)}${capitalize(methodName)}${capitalize(parameterName)}`;
 }
 
-export function uniqueNameAsMethodReturnType(ownerName: string, methodName: string): string {
+export function uniquePathWithMethodReturnType(ownerName: string, methodName: string): string {
   return `${capitalize(ownerName)}${capitalize(methodName)}ReturnType`;
 }
 

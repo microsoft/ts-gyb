@@ -17,7 +17,7 @@ import { ValueTransformer } from './ValueTransformer';
 export class SwiftValueTransformer implements ValueTransformer {
   constructor(private readonly typeNameMap: Record<string, string>) {}
 
-  convertValueType(valueType: ValueType, uniqueName: string): string {
+  convertValueType(valueType: ValueType, uniquePath: string): string {
     if (isBasicType(valueType)) {
       switch (valueType.value) {
         case BasicTypeValue.string:
@@ -40,7 +40,7 @@ export class SwiftValueTransformer implements ValueTransformer {
     }
 
     if (isArraryType(valueType)) {
-      return `[${this.convertValueType(valueType.elementType, uniqueName)}]`;
+      return `[${this.convertValueType(valueType.elementType, uniquePath)}]`;
     }
 
     if (isDictionaryType(valueType)) {
@@ -56,11 +56,11 @@ export class SwiftValueTransformer implements ValueTransformer {
           throw Error('Type not exists');
       }
 
-      return `[${keyType}: ${this.convertValueType(valueType.valueType, uniqueName)}]`;
+      return `[${keyType}: ${this.convertValueType(valueType.valueType, uniquePath)}]`;
     }
 
     if (isOptionalType(valueType)) {
-      return `${this.convertValueType(valueType.wrappedType, uniqueName)}?`;
+      return `${this.convertValueType(valueType.wrappedType, uniquePath)}?`;
     }
 
     if (isPredefinedType(valueType)) {
@@ -68,18 +68,18 @@ export class SwiftValueTransformer implements ValueTransformer {
     }
 
     if (isUnionType(valueType)) {
-      return uniqueName;
+      return uniquePath;
     }
 
     throw Error('Type not handled');
   }
 
-  convertNonOptionalValueType(valueType: ValueType, uniqueName: string): string {
+  convertNonOptionalValueType(valueType: ValueType, uniquePath: string): string {
     if (isOptionalType(valueType)) {
-      return this.convertValueType(valueType.wrappedType, uniqueName);
+      return this.convertValueType(valueType.wrappedType, uniquePath);
     }
 
-    return this.convertValueType(valueType, uniqueName);
+    return this.convertValueType(valueType, uniquePath);
   }
 
   convertValue(value: Value, type: ValueType): string {

@@ -1,6 +1,6 @@
 import { ValueTypeSource } from '../../generator/named-types';
 import { InterfaceType } from '../../types';
-import { uniqueNameAsMember } from '../../utils';
+import { uniquePathWithMember } from '../../utils';
 import { getDocumentationLines } from '../utils';
 import { ValueTransformer } from '../value-transformer';
 
@@ -20,7 +20,7 @@ export class InterfaceTypeView {
     const { typeName } = this;
     return members.map((member, index) => ({
       name: member.name,
-      type: this.valueTransformer.convertValueType(member.type, uniqueNameAsMember(typeName, member.name)),
+      type: this.valueTransformer.convertValueType(member.type, uniquePathWithMember(typeName, member.name)),
       documentationLines: getDocumentationLines(member.documentation),
       last: index === members.length - 1,
     }));
@@ -37,7 +37,7 @@ export class InterfaceTypeView {
 
         return {
           name: member.name,
-          type: this.valueTransformer.convertValueType(member.type, uniqueNameAsMember(typeName, member.name)),
+          type: this.valueTransformer.convertValueType(member.type, uniquePathWithMember(typeName, member.name)),
           value: this.valueTransformer.convertValue(member.staticValue, member.type),
           documentationLines: getDocumentationLines(member.documentation),
         };

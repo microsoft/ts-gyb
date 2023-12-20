@@ -2,9 +2,9 @@ import {
   capitalize,
   basicTypeOfUnion,
   membersOfUnion,
-  uniqueNameAsMember,
-  uniqueNameAsMethodParameter,
-  uniqueNameAsMethodReturnType,
+  uniquePathWithMember,
+  uniquePathWithMethodParameter,
+  uniquePathWithMethodReturnType,
 } from '../utils';
 import {
   isArraryType,
@@ -49,14 +49,18 @@ export type NamedTypesResult = { associatedTypes: Record<string, NamedTypeInfo[]
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
   modules
     .flatMap((module) => fetchRootTypes(module))
-    .forEach(({ valueType, uniqueName }) => {
-      recursiveVisitMembersType(valueType, uniqueName, (namedType) => {
-        if (!isInterfaceType(namedType)) {
-          return;
-        }
+    .forEach(({ valueType, uniquePath }) => {
+      recursiveVisitMembersType(
+        valueType,
+        (namedType) => {
+          if (!isInterfaceType(namedType)) {
+            return;
+          }
 
-        namedType.name = namedType.name?.replace(/^I/, '');
-      });
+          namedType.name = namedType.name?.replace(/^I/, '');
+        },
+        uniquePath
+      );
     });
 }
 
@@ -106,25 +110,29 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
   const typeMap: Record<string, { namedType: NamedType; source: ValueTypeSource; associatedModules: Set<string> }> = {};
 
   modules.forEach((module) => {
-    fetchRootTypes(module).forEach(({ valueType, source, uniqueName }) => {
-      recursiveVisitMembersType(valueType, uniqueName, (membersType, path) => {
-        let namedType = membersType;
-        if (isTupleType(namedType)) {
-          namedType = membersType as unknown as InterfaceType;
-          namedType.kind = ValueTypeKind.interfaceType;
-          namedType.name = path;
-          namedType.documentation = '';
-          namedType.customTags = {};
-        }
+    fetchRootTypes(module).forEach(({ valueType, source, uniquePath }) => {
+      recursiveVisitMembersType(
+        valueType,
+        (membersType, path) => {
+          let namedType = membersType;
+          if (isTupleType(namedType)) {
+            namedType = membersType as unknown as InterfaceType;
+            namedType.kind = ValueTypeKind.interfaceType;
+            namedType.name = path;
+            namedType.documentation = '';
+            namedType.customTags = {};
+          }
 
-        if (typeMap[namedType.name] === undefined) {
-          typeMap[namedType.name] = { namedType, source, associatedModules: new Set() };
-        }
+          if (typeMap[namedType.name] === undefined) {
+            typeMap[namedType.name] = { namedType, source, associatedModules: new Set() };
+          }
 
-        const existingResult = typeMap[namedType.name];
-        existingResult.associatedModules.add(module.name);
-        existingResult.source |= source;
-      });
+          const existingResult = typeMap[namedType.name];
+          existingResult.associatedModules.add(module.name);
+          existingResult.source |= source;
+        },
+        uniquePath
+      );
     });
   });
 
@@ -147,18 +155,18 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
   return { associatedTypes, sharedTypes };
 }
 
-function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTypeSource; uniqueName: string }[] {
+function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTypeSource; uniquePath: string }[] {
   const typesInMembers: ReturnType<typeof fetchRootTypes> = module.members.map((field) => ({
     valueType: field.type,
     source: ValueTypeSource.Field,
-    uniqueName: uniqueNameAsMember(module.name, field.name),
+    uniquePath: uniquePathWithMember(module.name, field.name),
   }));
   const typesInMethods: ReturnType<typeof fetchRootTypes> = module.methods.flatMap((method) =>
     method.parameters
       .map((parameter) => ({
         valueType: parameter.type,
         source: ValueTypeSource.Parameter,
-        uniqueName: uniqueNameAsMethodParameter(module.name, method.name, parameter.name),
+        uniquePath: uniquePathWithMethodParameter(module.name, method.name, parameter.name),
       }))
       .concat(
         method.returnType
@@ -166,7 +174,7 @@ function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTy
               {
                 valueType: method.returnType,
                 source: ValueTypeSource.Return,
-                uniqueName: uniqueNameAsMethodReturnType(module.name, method.name),
+                uniquePath: uniquePathWithMethodReturnType(module.name, method.name),
               },
             ]
           : []
@@ -178,20 +186,14 @@ function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTy
 
 function recursiveVisitMembersType(
   valueType: ValueType,
-  uniqueName: string,
   visit: (membersType: NamedType | TupleType, path: string) => void,
-  path = ''
+  path: string
 ): void {
   if (isInterfaceType(valueType)) {
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(
-        member.type,
-        `${capitalize(valueType.name)}${capitalize(member.name)}`,
-        visit,
-        `${path}${valueType.name}Members${capitalize(member.name)}Type`
-      );
+      recursiveVisitMembersType(member.type, visit, uniquePathWithMember(valueType.name, member.name));
     });
 
     return;
@@ -201,7 +203,7 @@ function recursiveVisitMembersType(
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(member.type, uniqueName, visit, `${path}Members${capitalize(member.name)}Type`);
+      recursiveVisitMembersType(member.type, visit, uniquePathWithMember(path, member.name));
     });
 
     return;
@@ -213,17 +215,17 @@ function recursiveVisitMembersType(
   }
 
   if (isArraryType(valueType)) {
-    recursiveVisitMembersType(valueType.elementType, uniqueName, visit, `${path}Element`);
+    recursiveVisitMembersType(valueType.elementType, visit, `${path}Element`);
     return;
   }
 
   if (isDictionaryType(valueType)) {
-    recursiveVisitMembersType(valueType.valueType, uniqueName, visit, `${path}Value`);
+    recursiveVisitMembersType(valueType.valueType, visit, `${path}Value`);
     return;
   }
 
   if (isOptionalType(valueType)) {
-    recursiveVisitMembersType(valueType.wrappedType, uniqueName, visit, `${path}`);
+    recursiveVisitMembersType(valueType.wrappedType, visit, `${path}`);
     return;
   }
 
@@ -231,7 +233,7 @@ function recursiveVisitMembersType(
     const subType = basicTypeOfUnion(valueType);
     const subNamedType: EnumType = {
       kind: ValueTypeKind.enumType,
-      name: uniqueName,
+      name: path, // use path as unique name
       subType: subType === 'number' ? EnumSubType.number : EnumSubType.string,
       members: membersOfUnion(valueType),
       documentation: '',

@@ -1,5 +1,5 @@
 import { Module } from '../../types';
-import { uniqueNameAsMember } from '../../utils';
+import { uniquePathWithMember } from '../../utils';
 import { ValueTransformer } from '../value-transformer/ValueTransformer';
 import { MethodView } from './MethodView';
 import { NamedTypeView } from './index';
@@ -21,7 +21,7 @@ export class ModuleView {
 
     return members.map((member, index) => ({
       name: member.name,
-      type: this.valueTransformer.convertValueType(member.type, uniqueNameAsMember(this.module.name, member.name)),
+      type: this.valueTransformer.convertValueType(member.type, uniquePathWithMember(this.module.name, member.name)),
       documentationLines: getDocumentationLines(member.documentation),
       last: index === members.length - 1,
     }));

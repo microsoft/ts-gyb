@@ -17,7 +17,7 @@ import { ValueTransformer } from './ValueTransformer';
 export class KotlinValueTransformer implements ValueTransformer {
   constructor(private readonly typeNameMap: Record<string, string>) {}
 
-  convertValueType(valueType: ValueType, uniqueName: string): string {
+  convertValueType(valueType: ValueType, uniquePath: string): string {
     if (isBasicType(valueType)) {
       switch (valueType.value) {
         case BasicTypeValue.string:
@@ -40,7 +40,7 @@ export class KotlinValueTransformer implements ValueTransformer {
     }
 
     if (isArraryType(valueType)) {
-      return `Array<${this.convertValueType(valueType.elementType, uniqueName)}>`;
+      return `Array<${this.convertValueType(valueType.elementType, uniquePath)}>`;
     }
 
     if (isDictionaryType(valueType)) {
@@ -56,11 +56,11 @@ export class KotlinValueTransformer implements ValueTransformer {
           throw Error('Type not exists');
       }
 
-      return `Map<${keyType}, ${this.convertValueType(valueType.valueType, uniqueName)}>`;
+      return `Map<${keyType}, ${this.convertValueType(valueType.valueType, uniquePath)}>`;
     }
 
     if (isOptionalType(valueType)) {
-      return `${this.convertValueType(valueType.wrappedType, uniqueName)}?`;
+      return `${this.convertValueType(valueType.wrappedType, uniquePath)}?`;
     }
 
     if (isPredefinedType(valueType)) {
@@ -68,18 +68,18 @@ export class KotlinValueTransformer implements ValueTransformer {
     }
 
     if (isUnionType(valueType)) {
-      return uniqueName;
+      return uniquePath;
     }
 
     throw Error('Type not handled');
   }
 
-  convertNonOptionalValueType(valueType: ValueType, uniqueName: string): string {
+  convertNonOptionalValueType(valueType: ValueType, uniquePath: string): string {
     if (isOptionalType(valueType)) {
-      return this.convertValueType(valueType.wrappedType, uniqueName);
+      return this.convertValueType(valueType.wrappedType, uniquePath);
     }
 
-    return this.convertValueType(valueType, uniqueName);
+    return this.convertValueType(valueType, uniquePath);
   }
 
   convertValue(value: Value, type: ValueType): string {
