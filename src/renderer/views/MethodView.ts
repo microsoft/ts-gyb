@@ -1,9 +1,14 @@
 import { Method } from '../../types';
+import { uniqueNameAsMethodParameter, uniqueNameAsMethodReturnType } from '../../utils';
 import { getDocumentationLines } from '../utils';
 import { ValueTransformer } from '../value-transformer';
 
 export class MethodView {
-  constructor(private readonly method: Method, private readonly valueTransformer: ValueTransformer) {}
+  constructor(
+    private readonly method: Method,
+    private readonly valueTransformer: ValueTransformer,
+    private readonly ownerName: string
+  ) {}
 
   get methodName(): string {
     return this.method.name;
@@ -16,7 +21,10 @@ export class MethodView {
   get parameters(): { name: string; type: string; last: boolean }[] {
     return this.method.parameters.map((parameter, index) => ({
       name: parameter.name,
-      type: this.valueTransformer.convertValueType(parameter.type),
+      type: this.valueTransformer.convertValueType(
+        parameter.type,
+        uniqueNameAsMethodParameter(this.ownerName, this.methodName, parameter.name)
+      ),
       last: index === this.method.parameters.length - 1,
     }));
   }
@@ -26,7 +34,10 @@ export class MethodView {
       return null;
     }
 
-    return this.valueTransformer.convertValueType(this.method.returnType);
+    return this.valueTransformer.convertValueType(
+      this.method.returnType,
+      uniqueNameAsMethodReturnType(this.ownerName, this.methodName)
+    );
   }
 
   get nonOptionalReturnType(): string | null {
@@ -34,7 +45,10 @@ export class MethodView {
       return null;
     }
 
-    return this.valueTransformer.convertNonOptionalValueType(this.method.returnType);
+    return this.valueTransformer.convertNonOptionalValueType(
+      this.method.returnType,
+      uniqueNameAsMethodReturnType(this.ownerName, this.methodName)
+    );
   }
 
   get documentationLines(): string[] {

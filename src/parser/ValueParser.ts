@@ -16,11 +16,12 @@ import {
   DictionaryKeyType,
   isInterfaceType,
   PredefinedType,
-  Value,
   TupleType,
   isTupleType,
   EnumField,
   isBasicType,
+  LiteralType,
+  UnionType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
@@ -243,10 +244,16 @@ export class ValueParser {
 
     let nullable = false;
     let valueType: ValueType | undefined;
+    const literalValues: LiteralType[] = [];
 
     node.types.forEach((typeNode) => {
       if (isUndefinedOrNull(typeNode)) {
         nullable = true;
+        return;
+      }
+      const literalKind = this.parseLiteralNode(typeNode);
+      if (literalKind !== null) {
+        literalValues.push(literalKind);
         return;
       }
 
@@ -276,6 +283,28 @@ export class ValueParser {
       };
     });
 
+    if (literalValues.length > 0) {
+      const kindSet = new Set(
+        literalValues.map((obj) => {
+          if ('value' in obj.type) {
+            return obj.type.value;
+          }
+          return null;
+        })
+      );
+
+      if (kindSet.size !== 1) {
+        throw new ValueParserError(
+          `union type ${node.getText()} has multiple literal type`,
+          'Union type must contain only one supported literal type'
+        );
+      }
+      const unionKind: UnionType = {
+        kind: ValueTypeKind.unionType,
+        value: literalValues,
+      };
+      return unionKind;
+    }
     if (!valueType) {
       throw new ValueParserError(
         `union type ${node.getText()} is invalid`,
@@ -649,10 +678,11 @@ export class ValueParser {
     };
   }
 
-  private parseLiteralNode(typeNode: ts.TypeNode): { type: ValueType; value: Value } | null {
+  private parseLiteralNode(typeNode: ts.TypeNode): LiteralType | null {
     if (ts.isLiteralTypeNode(typeNode)) {
       if (ts.isNumericLiteral(typeNode.literal)) {
         return {
+          kind: ValueTypeKind.literalType,
           type: {
             kind: ValueTypeKind.basicType,
             value: BasicTypeValue.number,
@@ -663,6 +693,7 @@ export class ValueParser {
 
       if (ts.isStringLiteral(typeNode.literal)) {
         return {
+          kind: ValueTypeKind.literalType,
           type: {
             kind: ValueTypeKind.basicType,
             value: BasicTypeValue.string,
@@ -692,6 +723,7 @@ export class ValueParser {
           throw Error(`Invalid enum member ${typeName}`);
         }
         return {
+          kind: ValueTypeKind.literalType,
           type: enumType,
           value: referencedNode.name.getText(),
         };

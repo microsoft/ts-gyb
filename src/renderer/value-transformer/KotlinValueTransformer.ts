@@ -10,13 +10,14 @@ import {
   isPredefinedType,
   ValueType,
   Value,
+  isUnionType,
 } from '../../types';
 import { ValueTransformer } from './ValueTransformer';
 
 export class KotlinValueTransformer implements ValueTransformer {
   constructor(private readonly typeNameMap: Record<string, string>) {}
 
-  convertValueType(valueType: ValueType): string {
+  convertValueType(valueType: ValueType, uniqueName: string): string {
     if (isBasicType(valueType)) {
       switch (valueType.value) {
         case BasicTypeValue.string:
@@ -39,7 +40,7 @@ export class KotlinValueTransformer implements ValueTransformer {
     }
 
     if (isArraryType(valueType)) {
-      return `Array<${this.convertValueType(valueType.elementType)}>`;
+      return `Array<${this.convertValueType(valueType.elementType, uniqueName)}>`;
     }
 
     if (isDictionaryType(valueType)) {
@@ -55,26 +56,30 @@ export class KotlinValueTransformer implements ValueTransformer {
           throw Error('Type not exists');
       }
 
-      return `Map<${keyType}, ${this.convertValueType(valueType.valueType)}>`;
+      return `Map<${keyType}, ${this.convertValueType(valueType.valueType, uniqueName)}>`;
     }
 
     if (isOptionalType(valueType)) {
-      return `${this.convertValueType(valueType.wrappedType)}?`;
+      return `${this.convertValueType(valueType.wrappedType, uniqueName)}?`;
     }
 
     if (isPredefinedType(valueType)) {
       return this.typeNameMap[valueType.name] ?? valueType.name;
     }
 
+    if (isUnionType(valueType)) {
+      return uniqueName;
+    }
+
     throw Error('Type not handled');
   }
 
-  convertNonOptionalValueType(valueType: ValueType): string {
+  convertNonOptionalValueType(valueType: ValueType, uniqueName: string): string {
     if (isOptionalType(valueType)) {
-      return this.convertValueType(valueType.wrappedType);
+      return this.convertValueType(valueType.wrappedType, uniqueName);
     }
 
-    return this.convertValueType(valueType);
+    return this.convertValueType(valueType, uniqueName);
   }
 
   convertValue(value: Value, type: ValueType): string {
@@ -120,10 +125,14 @@ export class KotlinValueTransformer implements ValueTransformer {
   }
 
   convertEnumKey(text: string): string {
-    return text
-      .replace(/\.?([A-Z]+)/g, (_, p1: string) => `_${p1}`)
-      .replace(/^_/, '')
-      .toUpperCase();
+    let result = text.replace(/\.?([A-Z]+)/g, (_, p1: string) => `_${p1}`);
+
+    const testText = result.replace(/^_/, '');
+    if (Number.isNaN(Number(testText))) {
+      result = testText;
+    }
+
+    return result.toUpperCase();
   }
 
   convertTypeNameFromCustomMap(name: string): string {

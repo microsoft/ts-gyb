@@ -1,4 +1,11 @@
-import { capitalize } from '../utils';
+import {
+  capitalize,
+  basicTypeOfUnion,
+  membersOfUnion,
+  uniqueNameAsMember,
+  uniqueNameAsMethodParameter,
+  uniqueNameAsMethodReturnType,
+} from '../utils';
 import {
   isArraryType,
   isInterfaceType,
@@ -12,6 +19,8 @@ import {
   TupleType,
   isTupleType,
   ValueTypeKind,
+  isUnionType,
+  EnumSubType,
 } from '../types';
 
 export const enum ValueTypeSource {
@@ -40,8 +49,8 @@ export type NamedTypesResult = { associatedTypes: Record<string, NamedTypeInfo[]
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
   modules
     .flatMap((module) => fetchRootTypes(module))
-    .forEach(([valueType]) => {
-      recursiveVisitMembersType(valueType, (namedType) => {
+    .forEach(({ valueType, uniqueName }) => {
+      recursiveVisitMembersType(valueType, uniqueName, (namedType) => {
         if (!isInterfaceType(namedType)) {
           return;
         }
@@ -97,8 +106,8 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
   const typeMap: Record<string, { namedType: NamedType; source: ValueTypeSource; associatedModules: Set<string> }> = {};
 
   modules.forEach((module) => {
-    fetchRootTypes(module).forEach(([valueType, source]) => {
-      recursiveVisitMembersType(valueType, (membersType, path) => {
+    fetchRootTypes(module).forEach(({ valueType, source, uniqueName }) => {
+      recursiveVisitMembersType(valueType, uniqueName, (membersType, path) => {
         let namedType = membersType;
         if (isTupleType(namedType)) {
           namedType = membersType as unknown as InterfaceType;
@@ -138,15 +147,30 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
   return { associatedTypes, sharedTypes };
 }
 
-function fetchRootTypes(module: Module): [ValueType, ValueTypeSource][] {
-  const typesInMembers: [ValueType, ValueTypeSource][] = module.members.map((field) => [
-    field.type,
-    ValueTypeSource.Field,
-  ]);
-  const typesInMethods: [ValueType, ValueTypeSource][] = module.methods.flatMap((method) =>
+function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTypeSource; uniqueName: string }[] {
+  const typesInMembers: ReturnType<typeof fetchRootTypes> = module.members.map((field) => ({
+    valueType: field.type,
+    source: ValueTypeSource.Field,
+    uniqueName: uniqueNameAsMember(module.name, field.name),
+  }));
+  const typesInMethods: ReturnType<typeof fetchRootTypes> = module.methods.flatMap((method) =>
     method.parameters
-      .map((parameter): [ValueType, ValueTypeSource] => [parameter.type, ValueTypeSource.Parameter])
-      .concat(method.returnType ? [[method.returnType, ValueTypeSource.Return]] : [])
+      .map((parameter) => ({
+        valueType: parameter.type,
+        source: ValueTypeSource.Parameter,
+        uniqueName: uniqueNameAsMethodParameter(module.name, method.name, parameter.name),
+      }))
+      .concat(
+        method.returnType
+          ? [
+              {
+                valueType: method.returnType,
+                source: ValueTypeSource.Return,
+                uniqueName: uniqueNameAsMethodReturnType(module.name, method.name),
+              },
+            ]
+          : []
+      )
   );
 
   return typesInMembers.concat(typesInMethods);
@@ -154,6 +178,7 @@ function fetchRootTypes(module: Module): [ValueType, ValueTypeSource][] {
 
 function recursiveVisitMembersType(
   valueType: ValueType,
+  uniqueName: string,
   visit: (membersType: NamedType | TupleType, path: string) => void,
   path = ''
 ): void {
@@ -161,7 +186,12 @@ function recursiveVisitMembersType(
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(member.type, visit, `${path}${valueType.name}Members${capitalize(member.name)}Type`);
+      recursiveVisitMembersType(
+        member.type,
+        `${capitalize(valueType.name)}${capitalize(member.name)}`,
+        visit,
+        `${path}${valueType.name}Members${capitalize(member.name)}Type`
+      );
     });
 
     return;
@@ -171,7 +201,7 @@ function recursiveVisitMembersType(
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(member.type, visit, `${path}Members${capitalize(member.name)}Type`);
+      recursiveVisitMembersType(member.type, uniqueName, visit, `${path}Members${capitalize(member.name)}Type`);
     });
 
     return;
@@ -183,16 +213,33 @@ function recursiveVisitMembersType(
   }
 
   if (isArraryType(valueType)) {
-    recursiveVisitMembersType(valueType.elementType, visit, `${path}Element`);
+    recursiveVisitMembersType(valueType.elementType, uniqueName, visit, `${path}Element`);
     return;
   }
 
   if (isDictionaryType(valueType)) {
-    recursiveVisitMembersType(valueType.valueType, visit, `${path}Value`);
+    recursiveVisitMembersType(valueType.valueType, uniqueName, visit, `${path}Value`);
     return;
   }
 
   if (isOptionalType(valueType)) {
-    recursiveVisitMembersType(valueType.wrappedType, visit, `${path}`);
+    recursiveVisitMembersType(valueType.wrappedType, uniqueName, visit, `${path}`);
+    return;
   }
+
+  if (isUnionType(valueType)) {
+    const subType = basicTypeOfUnion(valueType);
+    const subNamedType: EnumType = {
+      kind: ValueTypeKind.enumType,
+      name: uniqueName,
+      subType: subType === 'number' ? EnumSubType.number : EnumSubType.string,
+      members: membersOfUnion(valueType),
+      documentation: '',
+      customTags: {},
+    };
+    visit(subNamedType, path);
+    return;
+  }
+
+  console.log(`Unhandled value type ${JSON.stringify(valueType)}`);
 }

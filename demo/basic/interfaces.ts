@@ -36,14 +36,16 @@ enum DefaultEnum {
  */
 interface FullSize extends BaseSize, CustomSize {
   /**
-  * Example documentation for member
-  */
+   * Example documentation for member
+   */
   member: NumEnum.one;
   size: number;
   count: CodeGen_Int;
   stringEnum: StringEnum;
   numEnum: NumEnum;
   defEnum: DefaultEnum;
+  stringUnion1: 'A1' | 'B1';
+  numUnion1: 11 | 21;
 }
 
 interface DictionaryWithAnyKey {
@@ -68,6 +70,8 @@ export interface IHtmlApi {
   requestRenderingResult(): void;
   getSize(): FullSize;
   getAliasSize(): AliasSize;
+  getName(): 'A2' | 'B2';
+  getAge({ sex }: { sex: 'Male' | 'Female' }): 21 | 22;
   testDictionaryWithAnyKey({ dict }: { dict: DictionaryWithAnyKey }): void;
 }
 

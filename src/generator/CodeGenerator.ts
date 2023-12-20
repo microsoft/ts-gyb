@@ -76,7 +76,7 @@ export class CodeGenerator {
 
   printSharedTypes(sharedTypes: NamedTypeInfo[]): void {
     console.log('Shared named types:\n');
-    console.log(sharedTypes.map((namedType) => serializeNamedType(namedType.type)).join('\n\n'));
+    console.log(sharedTypes.map((namedType) => serializeNamedType(namedType.type, '')).join('\n\n'));
   }
 
   renderModules(modules: ParsedModule[], options: RenderOptions): void {

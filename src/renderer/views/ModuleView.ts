@@ -1,4 +1,5 @@
 import { Module } from '../../types';
+import { uniqueNameAsMember } from '../../utils';
 import { ValueTransformer } from '../value-transformer/ValueTransformer';
 import { MethodView } from './MethodView';
 import { NamedTypeView } from './index';
@@ -20,14 +21,14 @@ export class ModuleView {
 
     return members.map((member, index) => ({
       name: member.name,
-      type: this.valueTransformer.convertValueType(member.type),
+      type: this.valueTransformer.convertValueType(member.type, uniqueNameAsMember(this.module.name, member.name)),
       documentationLines: getDocumentationLines(member.documentation),
       last: index === members.length - 1,
     }));
   }
 
   get methods(): MethodView[] {
-    return this.module.methods.map((method) => new MethodView(method, this.valueTransformer));
+    return this.module.methods.map((method) => new MethodView(method, this.valueTransformer, this.module.name));
   }
 
   get exportedInterfaceBases(): Record<string, boolean> {
