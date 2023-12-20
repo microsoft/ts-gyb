@@ -130,7 +130,7 @@ export interface LiteralType extends BaseValueType {
 
 export interface UnionType extends BaseValueType {
   kind: ValueTypeKind.unionType;
-  value: LiteralType[];
+  memberTypes: LiteralType[];
 }
 
 export function isBasicType(valueType: ValueType): valueType is BasicType {
