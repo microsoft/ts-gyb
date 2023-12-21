@@ -1,5 +1,4 @@
 import {
-  capitalize,
   basicTypeOfUnion,
   membersOfUnion,
   uniquePathWithMember,
