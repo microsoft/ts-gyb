@@ -66,12 +66,12 @@ public class IHtmlApi {
     jsExecutor.execute(with: "htmlApi", feature: "getName", args: nil, completion: completion)
   }
 
-  public func getAge(sex: IHtmlApiGetAgeSex, completion: @escaping BridgeCompletion<IHtmlApiGetAgeReturnType>) {
+  public func getAge(gender: IHtmlApiGetAgeGender, completion: @escaping BridgeCompletion<IHtmlApiGetAgeReturnType>) {
     struct Args: Encodable {
-      let sex: IHtmlApiGetAgeSex
+      let gender: IHtmlApiGetAgeGender
     }
     let args = Args(
-      sex: sex
+      gender: gender
     )
     jsExecutor.execute(with: "htmlApi", feature: "getAge", args: args, completion: completion)
   }
@@ -102,7 +102,7 @@ public enum IHtmlApiGetNameReturnType: String, Codable {
   case b2 = "B2"
 }
 
-public enum IHtmlApiGetAgeSex: String, Codable {
+public enum IHtmlApiGetAgeGender: String, Codable {
   case male = "Male"
   case female = "Female"
 }

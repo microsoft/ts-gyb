@@ -31,7 +31,7 @@ interface IHtmlApiBridge {
     fun getSize(callback: Callback<OverriddenFullSize>)
     fun getAliasSize(callback: Callback<JSBaseSize>)
     fun getName(callback: Callback<IHtmlApiGetNameReturnType>)
-    fun getAge(sex: IHtmlApiGetAgeSex, callback: Callback<IHtmlApiGetAgeReturnType>)
+    fun getAge(gender: IHtmlApiGetAgeGender, callback: Callback<IHtmlApiGetAgeReturnType>)
     fun testDictionaryWithAnyKey(dict: Map<String, String>)
 }
 
@@ -75,9 +75,9 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
         executeJsForResponse(IHtmlApiGetNameReturnType::class.java, "getName", callback)
     }
 
-    override fun getAge(sex: IHtmlApiGetAgeSex, callback: Callback<IHtmlApiGetAgeReturnType>) {
+    override fun getAge(gender: IHtmlApiGetAgeGender, callback: Callback<IHtmlApiGetAgeReturnType>) {
         executeJsForResponse(IHtmlApiGetAgeReturnType::class.java, "getAge", callback, mapOf(
-            "sex" to sex
+            "gender" to gender
         ))
     }
 
@@ -98,7 +98,7 @@ enum class IHtmlApiGetNameReturnType {
     @SerializedName("B2") B2
 }
 
-enum class IHtmlApiGetAgeSex {
+enum class IHtmlApiGetAgeGender {
     @SerializedName("Male") MALE,
     @SerializedName("Female") FEMALE
 }

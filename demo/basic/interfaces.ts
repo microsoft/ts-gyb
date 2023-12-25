@@ -72,7 +72,7 @@ export interface IHtmlApi {
   getSize(): FullSize;
   getAliasSize(): AliasSize;
   getName(): 'A2' | 'B2';
-  getAge({ sex }: { sex: 'Male' | 'Female' }): 21 | 22;
+  getAge({ gender }: { gender: 'Male' | 'Female' }): 21 | 22;
   testDictionaryWithAnyKey({ dict }: { dict: DictionaryWithAnyKey }): void;
 }
 
