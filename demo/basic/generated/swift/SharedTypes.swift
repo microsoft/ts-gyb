@@ -14,7 +14,8 @@ public struct OverriddenFullSize: Codable {
   public var stringEnum: StringEnum
   public var numEnum: NumEnum
   public var defEnum: DefaultEnum
-  public var stringUnion1: OverriddenFullSizeMembersStringUnion1Type
+  public var stringUnion: OverriddenFullSizeMembersStringUnionType
+  public var nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?
   public var numUnion1: OverriddenFullSizeMembersNumUnion1Type
   public var foo: OverriddenFullSizeMembersFooType
   public var width: Double
@@ -23,13 +24,14 @@ public struct OverriddenFullSize: Codable {
   /// Example documentation for member
   private var member: NumEnum = .one
 
-  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion1: OverriddenFullSizeMembersStringUnion1Type, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, width: Double, height: Double, scale: Double) {
+  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion: OverriddenFullSizeMembersStringUnionType, nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, width: Double, height: Double, scale: Double) {
     self.size = size
     self.count = count
     self.stringEnum = stringEnum
     self.numEnum = numEnum
     self.defEnum = defEnum
-    self.stringUnion1 = stringUnion1
+    self.stringUnion = stringUnion
+    self.nullableStringUnion = nullableStringUnion
     self.numUnion1 = numUnion1
     self.foo = foo
     self.width = width
@@ -54,7 +56,12 @@ public enum DefaultEnum: Int, Codable {
   case defaultValueD = 1
 }
 
-public enum OverriddenFullSizeMembersStringUnion1Type: String, Codable {
+public enum OverriddenFullSizeMembersStringUnionType: String, Codable {
+  case a1 = "A1"
+  case b1 = "B1"
+}
+
+public enum OverriddenFullSizeMembersNullableStringUnionType: String, Codable {
   case a1 = "A1"
   case b1 = "B1"
 }

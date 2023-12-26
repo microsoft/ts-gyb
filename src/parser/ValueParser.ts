@@ -22,6 +22,7 @@ import {
   isBasicType,
   LiteralType,
   UnionType,
+  OptionalType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
@@ -303,6 +304,13 @@ export class ValueParser {
         kind: ValueTypeKind.unionType,
         members: literalValues,
       };
+      if (nullable) {
+        const optionalType: OptionalType = {
+          kind: ValueTypeKind.optionalType,
+          wrappedType: unionKind,
+        };
+        return optionalType;
+      }
       return unionKind;
     }
     if (!valueType) {
