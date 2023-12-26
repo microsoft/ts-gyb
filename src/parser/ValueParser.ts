@@ -690,7 +690,6 @@ export class ValueParser {
     if (ts.isLiteralTypeNode(typeNode)) {
       if (ts.isNumericLiteral(typeNode.literal)) {
         return {
-          kind: ValueTypeKind.literalType,
           type: {
             kind: ValueTypeKind.basicType,
             value: BasicTypeValue.number,
@@ -701,7 +700,6 @@ export class ValueParser {
 
       if (ts.isStringLiteral(typeNode.literal)) {
         return {
-          kind: ValueTypeKind.literalType,
           type: {
             kind: ValueTypeKind.basicType,
             value: BasicTypeValue.string,
@@ -731,7 +729,6 @@ export class ValueParser {
           throw Error(`Invalid enum member ${typeName}`);
         }
         return {
-          kind: ValueTypeKind.literalType,
           type: enumType,
           value: referencedNode.name.getText(),
         };

@@ -31,7 +31,6 @@ export type NonEmptyType =
   | ArrayType
   | DictionaryType
   | PredefinedType
-  | LiteralType
   | UnionType;
 
 export enum ValueTypeKind {
@@ -43,7 +42,6 @@ export enum ValueTypeKind {
   dictionaryType = 'dictionaryType',
   optionalType = 'optionalType',
   predefinedType = 'predefinedType',
-  literalType = 'literalType',
   unionType = 'unionType',
 }
 
@@ -117,8 +115,8 @@ export interface PredefinedType extends BaseValueType {
   name: string;
 }
 
-export interface LiteralType extends BaseValueType {
-  kind: ValueTypeKind.literalType;
+/// inferace for parseLiteralNode in src/parser/ValueParser.ts
+export interface LiteralType {
   type:
     | {
         kind: ValueTypeKind.basicType;
