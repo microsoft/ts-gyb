@@ -20,6 +20,7 @@ import {
   ValueTypeKind,
   isUnionType,
   EnumSubType,
+  UnionType,
 } from '../types';
 
 export const enum ValueTypeSource {
@@ -113,13 +114,23 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
       recursiveVisitMembersType(
         valueType,
         (membersType, path) => {
-          let namedType = membersType;
+          let namedType = membersType as unknown as NamedType;
           if (isTupleType(namedType)) {
             namedType = membersType as unknown as InterfaceType;
             namedType.kind = ValueTypeKind.interfaceType;
             namedType.name = path;
             namedType.documentation = '';
             namedType.customTags = {};
+          } else if (isUnionType(namedType)) {
+            const enumType = membersType as unknown as EnumType;
+            const subType = basicTypeOfUnion(namedType);
+
+            enumType.kind = ValueTypeKind.enumType;
+            enumType.name = path;
+            enumType.subType = subType === 'number' ? EnumSubType.number : EnumSubType.string;
+            enumType.members = membersOfUnion(namedType);
+            enumType.documentation = '';
+            enumType.customTags = {};
           }
 
           if (typeMap[namedType.name] === undefined) {
@@ -185,7 +196,7 @@ function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTy
 
 function recursiveVisitMembersType(
   valueType: ValueType,
-  visit: (membersType: NamedType | TupleType, path: string) => void,
+  visit: (membersType: NamedType | TupleType | UnionType, path: string) => void,
   path: string
 ): void {
   if (isInterfaceType(valueType)) {
@@ -229,16 +240,7 @@ function recursiveVisitMembersType(
   }
 
   if (isUnionType(valueType)) {
-    const subType = basicTypeOfUnion(valueType);
-    const subNamedType: EnumType = {
-      kind: ValueTypeKind.enumType,
-      name: path, // use path as unique name
-      subType: subType === 'number' ? EnumSubType.number : EnumSubType.string,
-      members: membersOfUnion(valueType),
-      documentation: '',
-      customTags: {},
-    };
-    visit(subNamedType, path);
+    visit(valueType, path);
     return;
   }
 

@@ -10,7 +10,6 @@ import {
   isPredefinedType,
   ValueType,
   Value,
-  isUnionType,
 } from '../../types';
 import { ValueTransformer } from './ValueTransformer';
 
@@ -65,10 +64,6 @@ export class KotlinValueTransformer implements ValueTransformer {
 
     if (isPredefinedType(valueType)) {
       return this.typeNameMap[valueType.name] ?? valueType.name;
-    }
-
-    if (isUnionType(valueType)) {
-      return uniquePath;
     }
 
     throw Error('Type not handled');

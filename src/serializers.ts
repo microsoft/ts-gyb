@@ -13,7 +13,6 @@ import {
   Module,
   ValueType,
   Value,
-  isUnionType,
 } from './types';
 import { uniquePathWithMember, uniquePathWithMethodParameter, uniquePathWithMethodReturnType } from './utils';
 
@@ -141,9 +140,6 @@ function serializeValueType(valueType: ValueType, uniqueTypeName: string): strin
   }
   if (isPredefinedType(valueType)) {
     return valueType.name;
-  }
-  if (isUnionType(valueType)) {
-    return uniqueTypeName;
   }
 
   throw Error(`Unhandled value type ${JSON.stringify(valueType)}`);
