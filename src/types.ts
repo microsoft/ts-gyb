@@ -115,20 +115,14 @@ export interface PredefinedType extends BaseValueType {
   name: string;
 }
 
-/// inferace for parseLiteralNode in src/parser/ValueParser.ts
-export interface LiteralType {
-  type:
-    | {
-        kind: ValueTypeKind.basicType;
-        value: BasicTypeValue.string | BasicTypeValue.number | BasicTypeValue.boolean;
-      }
-    | EnumType;
+export interface UnionLiteralType {
+  type: BasicTypeValue.string | BasicTypeValue.number;
   value: Value;
 }
 
 export interface UnionType extends BaseValueType {
   kind: ValueTypeKind.unionType;
-  members: LiteralType[];
+  members: UnionLiteralType[];
 }
 
 export function isBasicType(valueType: ValueType): valueType is BasicType {

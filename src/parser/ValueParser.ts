@@ -20,9 +20,10 @@ import {
   isTupleType,
   EnumField,
   isBasicType,
-  LiteralType,
   UnionType,
   OptionalType,
+  Value,
+  UnionLiteralType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
@@ -245,7 +246,7 @@ export class ValueParser {
 
     let nullable = false;
     let valueType: ValueType | undefined;
-    const literalValues: LiteralType[] = [];
+    const literalValues: UnionLiteralType[] = [];
 
     node.types.forEach((typeNode) => {
       if (isUndefinedOrNull(typeNode)) {
@@ -254,7 +255,16 @@ export class ValueParser {
       }
       const literalKind = this.parseLiteralNode(typeNode);
       if (literalKind !== null) {
-        literalValues.push(literalKind);
+        if (
+          literalKind.type.kind === ValueTypeKind.basicType &&
+          (literalKind.type.value === BasicTypeValue.string || literalKind.type.value === BasicTypeValue.number)
+        ) {
+          literalValues.push({
+            type: literalKind.type.value,
+            value: literalKind.value,
+          });
+          return;
+        }
         return;
       }
 
@@ -285,14 +295,7 @@ export class ValueParser {
     });
 
     if (literalValues.length > 0) {
-      const kindSet = new Set(
-        literalValues.map((obj) => {
-          if ('value' in obj.type) {
-            return obj.type.value;
-          }
-          return null;
-        })
-      );
+      const kindSet = new Set(literalValues.map((obj) => obj.type));
 
       if (kindSet.size !== 1) {
         throw new ValueParserError(
@@ -686,7 +689,7 @@ export class ValueParser {
     };
   }
 
-  private parseLiteralNode(typeNode: ts.TypeNode): LiteralType | null {
+  private parseLiteralNode(typeNode: ts.TypeNode): { type: ValueType; value: Value } | null {
     if (ts.isLiteralTypeNode(typeNode)) {
       if (ts.isNumericLiteral(typeNode.literal)) {
         return {
