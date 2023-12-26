@@ -38,7 +38,7 @@ export function uniquePathWithMethodReturnType(ownerName: string, methodName: st
 }
 
 export function basicTypeOfUnion(union: UnionType): BasicTypeValue {
-  const { type } = union.memberTypes[0];
+  const { type } = union.members[0];
   if ('value' in type) {
     return type.value;
   }
@@ -47,7 +47,7 @@ export function basicTypeOfUnion(union: UnionType): BasicTypeValue {
 
 export function membersOfUnion(union: UnionType): EnumField[] {
   const result: EnumField[] = [];
-  union.memberTypes.forEach((value) => {
+  union.members.forEach((value) => {
     switch (value.type.kind) {
       case ValueTypeKind.basicType:
         switch (value.type.value) {

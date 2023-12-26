@@ -301,7 +301,7 @@ export class ValueParser {
       }
       const unionKind: UnionType = {
         kind: ValueTypeKind.unionType,
-        memberTypes: literalValues,
+        members: literalValues,
       };
       return unionKind;
     }
