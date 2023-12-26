@@ -16,7 +16,7 @@ import { ValueTransformer } from './ValueTransformer';
 export class SwiftValueTransformer implements ValueTransformer {
   constructor(private readonly typeNameMap: Record<string, string>) {}
 
-  convertValueType(valueType: ValueType, uniquePath: string): string {
+  convertValueType(valueType: ValueType): string {
     if (isBasicType(valueType)) {
       switch (valueType.value) {
         case BasicTypeValue.string:
@@ -39,7 +39,7 @@ export class SwiftValueTransformer implements ValueTransformer {
     }
 
     if (isArraryType(valueType)) {
-      return `[${this.convertValueType(valueType.elementType, uniquePath)}]`;
+      return `[${this.convertValueType(valueType.elementType)}]`;
     }
 
     if (isDictionaryType(valueType)) {
@@ -55,11 +55,11 @@ export class SwiftValueTransformer implements ValueTransformer {
           throw Error('Type not exists');
       }
 
-      return `[${keyType}: ${this.convertValueType(valueType.valueType, uniquePath)}]`;
+      return `[${keyType}: ${this.convertValueType(valueType.valueType)}]`;
     }
 
     if (isOptionalType(valueType)) {
-      return `${this.convertValueType(valueType.wrappedType, uniquePath)}?`;
+      return `${this.convertValueType(valueType.wrappedType)}?`;
     }
 
     if (isPredefinedType(valueType)) {
@@ -69,12 +69,12 @@ export class SwiftValueTransformer implements ValueTransformer {
     throw Error('Type not handled');
   }
 
-  convertNonOptionalValueType(valueType: ValueType, uniquePath: string): string {
+  convertNonOptionalValueType(valueType: ValueType): string {
     if (isOptionalType(valueType)) {
-      return this.convertValueType(valueType.wrappedType, uniquePath);
+      return this.convertValueType(valueType.wrappedType);
     }
 
-    return this.convertValueType(valueType, uniquePath);
+    return this.convertValueType(valueType);
   }
 
   convertValue(value: Value, type: ValueType): string {

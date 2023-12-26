@@ -1,6 +1,5 @@
 import { ValueTypeSource } from '../../generator/named-types';
 import { InterfaceType } from '../../types';
-import { uniquePathWithMember } from '../../utils';
 import { getDocumentationLines } from '../utils';
 import { ValueTransformer } from '../value-transformer';
 
@@ -12,22 +11,20 @@ export class InterfaceTypeView {
   ) {}
 
   get typeName(): string {
-    return this.valueTransformer.convertValueType(this.interfaceType, '');
+    return this.valueTransformer.convertValueType(this.interfaceType);
   }
 
   get members(): { name: string; type: string; documentationLines: string[]; last: boolean }[] {
     const members = this.interfaceType.members.filter((member) => member.staticValue === undefined);
-    const { typeName } = this;
     return members.map((member, index) => ({
       name: member.name,
-      type: this.valueTransformer.convertValueType(member.type, uniquePathWithMember(typeName, member.name)),
+      type: this.valueTransformer.convertValueType(member.type),
       documentationLines: getDocumentationLines(member.documentation),
       last: index === members.length - 1,
     }));
   }
 
   get staticMembers(): { name: string; type: string; value: string; documentationLines: string[] }[] {
-    const { typeName } = this;
     return this.interfaceType.members
       .filter((member) => member.staticValue !== undefined)
       .map((member) => {
@@ -37,7 +34,7 @@ export class InterfaceTypeView {
 
         return {
           name: member.name,
-          type: this.valueTransformer.convertValueType(member.type, uniquePathWithMember(typeName, member.name)),
+          type: this.valueTransformer.convertValueType(member.type),
           value: this.valueTransformer.convertValue(member.staticValue, member.type),
           documentationLines: getDocumentationLines(member.documentation),
         };
