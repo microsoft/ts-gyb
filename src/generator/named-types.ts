@@ -114,7 +114,7 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
       recursiveVisitMembersType(
         valueType,
         (membersType, path) => {
-          let namedType = membersType as unknown as NamedType;
+          let namedType = membersType;
           if (isTupleType(namedType)) {
             namedType = membersType as unknown as InterfaceType;
             namedType.kind = ValueTypeKind.interfaceType;
@@ -122,15 +122,16 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
             namedType.documentation = '';
             namedType.customTags = {};
           } else if (isUnionType(namedType)) {
-            const enumType = membersType as unknown as EnumType;
             const subType = basicTypeOfUnion(namedType);
+            const members = membersOfUnion(namedType);
 
-            enumType.kind = ValueTypeKind.enumType;
-            enumType.name = path;
-            enumType.subType = subType === 'number' ? EnumSubType.number : EnumSubType.string;
-            enumType.members = membersOfUnion(namedType);
-            enumType.documentation = '';
-            enumType.customTags = {};
+            namedType = membersType as unknown as EnumType;
+            namedType.kind = ValueTypeKind.enumType;
+            namedType.name = path;
+            namedType.subType = subType === 'number' ? EnumSubType.number : EnumSubType.string;
+            namedType.members = members;
+            namedType.documentation = '';
+            namedType.customTags = {};
           }
 
           if (typeMap[namedType.name] === undefined) {
