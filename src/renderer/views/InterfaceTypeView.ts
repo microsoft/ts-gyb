@@ -16,6 +16,7 @@ export class InterfaceTypeView {
 
   get members(): { name: string; type: string; documentationLines: string[]; last: boolean }[] {
     const members = this.interfaceType.members.filter((member) => member.staticValue === undefined);
+
     return members.map((member, index) => ({
       name: member.name,
       type: this.valueTransformer.convertValueType(member.type),

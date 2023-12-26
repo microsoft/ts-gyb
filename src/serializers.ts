@@ -14,7 +14,6 @@ import {
   ValueType,
   Value,
 } from './types';
-import { uniquePathWithMember, uniquePathWithMethodParameter, uniquePathWithMethodReturnType } from './utils';
 
 const keywordColor = chalk.green;
 const identifierColor = chalk.blue;
@@ -23,7 +22,7 @@ const valueColor = chalk.cyan;
 const documentationColor = chalk.gray;
 
 export function serializeModule(module: Module, associatedTypes: NamedType[]): string {
-  const serializedAssociatedTypes = associatedTypes.map((associatedType) => serializeNamedType(associatedType, ''));
+  const serializedAssociatedTypes = associatedTypes.map((associatedType) => serializeNamedType(associatedType));
   const customTags =
     Object.keys(module.customTags).length > 0 ? `Custom tags: ${JSON.stringify(module.customTags)}\n` : '';
 
@@ -31,10 +30,7 @@ export function serializeModule(module: Module, associatedTypes: NamedType[]): s
     module.name
   } {
 ${module.members
-  .map(
-    (member) =>
-      `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member, module.name)}`
-  )
+  .map((member) => `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member)}`)
   .join('\n')
   .split('\n')
   .map((line) => `  ${line}`)
@@ -42,7 +38,7 @@ ${module.members
 
 ${module.methods
   .map((method) =>
-    serializeMethod(method, module.name)
+    serializeMethod(method)
       .split('\n')
       .map((line) => `  ${line}`)
       .join('\n')
@@ -59,7 +55,7 @@ ${module.methods
 }`;
 }
 
-export function serializeNamedType(namedType: NamedType, ownerName: string): string {
+export function serializeNamedType(namedType: NamedType): string {
   const customTags =
     Object.keys(namedType.customTags).length > 0 ? `Custom tags: ${JSON.stringify(namedType.customTags)}\n` : '';
 
@@ -68,10 +64,7 @@ export function serializeNamedType(namedType: NamedType, ownerName: string): str
       'Type'
     )} ${namedType.name} {
 ${namedType.members
-  .map(
-    (member) =>
-      `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member, ownerName)}`
-  )
+  .map((member) => `${serializeDocumentation(member.documentation)}${keywordColor('var')} ${serializeField(member)}`)
   .join('\n')
   .split('\n')
   .map((line) => `  ${line}`)
@@ -94,32 +87,23 @@ ${namedType.members
 }`;
 }
 
-function serializeMethod(method: Method, ownerName: string): string {
+function serializeMethod(method: Method): string {
   const serializedReturnType =
-    method.returnType !== null
-      ? `: ${typeColor(serializeValueType(method.returnType, uniquePathWithMethodReturnType(ownerName, method.name)))}`
-      : '';
+    method.returnType !== null ? `: ${typeColor(serializeValueType(method.returnType))}` : '';
   return `${serializeDocumentation(method.documentation)}${keywordColor('func')} ${identifierColor(
     method.name
   )}(${method.parameters
-    .map(
-      (parameter) =>
-        `${parameter.name}: ${typeColor(
-          serializeValueType(parameter.type, uniquePathWithMethodParameter(ownerName, method.name, parameter.name))
-        )}`
-    )
+    .map((parameter) => `${parameter.name}: ${typeColor(serializeValueType(parameter.type))}`)
     .join(', ')})${serializedReturnType}`;
 }
 
-function serializeField(field: Field, ownerName: string): string {
+function serializeField(field: Field): string {
   const staticValue =
     field.staticValue !== undefined ? ` = ${serializeStaticValue(field.staticValue, field.type)}` : '';
-  return `${identifierColor(field.name)}: ${typeColor(
-    serializeValueType(field.type, uniquePathWithMember(ownerName, field.name))
-  )}${staticValue}`;
+  return `${identifierColor(field.name)}: ${typeColor(serializeValueType(field.type))}${staticValue}`;
 }
 
-function serializeValueType(valueType: ValueType, uniqueTypeName: string): string {
+function serializeValueType(valueType: ValueType): string {
   if (isBasicType(valueType)) {
     return valueType.value;
   }
@@ -130,13 +114,13 @@ function serializeValueType(valueType: ValueType, uniqueTypeName: string): strin
     return valueType.name;
   }
   if (isArraryType(valueType)) {
-    return `[${serializeValueType(valueType.elementType, uniqueTypeName)}]`;
+    return `[${serializeValueType(valueType.elementType)}]`;
   }
   if (isDictionaryType(valueType)) {
-    return `[${valueType.keyType}: ${serializeValueType(valueType.valueType, uniqueTypeName)}]`;
+    return `[${valueType.keyType}: ${serializeValueType(valueType.valueType)}]`;
   }
   if (isOptionalType(valueType)) {
-    return `${serializeValueType(valueType.wrappedType, uniqueTypeName)}?`;
+    return `${serializeValueType(valueType.wrappedType)}?`;
   }
   if (isPredefinedType(valueType)) {
     return valueType.name;
