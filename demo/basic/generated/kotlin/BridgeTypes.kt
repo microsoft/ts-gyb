@@ -26,6 +26,7 @@ data class OverriddenFullSize(
     @JvmField val numEnum: NumEnum,
     @JvmField val defEnum: DefaultEnum,
     @JvmField val stringUnion: OverriddenFullSizeMembersStringUnionType,
+    @JvmField val numberStringUnion: OverriddenFullSizeMembersNumberStringUnionType,
     @JvmField val nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?,
     @JvmField val numUnion1: OverriddenFullSizeMembersNumUnion1Type,
     @JvmField val foo: OverriddenFullSizeMembersFooType,
@@ -81,6 +82,11 @@ class DefaultEnumTypeAdapter : JsonSerializer<DefaultEnum>, JsonDeserializer<Def
 enum class OverriddenFullSizeMembersStringUnionType {
     @SerializedName("A1") A1,
     @SerializedName("B1") B1
+}
+
+enum class OverriddenFullSizeMembersNumberStringUnionType {
+    @SerializedName("11") _11,
+    @SerializedName("21") _21
 }
 
 enum class OverriddenFullSizeMembersNullableStringUnionType {

@@ -246,7 +246,10 @@ export class ValueParser {
 
     let nullable = false;
     let valueType: ValueType | undefined;
-    const literalValues: UnionLiteralType[] = [];
+    const literalValues: {
+      type: BasicTypeValue.string | BasicTypeValue.number;
+      value: Value;
+    }[] = [];
 
     node.types.forEach((typeNode) => {
       if (isUndefinedOrNull(typeNode)) {
@@ -303,9 +306,19 @@ export class ValueParser {
           'Union type must contain only one supported literal type'
         );
       }
+      const members: UnionLiteralType[] = [];
+      literalValues.forEach((obj) => {
+        if (typeof obj.value === 'string') {
+          members.push(obj.value);
+        }
+        if (typeof obj.value === 'number') {
+          members.push(obj.value);
+        }
+      });
       const unionKind: UnionType = {
         kind: ValueTypeKind.unionType,
-        members: literalValues,
+        memberType: literalValues[0].type,
+        members,
       };
       if (nullable) {
         const optionalType: OptionalType = {

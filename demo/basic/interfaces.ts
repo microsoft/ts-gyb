@@ -45,6 +45,7 @@ interface FullSize extends BaseSize, CustomSize {
   numEnum: NumEnum;
   defEnum: DefaultEnum;
   stringUnion: 'A1' | 'B1';
+  numberStringUnion: '11' | '21';
   nullableStringUnion: 'A1' | 'B1' | null;
   numUnion1: 11 | 21;
   foo: { stringField: string } | { numberField: number };

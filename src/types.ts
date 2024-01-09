@@ -115,13 +115,11 @@ export interface PredefinedType extends BaseValueType {
   name: string;
 }
 
-export interface UnionLiteralType {
-  type: BasicTypeValue.string | BasicTypeValue.number;
-  value: Value;
-}
+export type UnionLiteralType = string | number;
 
 export interface UnionType extends BaseValueType {
   kind: ValueTypeKind.unionType;
+  memberType: BasicTypeValue.string | BasicTypeValue.number;
   members: UnionLiteralType[];
 }
 

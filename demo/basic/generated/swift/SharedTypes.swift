@@ -15,6 +15,7 @@ public struct OverriddenFullSize: Codable {
   public var numEnum: NumEnum
   public var defEnum: DefaultEnum
   public var stringUnion: OverriddenFullSizeMembersStringUnionType
+  public var numberStringUnion: OverriddenFullSizeMembersNumberStringUnionType
   public var nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?
   public var numUnion1: OverriddenFullSizeMembersNumUnion1Type
   public var foo: OverriddenFullSizeMembersFooType
@@ -24,13 +25,14 @@ public struct OverriddenFullSize: Codable {
   /// Example documentation for member
   private var member: NumEnum = .one
 
-  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion: OverriddenFullSizeMembersStringUnionType, nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, width: Double, height: Double, scale: Double) {
+  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion: OverriddenFullSizeMembersStringUnionType, numberStringUnion: OverriddenFullSizeMembersNumberStringUnionType, nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, width: Double, height: Double, scale: Double) {
     self.size = size
     self.count = count
     self.stringEnum = stringEnum
     self.numEnum = numEnum
     self.defEnum = defEnum
     self.stringUnion = stringUnion
+    self.numberStringUnion = numberStringUnion
     self.nullableStringUnion = nullableStringUnion
     self.numUnion1 = numUnion1
     self.foo = foo
@@ -59,6 +61,11 @@ public enum DefaultEnum: Int, Codable {
 public enum OverriddenFullSizeMembersStringUnionType: String, Codable {
   case a1 = "A1"
   case b1 = "B1"
+}
+
+public enum OverriddenFullSizeMembersNumberStringUnionType: String, Codable {
+  case _11 = "11"
+  case _21 = "21"
 }
 
 public enum OverriddenFullSizeMembersNullableStringUnionType: String, Codable {

@@ -38,36 +38,22 @@ export function uniquePathWithMethodReturnType(ownerName: string, methodName: st
 }
 
 export function basicTypeOfUnion(union: UnionType): BasicTypeValue {
-  return union.members[0].type;
+  return union.memberType;
 }
 
 export function membersOfUnion(union: UnionType): EnumField[] {
   const result: EnumField[] = [];
   union.members.forEach((value) => {
-    switch (value.type) {
-      case BasicTypeValue.string:
-        if (typeof value.value === 'string') {
-          const enumField: EnumField = {
-            key: value.value,
-            value: value.value,
-            documentation: '',
-          };
-          result.push(enumField);
-        }
-        break;
-      case BasicTypeValue.number:
-        if (typeof value.value === 'number') {
-          const enumField: EnumField = {
-            key: `_${value.value}`,
-            value: value.value,
-            documentation: '',
-          };
-          result.push(enumField);
-        }
-        break;
-      default:
-        break;
+    let key = `${value}`;
+    if (!Number.isNaN(Number(value))) {
+      key = `_${key}`;
     }
+    const enumField: EnumField = {
+      key,
+      value,
+      documentation: '',
+    };
+    result.push(enumField);
   });
   return result;
 }
