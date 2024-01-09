@@ -30,6 +30,8 @@ interface IHtmlApiBridge {
     fun requestRenderingResult()
     fun getSize(callback: Callback<OverriddenFullSize>)
     fun getAliasSize(callback: Callback<JSBaseSize>)
+    fun getName(callback: Callback<IHtmlApiGetNameReturnType>)
+    fun getAge(gender: IHtmlApiGetAgeGender, callback: Callback<IHtmlApiGetAgeReturnType>)
     fun testDictionaryWithAnyKey(dict: Map<String, String>)
 }
 
@@ -69,6 +71,16 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
         executeJsForResponse(JSBaseSize::class.java, "getAliasSize", callback)
     }
 
+    override fun getName(callback: Callback<IHtmlApiGetNameReturnType>) {
+        executeJsForResponse(IHtmlApiGetNameReturnType::class.java, "getName", callback)
+    }
+
+    override fun getAge(gender: IHtmlApiGetAgeGender, callback: Callback<IHtmlApiGetAgeReturnType>) {
+        executeJsForResponse(IHtmlApiGetAgeReturnType::class.java, "getAge", callback, mapOf(
+            "gender" to gender
+        ))
+    }
+
     override fun testDictionaryWithAnyKey(dict: Map<String, String>) {
         executeJs("testDictionaryWithAnyKey", mapOf(
             "dict" to dict
@@ -76,62 +88,36 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
     }
 }
 
-data class OverriddenFullSize(
-    @JvmField val size: Float,
-    @JvmField val count: Int,
-    @JvmField val stringEnum: StringEnum,
-    @JvmField val numEnum: NumEnum,
-    @JvmField val defEnum: DefaultEnum,
-    @JvmField val width: Float,
-    @JvmField val height: Float,
-    @JvmField val scale: Float,
-    @JvmField val member: NumEnum = NumEnum.ONE,
-)
-
-enum class NumEnum(val value: Int) {
-    ONE(1),
-    TWO(2);
-
-    companion object {
-        fun find(value: Int) = values().find { it.value == value }
-    }
-}
-
-class NumEnumTypeAdapter : JsonSerializer<NumEnum>, JsonDeserializer<NumEnum> {
-    override fun serialize(obj: NumEnum, type: Type, context: JsonSerializationContext): JsonElement {
-        return JsonPrimitive(obj.value)
-    }
-
-    override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): NumEnum? {
-        return NumEnum.find(json.asInt)
-    }
-}
-
-enum class StringEnum {
-    @SerializedName("a") A,
-    @SerializedName("b") B
-}
-
-enum class DefaultEnum(val value: Int) {
-    DEFAULT_VALUE_C(0),
-    DEFAULT_VALUE_D(1);
-
-    companion object {
-        fun find(value: Int) = values().find { it.value == value }
-    }
-}
-
-class DefaultEnumTypeAdapter : JsonSerializer<DefaultEnum>, JsonDeserializer<DefaultEnum> {
-    override fun serialize(obj: DefaultEnum, type: Type, context: JsonSerializationContext): JsonElement {
-        return JsonPrimitive(obj.value)
-    }
-
-    override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): DefaultEnum? {
-        return DefaultEnum.find(json.asInt)
-    }
-}
-
 data class JSBaseSize(
     @JvmField val width: Float,
     @JvmField val height: Float,
 )
+
+enum class IHtmlApiGetNameReturnType {
+    @SerializedName("A2") A2,
+    @SerializedName("B2") B2
+}
+
+enum class IHtmlApiGetAgeGender {
+    @SerializedName("Male") MALE,
+    @SerializedName("Female") FEMALE
+}
+
+enum class IHtmlApiGetAgeReturnType(val value: Int) {
+    _21(21),
+    _22(22);
+
+    companion object {
+        fun find(value: Int) = values().find { it.value == value }
+    }
+}
+
+class IHtmlApiGetAgeReturnTypeTypeAdapter : JsonSerializer<IHtmlApiGetAgeReturnType>, JsonDeserializer<IHtmlApiGetAgeReturnType> {
+    override fun serialize(obj: IHtmlApiGetAgeReturnType, type: Type, context: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(obj.value)
+    }
+
+    override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext): IHtmlApiGetAgeReturnType? {
+        return IHtmlApiGetAgeReturnType.find(json.asInt)
+    }
+}
