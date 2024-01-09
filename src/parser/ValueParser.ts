@@ -16,11 +16,14 @@ import {
   DictionaryKeyType,
   isInterfaceType,
   PredefinedType,
-  Value,
   TupleType,
   isTupleType,
   EnumField,
   isBasicType,
+  UnionType,
+  OptionalType,
+  Value,
+  UnionLiteralType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
@@ -243,10 +246,28 @@ export class ValueParser {
 
     let nullable = false;
     let valueType: ValueType | undefined;
+    const literalValues: {
+      type: BasicTypeValue.string | BasicTypeValue.number;
+      value: Value;
+    }[] = [];
 
     node.types.forEach((typeNode) => {
       if (isUndefinedOrNull(typeNode)) {
         nullable = true;
+        return;
+      }
+      const literalKind = this.parseLiteralNode(typeNode);
+      if (literalKind !== null) {
+        if (
+          literalKind.type.kind === ValueTypeKind.basicType &&
+          (literalKind.type.value === BasicTypeValue.string || literalKind.type.value === BasicTypeValue.number)
+        ) {
+          literalValues.push({
+            type: literalKind.type.value,
+            value: literalKind.value,
+          });
+          return;
+        }
         return;
       }
 
@@ -276,6 +297,38 @@ export class ValueParser {
       };
     });
 
+    if (literalValues.length > 0) {
+      const kindSet = new Set(literalValues.map((obj) => obj.type));
+
+      if (kindSet.size !== 1) {
+        throw new ValueParserError(
+          `union type ${node.getText()} has multiple literal type`,
+          'Union type must contain only one supported literal type'
+        );
+      }
+      const members: UnionLiteralType[] = [];
+      literalValues.forEach((obj) => {
+        if (typeof obj.value === 'string') {
+          members.push(obj.value);
+        }
+        if (typeof obj.value === 'number') {
+          members.push(obj.value);
+        }
+      });
+      const unionKind: UnionType = {
+        kind: ValueTypeKind.unionType,
+        memberType: literalValues[0].type,
+        members,
+      };
+      if (nullable) {
+        const optionalType: OptionalType = {
+          kind: ValueTypeKind.optionalType,
+          wrappedType: unionKind,
+        };
+        return optionalType;
+      }
+      return unionKind;
+    }
     if (!valueType) {
       throw new ValueParserError(
         `union type ${node.getText()} is invalid`,

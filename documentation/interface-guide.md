@@ -146,7 +146,7 @@ Arries defined like `string[]` and `Array<number>` are supported. The element ca
 The support for union types is limited. Only these scenrios are supported:
 
 - Any supported value type union with `null` or/and `undefined` to specify optional type
-- Union two interfaces or object literals to a new object literal
+- Union two interfaces or object literals to a new object literal or union values of the same literal type to enum in the target language, e.g. string, number.
 - Combination of the above two cases
 
 Any other union types would result in an error.
@@ -156,6 +156,12 @@ Any other union types would result in an error.
 string | null
 string | undefined
 string | null | undefined
+'1' | '2' | null;
+
+// allowed: literal values
+'1' | '2';
+1 | 2;
+
 
 interface StringFieldInterface {
   stringField: string;

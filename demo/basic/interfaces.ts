@@ -36,14 +36,19 @@ enum DefaultEnum {
  */
 interface FullSize extends BaseSize, CustomSize {
   /**
-  * Example documentation for member
-  */
+   * Example documentation for member
+   */
   member: NumEnum.one;
   size: number;
   count: CodeGen_Int;
   stringEnum: StringEnum;
   numEnum: NumEnum;
   defEnum: DefaultEnum;
+  stringUnion: 'A1' | 'B1';
+  numberStringUnion: '11' | '21';
+  nullableStringUnion: 'A1' | 'B1' | null;
+  numUnion1: 11 | 21;
+  foo: { stringField: string } | { numberField: number };
 }
 
 interface DictionaryWithAnyKey {
@@ -68,6 +73,8 @@ export interface IHtmlApi {
   requestRenderingResult(): void;
   getSize(): FullSize;
   getAliasSize(): AliasSize;
+  getName(): 'A2' | 'B2';
+  getAge({ gender }: { gender: 'Male' | 'Female' }): 21 | 22;
   testDictionaryWithAnyKey({ dict }: { dict: DictionaryWithAnyKey }): void;
 }
 
@@ -81,4 +88,5 @@ export interface IImageOptionApi {
   getSourceOfImageWithID({ id }: { id: string }): string | null;
   getImageDataList(): string;
   getContentBoundsOfElementWithID({ id }: { id: string }): string | null;
+  getSize(): FullSize;
 }

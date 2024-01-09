@@ -62,6 +62,20 @@ public class IHtmlApi {
     jsExecutor.execute(with: "htmlApi", feature: "getAliasSize", args: nil, completion: completion)
   }
 
+  public func getName(completion: @escaping BridgeCompletion<IHtmlApiGetNameReturnType>) {
+    jsExecutor.execute(with: "htmlApi", feature: "getName", args: nil, completion: completion)
+  }
+
+  public func getAge(gender: IHtmlApiGetAgeGender, completion: @escaping BridgeCompletion<IHtmlApiGetAgeReturnType>) {
+    struct Args: Encodable {
+      let gender: IHtmlApiGetAgeGender
+    }
+    let args = Args(
+      gender: gender
+    )
+    jsExecutor.execute(with: "htmlApi", feature: "getAge", args: args, completion: completion)
+  }
+
   public func testDictionaryWithAnyKey(dict: [String: String], completion: BridgeJSExecutor.Completion? = nil) {
     struct Args: Encodable {
       let dict: [String: String]
@@ -73,47 +87,6 @@ public class IHtmlApi {
   }
 }
 
-/// Example documentation for interface
-public struct OverriddenFullSize: Codable {
-  public var size: Double
-  public var count: Int
-  public var stringEnum: StringEnum
-  public var numEnum: NumEnum
-  public var defEnum: DefaultEnum
-  public var width: Double
-  public var height: Double
-  public var scale: Double
-  /// Example documentation for member
-  private var member: NumEnum = .one
-
-  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, width: Double, height: Double, scale: Double) {
-    self.size = size
-    self.count = count
-    self.stringEnum = stringEnum
-    self.numEnum = numEnum
-    self.defEnum = defEnum
-    self.width = width
-    self.height = height
-    self.scale = scale
-  }
-}
-
-public enum NumEnum: Int, Codable {
-  case one = 1
-  case two = 2
-}
-
-public enum StringEnum: String, Codable {
-  /// Description for enum member a
-  case a = "a"
-  case b = "b"
-}
-
-public enum DefaultEnum: Int, Codable {
-  case defaultValueC = 0
-  case defaultValueD = 1
-}
-
 public struct BaseSize: Codable {
   public var width: Double
   public var height: Double
@@ -122,4 +95,19 @@ public struct BaseSize: Codable {
     self.width = width
     self.height = height
   }
+}
+
+public enum IHtmlApiGetNameReturnType: String, Codable {
+  case a2 = "A2"
+  case b2 = "B2"
+}
+
+public enum IHtmlApiGetAgeGender: String, Codable {
+  case male = "Male"
+  case female = "Female"
+}
+
+public enum IHtmlApiGetAgeReturnType: Int, Codable {
+  case _21 = 21
+  case _22 = 22
 }

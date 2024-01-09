@@ -55,4 +55,8 @@ public class IImageOptionApi {
     )
     jsExecutor.execute(with: "imageOption", feature: "getContentBoundsOfElementWithID", args: args, completion: completion)
   }
+
+  public func getSize(completion: @escaping BridgeCompletion<OverriddenFullSize>) {
+    jsExecutor.execute(with: "imageOption", feature: "getSize", args: nil, completion: completion)
+  }
 }
