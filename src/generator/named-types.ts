@@ -245,5 +245,13 @@ function recursiveVisitMembersType(
     return;
   }
 
-  console.log(`Unhandled value type ${JSON.stringify(valueType)}`);
+  if (valueType.kind === ValueTypeKind.basicType) {
+    // string, boolean, etc.
+    return;
+  }
+  if (valueType.kind === ValueTypeKind.predefinedType) {
+    // CodeGen_Int, etc.
+    return;
+  }
+  throw Error(`Unhandled value type ${JSON.stringify(valueType)}`);
 }
