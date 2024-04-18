@@ -216,6 +216,7 @@ ts-gyb parses tags in [JSDoc](https://jsdoc.app) documentation.
 - `@shouldExport`: Specify whether an `interface` should be exported. Set it to `true` to export.
 - `@overrideModuleName`: Change the name of the interface for ts-gyb. This is helpful for dropping the `I` prefix in TypeScript interface name.
 - `@overrideTypeName`: Similar to `@overrideModuleName`, this is used to override the name of custom types used in method parameters or return values.
+- `@default`: default value for Module Interface's function parameter, 
 
 ```typescript
 /**
@@ -225,6 +226,18 @@ ts-gyb parses tags in [JSDoc](https://jsdoc.app) documentation.
 interface InterfaceWithTags {
   // The name of the module would be `ProperNamedInterface` in generated code
   ...
+
+  foo(bar: {
+    /**
+     * @default null
+     */
+    bool?: boolean;
+    bool2?: boolean;
+    /**
+     * @default 1
+     */
+    num: number;
+  }): void;
 }
 ```
 

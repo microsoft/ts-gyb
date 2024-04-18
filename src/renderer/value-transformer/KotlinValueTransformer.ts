@@ -133,4 +133,8 @@ export class KotlinValueTransformer implements ValueTransformer {
   convertTypeNameFromCustomMap(name: string): string {
     return this.typeNameMap[name] ?? name;
   }
+
+  null(): string {
+    return 'null';
+  }
 }

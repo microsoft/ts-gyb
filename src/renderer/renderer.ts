@@ -8,5 +8,7 @@ export function renderCode<View>(templatePath: string, view: View): string {
   return Mustache.render(template, view, (partialName) => {
     const partialPath = path.join(directory, `${partialName}.mustache`);
     return fs.readFileSync(partialPath).toString();
+  }, {
+    escape: (value: string) => value,
   });
 }

@@ -145,8 +145,9 @@ export class ValueParser {
     const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
     const staticValue = this.parseLiteralNode(node.type);
+
     if (staticValue !== null) {
-      return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
+      return { name, type: staticValue.type, staticValue: staticValue.value, documentation, defaultValue: "" };
     }
 
     if (node.type.kind === ts.SyntaxKind.NeverKeyword) {
@@ -155,10 +156,24 @@ export class ValueParser {
 
     const valueType = this.valueTypeFromNode(node);
 
+    const jsDocTags = symbol?.getJsDocTags(this.checker);
+    let defaultValue = "";
+    jsDocTags?.forEach((tag) => {
+      if (tag.name === 'default' && tag.text?.length === 1) {
+        if (tag.text[0].kind === 'text') {
+          defaultValue = tag.text[0].text;
+        }
+      }
+    });
+    if (defaultValue.length === 0 && valueType.kind === ValueTypeKind.optionalType) {
+      defaultValue = "null";
+    }
+
     return {
       name,
       type: valueType,
       documentation,
+      defaultValue
     };
   }
 
