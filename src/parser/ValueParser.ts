@@ -169,9 +169,6 @@ export class ValueParser {
         defaultValue = tag.text[0].text;
       }
     });
-    if ((defaultValue ?? "").length === 0 && valueType.kind === ValueTypeKind.optionalType) {
-      defaultValue = "null";
-    }
 
     return {
       name,
