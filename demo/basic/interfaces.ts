@@ -84,9 +84,17 @@ export interface IHtmlApi {
     bool?: boolean;
     bool2?: boolean;
     /**
+     * @default true
+     */
+    bool3: boolean;
+    /**
      * @default 1
      */
     num: number;
+    /**
+     * @default "hello"
+     */
+    string: string;
   }): void;
 }
 

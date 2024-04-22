@@ -33,7 +33,7 @@ interface IHtmlApiBridge {
     fun getName(callback: Callback<IHtmlApiGetNameReturnType>)
     fun getAge(gender: IHtmlApiGetAgeGender, callback: Callback<IHtmlApiGetAgeReturnType>)
     fun testDictionaryWithAnyKey(dict: Map<String, String>)
-    fun testDefaultValue(bool: Boolean? = null, bool2: Boolean? = null, num: Float = 1)
+    fun testDefaultValue(bool: Boolean? = null, bool2: Boolean? = null, bool3: Boolean = true, num: Float = 1, string: String = "hello")
 }
 
 open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson, "htmlApi"), IHtmlApiBridge {
@@ -88,11 +88,13 @@ open class IHtmlApiBridge(editor: WebEditor, gson: Gson) : JsBridge(editor, gson
         ))
     }
 
-    override fun testDefaultValue(bool: Boolean? = null, bool2: Boolean? = null, num: Float = 1) {
+    override fun testDefaultValue(bool: Boolean? = null, bool2: Boolean? = null, bool3: Boolean = true, num: Float = 1, string: String = "hello") {
         executeJs("testDefaultValue", mapOf(
             "bool" to bool
             "bool2" to bool2
+            "bool3" to bool3
             "num" to num
+            "string" to string
         ))
     }
 }

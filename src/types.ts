@@ -20,7 +20,7 @@ export interface Field {
   type: ValueType;
   staticValue?: Value;
   documentation: string;
-  defaultValue: string;
+  defaultValue?: string;
 }
 
 export type ValueType = NonEmptyType | OptionalType;

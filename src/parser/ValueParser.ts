@@ -147,7 +147,7 @@ export class ValueParser {
     const staticValue = this.parseLiteralNode(node.type);
 
     if (staticValue !== null) {
-      return { name, type: staticValue.type, staticValue: staticValue.value, documentation, defaultValue: "" };
+      return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
     }
 
     if (node.type.kind === ts.SyntaxKind.NeverKeyword) {
@@ -157,15 +157,19 @@ export class ValueParser {
     const valueType = this.valueTypeFromNode(node);
 
     const jsDocTags = symbol?.getJsDocTags(this.checker);
-    let defaultValue = "";
+    let defaultValue: string | undefined;
     jsDocTags?.forEach((tag) => {
-      if (tag.name === 'default' && tag.text?.length === 1) {
-        if (tag.text[0].kind === 'text') {
-          defaultValue = tag.text[0].text;
+      if (tag.name === 'default') {
+        if (tag.text?.length !== 1 || tag.text[0].kind !== 'text' || tag.text[0].text.length === 0) {
+          throw new ValueParserError(
+            `Invalid default value for ${name}`,
+            'Default value must be a single value, like `@default 0` or `@default "hello"`'
+          );
         }
+        defaultValue = tag.text[0].text;
       }
     });
-    if (defaultValue.length === 0 && valueType.kind === ValueTypeKind.optionalType) {
+    if ((defaultValue ?? "").length === 0 && valueType.kind === ValueTypeKind.optionalType) {
       defaultValue = "null";
     }
 
