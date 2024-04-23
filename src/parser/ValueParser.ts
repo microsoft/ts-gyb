@@ -170,12 +170,18 @@ export class ValueParser {
       }
     });
 
-    return {
+    const field: Field = {
       name,
       type: valueType,
-      documentation,
-      defaultValue
+      documentation
     };
+
+    if (defaultValue != null) {
+      // to fix test fail
+      field.defaultValue = defaultValue;
+    }
+
+    return field;
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
