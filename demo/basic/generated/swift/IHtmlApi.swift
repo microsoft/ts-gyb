@@ -85,6 +85,24 @@ public class IHtmlApi {
     )
     jsExecutor.execute(with: "htmlApi", feature: "testDictionaryWithAnyKey", args: args, completion: completion)
   }
+
+  public func testDefaultValue(bool: Bool? = nil, bool2: Bool?, bool3: Bool = true, num: Double = 1, string: String = "hello", completion: BridgeJSExecutor.Completion? = nil) {
+    struct Args: Encodable {
+      let bool: Bool?
+      let bool2: Bool?
+      let bool3: Bool
+      let num: Double
+      let string: String
+    }
+    let args = Args(
+      bool: bool,
+      bool2: bool2,
+      bool3: bool3,
+      num: num,
+      string: string
+    )
+    jsExecutor.execute(with: "htmlApi", feature: "testDefaultValue", args: args, completion: completion)
+  }
 }
 
 public struct BaseSize: Codable {

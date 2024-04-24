@@ -76,6 +76,26 @@ export interface IHtmlApi {
   getName(): 'A2' | 'B2';
   getAge({ gender }: { gender: 'Male' | 'Female' }): 21 | 22;
   testDictionaryWithAnyKey({ dict }: { dict: DictionaryWithAnyKey }): void;
+
+  testDefaultValue(options: {
+    /**
+     * @default null
+     */
+    bool?: boolean;
+    bool2?: boolean;
+    /**
+     * @default true
+     */
+    bool3: boolean;
+    /**
+     * @default 1
+     */
+    num: number;
+    /**
+     * @default "hello"
+     */
+    string: string;
+  }): void;
 }
 
 /**

@@ -145,6 +145,7 @@ export class ValueParser {
     const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
     const staticValue = this.parseLiteralNode(node.type);
+
     if (staticValue !== null) {
       return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
     }
@@ -155,11 +156,32 @@ export class ValueParser {
 
     const valueType = this.valueTypeFromNode(node);
 
-    return {
+    const jsDocTags = symbol?.getJsDocTags(this.checker);
+    let defaultValue: string | undefined;
+    jsDocTags?.forEach((tag) => {
+      if (tag.name === 'default') {
+        if (tag.text?.length !== 1 || tag.text[0].kind !== 'text' || tag.text[0].text.length === 0) {
+          throw new ValueParserError(
+            `Invalid default value for ${name}`,
+            'Default value must be a single value, like `@default 0` or `@default "hello"`'
+          );
+        }
+        defaultValue = tag.text[0].text;
+      }
+    });
+
+    const field: Field = {
       name,
       type: valueType,
-      documentation,
+      documentation
     };
+
+    if (defaultValue != null) {
+      // to fix test fail
+      field.defaultValue = defaultValue;
+    }
+
+    return field;
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
