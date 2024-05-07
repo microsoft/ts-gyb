@@ -55,6 +55,14 @@ interface DictionaryWithAnyKey {
   [key: string]: string;
 }
 
+
+interface ObjectWithDefeaultValue {
+  /**
+    * @default true
+    */
+  defaultValue?: boolean;
+}
+
 /**
  * Documentation for module
  * @shouldExport true
@@ -95,7 +103,7 @@ export interface IHtmlApi {
      * @default "hello"
      */
     string: string;
-  }): void;
+  }): ObjectWithDefeaultValue;
 }
 
 /**
