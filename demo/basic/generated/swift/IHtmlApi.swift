@@ -86,7 +86,7 @@ public class IHtmlApi {
     jsExecutor.execute(with: "htmlApi", feature: "testDictionaryWithAnyKey", args: args, completion: completion)
   }
 
-  public func testDefaultValue(bool: Bool? = nil, bool2: Bool?, bool3: Bool = true, num: Double = 1, string: String = "hello", completion: BridgeJSExecutor.Completion? = nil) {
+  public func testDefaultValue(bool: Bool? = nil, bool2: Bool?, bool3: Bool = true, num: Double = 1, string: String = "hello", completion: @escaping BridgeCompletion<nterfaceWithDefeaultValue>) {
     struct Args: Encodable {
       let bool: Bool?
       let bool2: Bool?
@@ -128,4 +128,12 @@ public enum IHtmlApiGetAgeGender: String, Codable {
 public enum IHtmlApiGetAgeReturnType: Int, Codable {
   case _21 = 21
   case _22 = 22
+}
+
+public struct nterfaceWithDefeaultValue: Codable {
+  public var defaultValue: Bool?
+
+  public init(defaultValue: Bool? = true) {
+    self.defaultValue = defaultValue
+  }
 }
