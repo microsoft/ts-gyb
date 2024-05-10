@@ -36,7 +36,7 @@ public enum {{typeName}}: {{valueType}}, Codable {
   {{/members}}
 }
 {{/enum}}
-{{#typeUnion}}
+{{#unionType}}
 public enum {{typeName}}: Codable {
   {{#members}}
   case {{name}}(_ value: {{type}})
@@ -69,4 +69,4 @@ public enum {{typeName}}: Codable {
     }
   }
 }
-{{/typeUnion}}
+{{/unionType}}

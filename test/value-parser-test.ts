@@ -296,7 +296,7 @@ describe('ValueParser', () => {
     testValueType('Multiple types union', 'string | number', {
       customTags: {},
       name: '',
-      kind: ValueTypeKind.typeUnion,
+      kind: ValueTypeKind.unionType,
       members: [{
         kind: ValueTypeKind.basicType,
         value: BasicTypeValue.string,

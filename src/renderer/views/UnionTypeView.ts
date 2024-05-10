@@ -1,10 +1,10 @@
 import { uncapitalize } from "../../utils";
-import { TypeUnion, isBasicType } from '../../types';
+import { UnionType, isBasicType } from '../../types';
 import { ValueTransformer } from '../value-transformer';
 
-export class TypeUnionView {
+export class UnionTypeView {
   constructor(
-    private readonly value: TypeUnion,
+    private readonly value: UnionType,
     private readonly valueTransformer: ValueTransformer
   ) { }
 

@@ -20,7 +20,7 @@ import {
   isTupleType,
   EnumField,
   isBasicType,
-  UnionType,
+  LiteralType,
   OptionalType,
   Value,
   UnionLiteralType,
@@ -226,9 +226,9 @@ export class ValueParser {
   }
 
   private valueTypeFromTypeNode(typeNode: ts.TypeNode): ValueType {
-    const unionType = this.parseUnionTypeNode(typeNode);
-    if (unionType !== null) {
-      return unionType;
+    const literalType = this.parseLiteralOrUnionTypeNode(typeNode);
+    if (literalType !== null) {
+      return literalType;
     }
 
     const referenceType = this.parseReferenceTypeNode(typeNode);
@@ -261,7 +261,7 @@ export class ValueParser {
     );
   }
 
-  private parseUnionTypeNode(node: ts.TypeNode): ValueType | null {
+  private parseLiteralOrUnionTypeNode(node: ts.TypeNode): ValueType | null {
     if (!ts.isUnionTypeNode(node)) {
       return null;
     }
@@ -333,19 +333,19 @@ export class ValueParser {
           members.push(obj.value);
         }
       });
-      const unionKind: UnionType = {
-        kind: ValueTypeKind.unionType,
+      const literalKind: LiteralType = {
+        kind: ValueTypeKind.literalType,
         memberType: literalValues[0].type,
         members,
       };
       if (nullable) {
         const optionalType: OptionalType = {
           kind: ValueTypeKind.optionalType,
-          wrappedType: unionKind,
+          wrappedType: literalKind,
         };
         return optionalType;
       }
-      return unionKind;
+      return literalKind;
     }
 
     if (valueTypes.length === 0 && tupleMembers.length === 0) {
@@ -389,7 +389,7 @@ export class ValueParser {
 
     return {
       name: '',
-      kind: ValueTypeKind.typeUnion,
+      kind: ValueTypeKind.unionType,
       members: valueTypes,
       customTags: {},
     };

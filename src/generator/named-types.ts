@@ -19,13 +19,13 @@ import {
   TupleType,
   isTupleType,
   ValueTypeKind,
-  isUnionType,
+  isLiteralType,
   EnumSubType,
-  UnionType,
-  isTypeUnion,
+  LiteralType,
+  isUnionType,
   isBasicType,
   isPredefinedType,
-  TypeUnion,
+  UnionType,
 } from '../types';
 
 export const enum ValueTypeSource {
@@ -34,7 +34,7 @@ export const enum ValueTypeSource {
   Return = 1 << 2,
 }
 
-export type NamedType = InterfaceType | EnumType | TypeUnion;
+export type NamedType = InterfaceType | EnumType | UnionType;
 export interface NamedTypeInfo {
   type: NamedType;
   source: ValueTypeSource;
@@ -126,7 +126,7 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
             namedType.name = path;
             namedType.documentation = '';
             namedType.customTags = {};
-          } else if (isUnionType(namedType)) {
+          } else if (isLiteralType(namedType)) {
             const subType = basicTypeOfUnion(namedType);
             const members = membersOfUnion(namedType);
 
@@ -137,7 +137,7 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
             namedType.members = members;
             namedType.documentation = '';
             namedType.customTags = {};
-          } else if (isTypeUnion(namedType)) {
+          } else if (isUnionType(namedType)) {
             namedType.name = path;
           }
 
@@ -204,7 +204,7 @@ function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTy
 
 function recursiveVisitMembersType(
   valueType: ValueType,
-  visit: (membersType: NamedType | TupleType | UnionType | TypeUnion, path: string) => void,
+  visit: (membersType: NamedType | TupleType | LiteralType | UnionType, path: string) => void,
   path: string
 ): void {
   if (isInterfaceType(valueType)) {
@@ -247,12 +247,12 @@ function recursiveVisitMembersType(
     return;
   }
 
-  if (isUnionType(valueType)) {
+  if (isLiteralType(valueType)) {
     visit(valueType, path);
     return;
   }
 
-  if (isTypeUnion(valueType)) {
+  if (isUnionType(valueType)) {
     visit(valueType, path);
     valueType.members.forEach((member) => {
       let subType: string;

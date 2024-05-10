@@ -32,8 +32,8 @@ export type NonEmptyType =
   | ArrayType
   | DictionaryType
   | PredefinedType
-  | UnionType
-  | TypeUnion;
+  | LiteralType
+  | UnionType;
 
 export enum ValueTypeKind {
   basicType = 'basicType',
@@ -44,8 +44,8 @@ export enum ValueTypeKind {
   dictionaryType = 'dictionaryType',
   optionalType = 'optionalType',
   predefinedType = 'predefinedType',
+  literalType = 'literalType',
   unionType = 'unionType',
-  typeUnion = 'typeUnion',
 }
 
 interface BaseValueType {
@@ -119,15 +119,15 @@ export interface PredefinedType extends BaseValueType {
 
 export type UnionLiteralType = string | number;
 
-export interface UnionType extends BaseValueType {
-  kind: ValueTypeKind.unionType;
+export interface LiteralType extends BaseValueType {
+  kind: ValueTypeKind.literalType;
   memberType: BasicTypeValue.string | BasicTypeValue.number;
   members: UnionLiteralType[];
 }
 
-export interface TypeUnion extends BaseValueType {
+export interface UnionType extends BaseValueType {
   name: string;
-  kind: ValueTypeKind.typeUnion;
+  kind: ValueTypeKind.unionType;
   members: ValueType[];
   customTags: Record<string, unknown>;
 }
@@ -164,12 +164,12 @@ export function isPredefinedType(valueType: ValueType): valueType is PredefinedT
   return valueType.kind === ValueTypeKind.predefinedType;
 }
 
-export function isUnionType(valueType: ValueType): valueType is UnionType {
-  return valueType.kind === ValueTypeKind.unionType;
+export function isLiteralType(valueType: ValueType): valueType is LiteralType {
+  return valueType.kind === ValueTypeKind.literalType;
 }
 
-export function isTypeUnion(valueType: ValueType): valueType is TypeUnion {
-  return valueType.kind === ValueTypeKind.typeUnion;
+export function isUnionType(valueType: ValueType): valueType is UnionType {
+  return valueType.kind === ValueTypeKind.unionType;
 }
 
 // TODO: Define these types to support recursive definition

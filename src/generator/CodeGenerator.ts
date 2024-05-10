@@ -10,7 +10,7 @@ import {
 } from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
-import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView, TypeUnionView } from '../renderer/views';
+import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView, UnionTypeView } from '../renderer/views';
 import { serializeModule, serializeNamedType } from '../serializers';
 import { isEnumType, isInterfaceType } from '../types';
 import { applyDefaultCustomTags } from './utils';
@@ -132,8 +132,8 @@ export class CodeGenerator {
       namedTypeView = new EnumTypeView(namedType.type, namedType.source, valueTransformer);
       namedTypeView.enum = true;
     } else {
-      namedTypeView = new TypeUnionView(namedType.type, valueTransformer);
-      namedTypeView.typeUnion = true;
+      namedTypeView = new UnionTypeView(namedType.type, valueTransformer);
+      namedTypeView.unionType = true;
     }
 
     return namedTypeView;

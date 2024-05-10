@@ -13,7 +13,7 @@ import {
   Module,
   ValueType,
   Value,
-  isTypeUnion,
+  isUnionType,
 } from './types';
 
 const keywordColor = chalk.green;
@@ -86,7 +86,7 @@ ${namedType.members
         .join('\n')}
   }`;
   }
-  if (isTypeUnion(namedType)) {
+  if (isUnionType(namedType)) {
     return `${documentationColor(customTags)}
   ${namedType.members
         .map(
@@ -138,7 +138,7 @@ function serializeValueType(valueType: ValueType): string {
     return valueType.name;
   }
 
-  if (isTypeUnion(valueType)) {
+  if (isUnionType(valueType)) {
     return valueType.name;
   }
 

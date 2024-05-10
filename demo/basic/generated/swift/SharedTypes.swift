@@ -19,14 +19,14 @@ public struct OverriddenFullSize: Codable {
   public var nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?
   public var numUnion1: OverriddenFullSizeMembersNumUnion1Type
   public var foo: OverriddenFullSizeMembersFooType
-  public var typeUnion: OverriddenFullSizeMembersTypeUnionType
+  public var unionType: OverriddenFullSizeMembersUnionTypeType
   public var width: Double
   public var height: Double
   public var scale: Double
   /// Example documentation for member
   private var member: NumEnum = .one
 
-  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion: OverriddenFullSizeMembersStringUnionType, numberStringUnion: OverriddenFullSizeMembersNumberStringUnionType, nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, typeUnion: OverriddenFullSizeMembersTypeUnionType, width: Double, height: Double, scale: Double) {
+  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion: OverriddenFullSizeMembersStringUnionType, numberStringUnion: OverriddenFullSizeMembersNumberStringUnionType, nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, unionType: OverriddenFullSizeMembersUnionTypeType, width: Double, height: Double, scale: Double) {
     self.size = size
     self.count = count
     self.stringEnum = stringEnum
@@ -37,7 +37,7 @@ public struct OverriddenFullSize: Codable {
     self.nullableStringUnion = nullableStringUnion
     self.numUnion1 = numUnion1
     self.foo = foo
-    self.typeUnion = typeUnion
+    self.unionType = unionType
     self.width = width
     self.height = height
     self.scale = scale
@@ -90,7 +90,7 @@ public struct OverriddenFullSizeMembersFooType: Codable {
   }
 }
 
-public enum OverriddenFullSizeMembersTypeUnionType: Codable {
+public enum OverriddenFullSizeMembersUnionTypeType: Codable {
   case string(_ value: String)
   case double(_ value: Double)
   case bool(_ value: Bool)
