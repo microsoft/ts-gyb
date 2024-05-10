@@ -289,15 +289,21 @@ describe('ValueParser', () => {
     it('Empty types union', () => {
       const valueTypeCode = 'null | undefined';
       withTempValueParser(valueTypeCode, parseFunc => {
-        expect(parseFunc).to.throw('union type null | undefined is invalid');
+        expect(parseFunc).to.throw('type null | undefined is invalid');
       });
     });
 
-    it('Multiple types union', () => {
-      const valueTypeCode = 'string | number';
-      withTempValueParser(valueTypeCode, parseFunc => {
-        expect(parseFunc).to.throw('union type string | number is invalid');
-      });
+    testValueType('Multiple types union', 'string | number', {
+      customTags: {},
+      name: '',
+      kind: ValueTypeKind.typeUnion,
+      members: [{
+        kind: ValueTypeKind.basicType,
+        value: BasicTypeValue.string,
+      }, {
+        kind: ValueTypeKind.basicType,
+        value: BasicTypeValue.number,
+      }],
     });
 
     const optionalStringType: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: stringType };

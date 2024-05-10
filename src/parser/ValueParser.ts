@@ -363,10 +363,18 @@ export class ValueParser {
     }
 
     if (isTuple) {
-      return {
+      const value: TupleType = {
         kind: ValueTypeKind.tupleType,
         members: tupleMembers,
       };
+      if (nullable) {
+        const optionalType: OptionalType = {
+          kind: ValueTypeKind.optionalType,
+          wrappedType: value,
+        };
+        return optionalType;
+      }
+      return value;
     }
 
     if (valueTypes.length === 1) {
