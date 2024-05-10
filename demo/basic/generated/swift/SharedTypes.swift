@@ -19,13 +19,14 @@ public struct OverriddenFullSize: Codable {
   public var nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?
   public var numUnion1: OverriddenFullSizeMembersNumUnion1Type
   public var foo: OverriddenFullSizeMembersFooType
+  public var typeUnion: OverriddenFullSizeMembersTypeUnionType
   public var width: Double
   public var height: Double
   public var scale: Double
   /// Example documentation for member
   private var member: NumEnum = .one
 
-  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion: OverriddenFullSizeMembersStringUnionType, numberStringUnion: OverriddenFullSizeMembersNumberStringUnionType, nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, width: Double, height: Double, scale: Double) {
+  public init(size: Double, count: Int, stringEnum: StringEnum, numEnum: NumEnum, defEnum: DefaultEnum, stringUnion: OverriddenFullSizeMembersStringUnionType, numberStringUnion: OverriddenFullSizeMembersNumberStringUnionType, nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?, numUnion1: OverriddenFullSizeMembersNumUnion1Type, foo: OverriddenFullSizeMembersFooType, typeUnion: OverriddenFullSizeMembersTypeUnionType, width: Double, height: Double, scale: Double) {
     self.size = size
     self.count = count
     self.stringEnum = stringEnum
@@ -36,6 +37,7 @@ public struct OverriddenFullSize: Codable {
     self.nullableStringUnion = nullableStringUnion
     self.numUnion1 = numUnion1
     self.foo = foo
+    self.typeUnion = typeUnion
     self.width = width
     self.height = height
     self.scale = scale
@@ -85,5 +87,49 @@ public struct OverriddenFullSizeMembersFooType: Codable {
   public init(stringField: String, numberField: Double) {
     self.stringField = stringField
     self.numberField = numberField
+  }
+}
+
+public enum OverriddenFullSizeMembersTypeUnionType: Codable {
+  case string(_ value: String)
+  case double(_ value: Double)
+  case bool(_ value: Bool)
+  case numEnum(_ value: NumEnum)
+  case defaultEnum(_ value: DefaultEnum)
+
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    if let value = try? container.decode(String.self) {
+      self = .string(value)
+    } 
+    else if let value = try? container.decode(Double.self) {
+      self = .double(value)
+    } 
+    else if let value = try? container.decode(Bool.self) {
+      self = .bool(value)
+    } 
+    else if let value = try? container.decode(NumEnum.self) {
+      self = .numEnum(value)
+    } 
+    else {
+      let value = try container.decode(DefaultEnum.self)
+      self = .defaultEnum(value)
+    }
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.singleValueContainer()
+    switch self {
+    case .string(let value):
+      try container.encode(value)
+    case .double(let value):
+      try container.encode(value)
+    case .bool(let value):
+      try container.encode(value)
+    case .numEnum(let value):
+      try container.encode(value)
+    case .defaultEnum(let value):
+      try container.encode(value)
+    }
   }
 }

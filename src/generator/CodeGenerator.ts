@@ -10,9 +10,9 @@ import {
 } from './named-types';
 import { Parser } from '../parser/Parser';
 import { renderCode } from '../renderer/renderer';
-import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView } from '../renderer/views';
+import { NamedTypeView, ModuleView, InterfaceTypeView, EnumTypeView, TypeUnionView } from '../renderer/views';
 import { serializeModule, serializeNamedType } from '../serializers';
-import { isInterfaceType } from '../types';
+import { isEnumType, isInterfaceType } from '../types';
 import { applyDefaultCustomTags } from './utils';
 import { ValueTransformer, SwiftValueTransformer, KotlinValueTransformer } from '../renderer/value-transformer';
 
@@ -128,9 +128,12 @@ export class CodeGenerator {
     if (isInterfaceType(namedType.type)) {
       namedTypeView = new InterfaceTypeView(namedType.type, namedType.source, valueTransformer);
       namedTypeView.custom = true;
-    } else {
+    } else if (isEnumType(namedType.type)) {
       namedTypeView = new EnumTypeView(namedType.type, namedType.source, valueTransformer);
       namedTypeView.enum = true;
+    } else {
+      namedTypeView = new TypeUnionView(namedType.type, valueTransformer);
+      namedTypeView.typeUnion = true;
     }
 
     return namedTypeView;

@@ -13,6 +13,7 @@ import {
   Module,
   ValueType,
   Value,
+  isTypeUnion,
 } from './types';
 
 const keywordColor = chalk.green;
@@ -71,20 +72,31 @@ ${namedType.members
   .join('\n')}
 }`;
   }
+  if (isEnumType(namedType)) {
+    return `${serializeDocumentation(namedType.documentation)}${documentationColor(customTags)}${keywordColor('Enum')} ${namedType.name
+      } {
+  ${namedType.members
+        .map(
+          (member) =>
+            `${serializeDocumentation(member.documentation)}${identifierColor(member.key)} = ${valueColor(member.value)}`
+        )
+        .join('\n')
+        .split('\n')
+        .map((line) => `  ${line}`)
+        .join('\n')}
+  }`;
+  }
+  if (isTypeUnion(namedType)) {
+    return `${documentationColor(customTags)}
+  ${namedType.members
+        .map(
+          (member) =>
+            serializeValueType(member)
+        )
+        .join(' | ')}`;
+  }
 
-  return `${serializeDocumentation(namedType.documentation)}${documentationColor(customTags)}${keywordColor('Enum')} ${
-    namedType.name
-  } {
-${namedType.members
-  .map(
-    (member) =>
-      `${serializeDocumentation(member.documentation)}${identifierColor(member.key)} = ${valueColor(member.value)}`
-  )
-  .join('\n')
-  .split('\n')
-  .map((line) => `  ${line}`)
-  .join('\n')}
-}`;
+  throw Error(`Unhandled value type ${JSON.stringify(namedType)}`);
 }
 
 function serializeMethod(method: Method): string {
@@ -123,6 +135,10 @@ function serializeValueType(valueType: ValueType): string {
     return `${serializeValueType(valueType.wrappedType)}?`;
   }
   if (isPredefinedType(valueType)) {
+    return valueType.name;
+  }
+
+  if (isTypeUnion(valueType)) {
     return valueType.name;
   }
 

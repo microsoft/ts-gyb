@@ -1,3 +1,5 @@
+import { Type } from "typescript";
+
 export interface Module {
   name: string;
   members: Field[];
@@ -32,7 +34,8 @@ export type NonEmptyType =
   | ArrayType
   | DictionaryType
   | PredefinedType
-  | UnionType;
+  | UnionType
+  | TypeUnion;
 
 export enum ValueTypeKind {
   basicType = 'basicType',
@@ -44,6 +47,7 @@ export enum ValueTypeKind {
   optionalType = 'optionalType',
   predefinedType = 'predefinedType',
   unionType = 'unionType',
+  typeUnion = 'typeUnion',
 }
 
 interface BaseValueType {
@@ -60,7 +64,6 @@ export interface BasicType extends BaseValueType {
   kind: ValueTypeKind.basicType;
   value: BasicTypeValue;
 }
-
 export interface InterfaceType extends BaseValueType, Omit<Module, 'exportedInterfaceBases'> {
   kind: ValueTypeKind.interfaceType;
 }
@@ -124,6 +127,13 @@ export interface UnionType extends BaseValueType {
   members: UnionLiteralType[];
 }
 
+export interface TypeUnion extends BaseValueType {
+  name: string;
+  kind: ValueTypeKind.typeUnion;
+  members: ValueType[];
+  customTags: Record<string, unknown>;
+}
+
 export function isBasicType(valueType: ValueType): valueType is BasicType {
   return valueType.kind === ValueTypeKind.basicType;
 }
@@ -158,6 +168,10 @@ export function isPredefinedType(valueType: ValueType): valueType is PredefinedT
 
 export function isUnionType(valueType: ValueType): valueType is UnionType {
   return valueType.kind === ValueTypeKind.unionType;
+}
+
+export function isTypeUnion(valueType: ValueType): valueType is TypeUnion {
+  return valueType.kind === ValueTypeKind.typeUnion;
 }
 
 // TODO: Define these types to support recursive definition

@@ -30,6 +30,7 @@ data class OverriddenFullSize(
     @JvmField val nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?,
     @JvmField val numUnion1: OverriddenFullSizeMembersNumUnion1Type,
     @JvmField val foo: OverriddenFullSizeMembersFooType,
+    @JvmField val typeUnion: OverriddenFullSizeMembersTypeUnionType,
     @JvmField val width: Float,
     @JvmField val height: Float,
     @JvmField val scale: Float,
@@ -117,3 +118,47 @@ data class OverriddenFullSizeMembersFooType(
     @JvmField val stringField: String,
     @JvmField val numberField: Float,
 )
+
+sealed class OverriddenFullSizeMembersTypeUnionType(val value: Any) {
+    data class StringValue(val value: String) : OverriddenFullSizeMembersTypeUnionType()
+    data class FloatValue(val value: Float) : OverriddenFullSizeMembersTypeUnionType()
+    data class BooleanValue(val value: Boolean) : OverriddenFullSizeMembersTypeUnionType()
+    data class NumEnumValue(val value: NumEnum) : OverriddenFullSizeMembersTypeUnionType()
+    data class DefaultEnumValue(val value: DefaultEnum) : OverriddenFullSizeMembersTypeUnionType()
+}
+
+class OverriddenFullSizeMembersTypeUnionTypeAdapter : JsonSerializer<OverriddenFullSizeMembersTypeUnionType>, JsonDeserializer<OverriddenFullSizeMembersTypeUnionType> {
+    override fun serialize(src: OverriddenFullSizeMembersTypeUnionType, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return context.serialize(src.value)
+    }
+ 
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): OverriddenFullSizeMembersTypeUnionType {
+        when {
+            json.isJsonPrimitive -> {
+                val primitive = json.asJsonPrimitive
+                if (primitive.isString) {
+                    return OverriddenFullSizeMembersTypeUnionType.StringValue(primitive.asString)
+                }
+                if (primitive.isNumber) {
+                    return OverriddenFullSizeMembersTypeUnionType.FloatValue(primitive.asFloat)
+                }
+                if (primitive.isBoolean) {
+                    return OverriddenFullSizeMembersTypeUnionType.BooleanValue(primitive.asBoolean)
+                }
+            }
+            json.isJsonObject -> {
+                try {
+                    return OverriddenFullSizeMembersTypeUnionType.NumEnumValue(context.deserialize(json, NumEnum::class.java))
+                } catch (e: Exception) {
+                    // Ignore the exception and try the next type
+                }
+                try {
+                    return OverriddenFullSizeMembersTypeUnionType.DefaultEnumValue(context.deserialize(json, DefaultEnum::class.java))
+                } catch (e: Exception) {
+                    // Ignore the exception and try the next type
+                }
+            }
+            else -> throw IllegalArgumentException("Unexpected JSON type: ${json.javaClass}")
+        }
+    }
+}

@@ -38,3 +38,57 @@ enum class {{typeName}} {
 }
 {{/isStringType}}
 {{/enum}}
+{{#typeUnion}}
+sealed class {{typeName}}(val value: Any) {
+    {{#members}}
+    data class {{type}}Value(val value: {{{type}}}) : {{typeName}}()
+    {{/members}}
+}
+
+class {{typeName}}Adapter : JsonSerializer<{{typeName}}>, JsonDeserializer<{{typeName}}> {
+    override fun serialize(src: {{typeName}}, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return context.serialize(src.value)
+    }
+ 
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): {{typeName}} {
+        when {
+            {{#hasBasicType}}
+            json.isJsonPrimitive -> {
+                val primitive = json.asJsonPrimitive
+                {{#members}}
+                {{#isNumber}}
+                if (primitive.isNumber) {
+                    return {{typeName}}.{{type}}Value(primitive.asFloat)
+                }
+                {{/isNumber}}
+                {{#isBoolean}}
+                if (primitive.isBoolean) {
+                    return {{typeName}}.{{type}}Value(primitive.asBoolean)
+                }
+                {{/isBoolean}}
+                {{#isString}}
+                if (primitive.isString) {
+                    return {{typeName}}.{{type}}Value(primitive.asString)
+                }
+                {{/isString}}
+                {{/members}}
+            }
+            {{/hasBasicType}}
+            {{#hasTupleType}}
+            json.isJsonObject -> {
+                {{#members}}
+                {{#isTuple}}
+                try {
+                    return {{typeName}}.{{type}}Value(context.deserialize(json, {{type}}::class.java))
+                } catch (e: Exception) {
+                    // Ignore the exception and try the next type
+                }
+                {{/isTuple}}
+                {{/members}}
+            }
+            {{/hasTupleType}}
+            else -> throw IllegalArgumentException("Unexpected JSON type: ${json.javaClass}")
+        }
+    }
+}
+{{/typeUnion}}
