@@ -1,5 +1,5 @@
-import { uncapitalize } from "../../utils";
-import { UnionType, isBasicType } from '../../types';
+import { capitalize, uncapitalize } from "../../utils";
+import { DictionaryKeyType, UnionType, ValueType, isArraryType, isBasicType, isDictionaryType } from '../../types';
 import { ValueTransformer } from '../value-transformer';
 
 export class UnionTypeView {
@@ -8,12 +8,37 @@ export class UnionTypeView {
     private readonly valueTransformer: ValueTransformer
   ) { }
 
-  get typeName(): string {
+  get unionTypeName(): string {
     return this.valueTransformer.convertTypeNameFromCustomMap(this.value.name);
   }
 
+  convertValueTypeToUnionMemberName(valueType: ValueType): string {
+    if (isArraryType(valueType)) {
+      return `${this.valueTransformer.convertValueType(valueType.elementType)}Array`;
+    }
+
+    if (isDictionaryType(valueType)) {
+      let keyType: string;
+      switch (valueType.keyType) {
+        case DictionaryKeyType.string:
+          keyType = 'String';
+          break;
+        case DictionaryKeyType.number:
+          keyType = 'Int';
+          break;
+        default:
+          throw Error('Type not exists');
+      }
+
+      return `${this.valueTransformer.convertValueType(valueType.valueType)}For${keyType}Dictionary`;
+    }
+
+    return this.valueTransformer.convertValueType(valueType);
+  }
+
   get members(): {
-    name: string,
+    capitalizeName: string,
+    uncapitalizeName: string,
     type: string;
     first: boolean;
     last: boolean;
@@ -47,13 +72,15 @@ export class UnionTypeView {
         return 0;
       })
       .map((member, index) => {
-      const typeName = this.valueTransformer.convertValueType(member);
-      return {
-        name: uncapitalize(typeName),
-        type: typeName,
-        first: index === 0,
-        last: index === members.length - 1,
-      };
-    });
+        const typeName = this.valueTransformer.convertValueType(member);
+        const memberName = this.convertValueTypeToUnionMemberName(member);
+        return {
+          capitalizeName: capitalize(memberName),
+          uncapitalizeName: uncapitalize(memberName),
+          type: typeName,
+          first: index === 0,
+          last: index === members.length - 1,
+        };
+      });
   }
 }

@@ -93,6 +93,8 @@ public struct OverriddenFullSizeMembersFooType: Codable {
 public enum OverriddenFullSizeMembersUnionTypeType: Codable {
   case numEnum(_ value: NumEnum)
   case defaultEnum(_ value: DefaultEnum)
+  case stringArray(_ value: [String])
+  case stringForStringDictionary(_ value: [String: String])
   case bool(_ value: Bool)
   case double(_ value: Double)
   case string(_ value: String)
@@ -104,6 +106,12 @@ public enum OverriddenFullSizeMembersUnionTypeType: Codable {
     } 
     else if let value = try? container.decode(DefaultEnum.self) {
       self = .defaultEnum(value)
+    } 
+    else if let value = try? container.decode([String].self) {
+      self = .stringArray(value)
+    } 
+    else if let value = try? container.decode([String: String].self) {
+      self = .stringForStringDictionary(value)
     } 
     else if let value = try? container.decode(Bool.self) {
       self = .bool(value)
@@ -123,6 +131,10 @@ public enum OverriddenFullSizeMembersUnionTypeType: Codable {
     case .numEnum(let value):
       try container.encode(value)
     case .defaultEnum(let value):
+      try container.encode(value)
+    case .stringArray(let value):
+      try container.encode(value)
+    case .stringForStringDictionary(let value):
       try container.encode(value)
     case .bool(let value):
       try container.encode(value)

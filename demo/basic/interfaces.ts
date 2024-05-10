@@ -49,7 +49,7 @@ interface FullSize extends BaseSize, CustomSize {
   nullableStringUnion: 'A1' | 'B1' | null;
   numUnion1: 11 | 21;
   foo: { stringField: string } | { numberField: number };
-  unionType: string | number | boolean | NumEnum | DefaultEnum;
+  unionType: string | number | boolean | NumEnum | DefaultEnum | string[] | DictionaryWithAnyKey;
 }
 
 interface DictionaryWithAnyKey {

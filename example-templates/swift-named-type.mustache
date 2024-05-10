@@ -37,9 +37,9 @@ public enum {{typeName}}: {{valueType}}, Codable {
 }
 {{/enum}}
 {{#unionType}}
-public enum {{typeName}}: Codable {
+public enum {{unionTypeName}}: Codable {
   {{#members}}
-  case {{name}}(_ value: {{type}})
+  case {{uncapitalizeName}}(_ value: {{type}})
   {{/members}}
 
   public init(from decoder: any Decoder) throws {
@@ -47,13 +47,13 @@ public enum {{typeName}}: Codable {
     {{#members}}
     {{^last}}
     {{^first}}else {{/first}}if let value = try? container.decode({{type}}.self) {
-      self = .{{name}}(value)
+      self = .{{uncapitalizeName}}(value)
     } 
     {{/last}}
     {{#last}}
     else {
       let value = try container.decode({{type}}.self)
-      self = .{{name}}(value)
+      self = .{{uncapitalizeName}}(value)
     }
     {{/last}}
     {{/members}}
@@ -63,7 +63,7 @@ public enum {{typeName}}: Codable {
     var container = encoder.singleValueContainer()
     switch self {
     {{#members}}
-    case .{{name}}(let value):
+    case .{{uncapitalizeName}}(let value):
       try container.encode(value)
     {{/members}}
     }

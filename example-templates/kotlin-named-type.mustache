@@ -39,21 +39,21 @@ enum class {{typeName}} {
 {{/isStringType}}
 {{/enum}}
 {{#unionType}}
-sealed class {{typeName}}(val value: Any) {
+sealed class {{unionTypeName}}(val value: Any) {
     {{#members}}
-    data class {{type}}Value(val value: {{{type}}}) : {{typeName}}()
+    data class {{capitalizeName}}Value(val value: {{{type}}}) : {{unionTypeName}}()
     {{/members}}
 }
 
-class {{typeName}}Adapter : JsonSerializer<{{typeName}}>, JsonDeserializer<{{typeName}}> {
-    override fun serialize(src: {{typeName}}, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+class {{unionTypeName}}Adapter : JsonSerializer<{{unionTypeName}}>, JsonDeserializer<{{unionTypeName}}> {
+    override fun serialize(src: {{unionTypeName}}, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
         return context.serialize(src.value)
     }
  
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): {{typeName}} {
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): {{unionTypeName}} {
         {{#members}}
         try {
-            return {{typeName}}.{{type}}Value(context.deserialize(json, {{type}}::class.java))
+            return {{unionTypeName}}.{{capitalizeName}}Value(context.deserialize(json, {{type}}::class.java))
         } catch (e: Exception) {
             // Ignore the exception and try the next type
         }
