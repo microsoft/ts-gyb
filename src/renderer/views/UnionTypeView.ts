@@ -12,41 +12,47 @@ export class UnionTypeView {
     return this.valueTransformer.convertTypeNameFromCustomMap(this.value.name);
   }
 
-  get hasBasicType(): boolean {
-    const { members } = this.value;
-
-    return members.filter(isBasicType).length > 0;
-  }
-
-  get hasTupleType(): boolean {
-    const { members } = this.value;
-
-    return members.filter(isBasicType).length !== members.length;
-  }
-
   get members(): {
     name: string,
     type: string;
     first: boolean;
     last: boolean;
-    isTuple: boolean;
-    isNumber: boolean;
-    isBoolean: boolean;
-    isString: boolean;
   }[] {
     const { members } = this.value;
 
-    return members.map((member, index) => {
+    return members
+      // put basic types to last
+      .sort((a, b) => {
+        if (isBasicType(a) && isBasicType(b)) {
+          // put string to last
+          if (a.value === 'string' && b.value === 'string') {
+            return 0;
+          }
+
+          if (a.value === 'string') {
+            return 1;
+          }
+
+          return -1;
+        }
+
+        if (isBasicType(a) && !isBasicType(b)) {
+          return 1;
+        }
+
+        if (!isBasicType(a) && isBasicType(b)) {
+          return -1;
+        }
+
+        return 0;
+      })
+      .map((member, index) => {
       const typeName = this.valueTransformer.convertValueType(member);
       return {
         name: uncapitalize(typeName),
         type: typeName,
         first: index === 0,
         last: index === members.length - 1,
-        isTuple: !isBasicType(member),
-        isNumber: isBasicType(member) && member.value === 'number',
-        isBoolean: isBasicType(member) && member.value === 'boolean',
-        isString: isBasicType(member) && member.value === 'string',
       };
     });
   }

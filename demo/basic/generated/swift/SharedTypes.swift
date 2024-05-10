@@ -91,44 +91,44 @@ public struct OverriddenFullSizeMembersFooType: Codable {
 }
 
 public enum OverriddenFullSizeMembersUnionTypeType: Codable {
-  case string(_ value: String)
-  case double(_ value: Double)
-  case bool(_ value: Bool)
   case numEnum(_ value: NumEnum)
   case defaultEnum(_ value: DefaultEnum)
+  case bool(_ value: Bool)
+  case double(_ value: Double)
+  case string(_ value: String)
 
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
-    if let value = try? container.decode(String.self) {
-      self = .string(value)
+    if let value = try? container.decode(NumEnum.self) {
+      self = .numEnum(value)
     } 
-    else if let value = try? container.decode(Double.self) {
-      self = .double(value)
+    else if let value = try? container.decode(DefaultEnum.self) {
+      self = .defaultEnum(value)
     } 
     else if let value = try? container.decode(Bool.self) {
       self = .bool(value)
     } 
-    else if let value = try? container.decode(NumEnum.self) {
-      self = .numEnum(value)
+    else if let value = try? container.decode(Double.self) {
+      self = .double(value)
     } 
     else {
-      let value = try container.decode(DefaultEnum.self)
-      self = .defaultEnum(value)
+      let value = try container.decode(String.self)
+      self = .string(value)
     }
   }
 
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
-    case .string(let value):
-      try container.encode(value)
-    case .double(let value):
-      try container.encode(value)
-    case .bool(let value):
-      try container.encode(value)
     case .numEnum(let value):
       try container.encode(value)
     case .defaultEnum(let value):
+      try container.encode(value)
+    case .bool(let value):
+      try container.encode(value)
+    case .double(let value):
+      try container.encode(value)
+    case .string(let value):
       try container.encode(value)
     }
   }
