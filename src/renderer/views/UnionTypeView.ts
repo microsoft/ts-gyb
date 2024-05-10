@@ -1,5 +1,5 @@
 import { capitalize, uncapitalize } from "../../utils";
-import { DictionaryKeyType, UnionType, ValueType, isArraryType, isBasicType, isDictionaryType } from '../../types';
+import { BasicType, DictionaryKeyType, DictionaryType, UnionType, ValueType, isArraryType, isBasicType, isDictionaryType } from '../../types';
 import { ValueTransformer } from '../value-transformer';
 
 export class UnionTypeView {
@@ -45,32 +45,35 @@ export class UnionTypeView {
   }[] {
     const { members } = this.value;
 
-    return members
-      // put basic types to last
-      .sort((a, b) => {
-        if (isBasicType(a) && isBasicType(b)) {
-          // put string to last
-          if (a.value === 'string' && b.value === 'string') {
-            return 0;
-          }
+    const dictionaryTypeMembers: DictionaryType[] = [];
+    let basicTypeMembers: BasicType[] = [];
+    const otherMembers: ValueType[] = [];
 
-          if (a.value === 'string') {
-            return 1;
-          }
+    members.forEach((member) => {
+      if (isDictionaryType(member)) {
+        dictionaryTypeMembers.push(member);
+      } else if (isBasicType(member)) {
+        basicTypeMembers.push(member);
+      } else {
+        otherMembers.push(member);
+      }
+    });
 
-          return -1;
-        }
-
-        if (isBasicType(a) && !isBasicType(b)) {
-          return 1;
-        }
-
-        if (!isBasicType(a) && isBasicType(b)) {
-          return -1;
-        }
-
+    basicTypeMembers = basicTypeMembers.sort((a, b) => {
+      // put string to last
+      if (a.value === 'string' && b.value === 'string') {
         return 0;
-      })
+      }
+
+      if (a.value === 'string') {
+        return 1;
+      }
+
+      return -1;
+    });
+
+    const sortedMembers: ValueType[] = [...otherMembers, ...dictionaryTypeMembers, ...basicTypeMembers];
+    return sortedMembers
       .map((member, index) => {
         const typeName = this.valueTransformer.convertValueType(member);
         const memberName = this.convertValueTypeToUnionMemberName(member);

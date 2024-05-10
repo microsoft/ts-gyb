@@ -124,8 +124,8 @@ sealed class OverriddenFullSizeMembersUnionTypeType(val value: Any) {
     data class DefaultEnumValue(val value: DefaultEnum) : OverriddenFullSizeMembersUnionTypeType()
     data class StringArrayValue(val value: Array<String>) : OverriddenFullSizeMembersUnionTypeType()
     data class StringForStringDictionaryValue(val value: Map<String, String>) : OverriddenFullSizeMembersUnionTypeType()
-    data class FloatValue(val value: Float) : OverriddenFullSizeMembersUnionTypeType()
     data class BooleanValue(val value: Boolean) : OverriddenFullSizeMembersUnionTypeType()
+    data class FloatValue(val value: Float) : OverriddenFullSizeMembersUnionTypeType()
     data class StringValue(val value: String) : OverriddenFullSizeMembersUnionTypeType()
 }
 
@@ -156,12 +156,12 @@ class OverriddenFullSizeMembersUnionTypeTypeAdapter : JsonSerializer<OverriddenF
             // Ignore the exception and try the next type
         }
         try {
-            return OverriddenFullSizeMembersUnionTypeType.FloatValue(context.deserialize(json, Float::class.java))
+            return OverriddenFullSizeMembersUnionTypeType.BooleanValue(context.deserialize(json, Boolean::class.java))
         } catch (e: Exception) {
             // Ignore the exception and try the next type
         }
         try {
-            return OverriddenFullSizeMembersUnionTypeType.BooleanValue(context.deserialize(json, Boolean::class.java))
+            return OverriddenFullSizeMembersUnionTypeType.FloatValue(context.deserialize(json, Float::class.java))
         } catch (e: Exception) {
             // Ignore the exception and try the next type
         }
