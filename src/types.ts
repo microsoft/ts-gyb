@@ -1,5 +1,3 @@
-import { Type } from "typescript";
-
 export interface Module {
   name: string;
   members: Field[];
