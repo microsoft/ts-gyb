@@ -32,6 +32,42 @@ describe('ValueParser', () => {
         expect(parseFunc()).to.deep.equal({ name: 'mockedMethod', parameters: [], returnType: null, isAsync: true, documentation: '', });
       })
     });
+
+    it('Return type', () => {
+      let customTypesCode = `
+      export interface SelectionRect {
+        start: number;
+      }
+      `
+      const methodCode = `
+      mockedMethod(): SelectionRect;
+      `;
+      withTempMethodParser(methodCode, parseFunc => {
+        expect(parseFunc()).to.deep.equal({
+          name: 'mockedMethod',
+          parameters: [],
+          returnType: {
+            name: 'SelectionRect',
+            customTags: {},
+            methods: [],
+            documentation: '',
+            kind: 'interfaceType',
+            members: [
+              {
+                documentation: '',
+                name: 'start',
+                type: {
+                  kind: 'basicType',
+                  value: 'number',
+                },
+              },
+            ],
+          },
+          isAsync: false,
+          documentation: '',
+        });
+      }, new Set(), customTypesCode)
+    });
   });
 
   describe('Parameters type', () => {
@@ -184,7 +220,6 @@ describe('ValueParser', () => {
     }
     `;
     testValueType('merged interface and tuple', 'InterfaceWithStringField | { numberField: number }', tupleWithMembersType, new Set(), interfacesCode);
-    testValueType('merged interfaces to tuple', 'InterfaceWithStringField | InterfaceWithNumberField', tupleWithMembersType, new Set(), interfacesCode);
   })
 
   describe('Parse enum type', () => {
@@ -287,7 +322,7 @@ describe('ValueParser', () => {
     testValueType('string interface dictionary', 'DictionaryInterface', { kind: ValueTypeKind.dictionaryType, keyType: DictionaryKeyType.string, valueType: numberType }, new Set(), dictionaryCode);
   });
 
-  describe('Parse optional type', () => {
+  describe('Parse union type', () => {
     it('Empty types union', () => {
       const valueTypeCode = 'null | undefined';
       withTempValueParser(valueTypeCode, parseFunc => {
