@@ -267,9 +267,9 @@ export class ValueParser {
     }
 
     let nullable = false;
-    let isTuple = false;
-    const valueTypes: ValueType[] = [];
-    const tupleMembers: Field[] = [];
+    const valueTypes: NonEmptyType[] = [];
+    let hasTupleType = false;
+    const tupleOrInterfaceTypes: (TupleType | InterfaceType)[] = [];
     const literalValues: {
       type: BasicTypeValue.string | BasicTypeValue.number;
       value: Value;
@@ -295,23 +295,15 @@ export class ValueParser {
         return;
       }
 
-      const newValueType = this.valueTypeFromTypeNode(typeNode);
+      const newValueType = this.valueTypeFromTypeNode(typeNode) as NonEmptyType;
 
-      if (valueTypes.length === 0) {
-        isTuple = isInterfaceType(newValueType) || isTupleType(newValueType);
+      valueTypes.push(newValueType);
+      if (isTupleType(newValueType)) {
+        hasTupleType = true;
+        tupleOrInterfaceTypes.push(newValueType);
       }
-
-      if (isTuple) {
-        if (isInterfaceType(newValueType) || isTupleType(newValueType)) {
-          tupleMembers.push(...newValueType.members);
-        } else {
-          throw new ValueParserError(
-            `type ${node.getText()} is invalid`,
-            'Use `multiple tuple types` or `union value types` or `type union`'
-          );
-        }
-      } else {
-        valueTypes.push(newValueType);
+      if (isInterfaceType(newValueType)) {
+        tupleOrInterfaceTypes.push(newValueType);
       }
     });
 
@@ -348,24 +340,24 @@ export class ValueParser {
       return literalKind;
     }
 
-    if (valueTypes.length === 0 && tupleMembers.length === 0) {
+    if (valueTypes.length === 0) {
       throw new ValueParserError(
         `type ${node.getText()} is invalid`,
         'Type must contain one supported non empty type'
       );
     }
 
-    if (valueTypes.length > 0 && tupleMembers.length > 0) {
+    if (hasTupleType && valueTypes.length !== tupleOrInterfaceTypes.length) {
       throw new ValueParserError(
         `mixing ${node.getText()} is invalid`,
         'Type must contain types or tuples'
       );
     }
 
-    if (isTuple) {
+    if (hasTupleType) {
       const value: TupleType = {
         kind: ValueTypeKind.tupleType,
-        members: tupleMembers,
+        members: tupleOrInterfaceTypes.map((type) => type.members).flat(),
       };
       if (nullable) {
         const optionalType: OptionalType = {
@@ -378,7 +370,7 @@ export class ValueParser {
     }
 
     if (valueTypes.length === 1) {
-      if (!isOptionalType(valueTypes[0]) && nullable) {
+      if (nullable) {
         return {
           kind: ValueTypeKind.optionalType,
           wrappedType: valueTypes[0],
