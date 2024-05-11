@@ -1,5 +1,6 @@
 import {
   basicTypeOfUnion,
+  capitalize,
   membersOfUnion,
   uniquePathWithMember,
   uniquePathWithMethodParameter,
@@ -18,8 +19,12 @@ import {
   TupleType,
   isTupleType,
   ValueTypeKind,
-  isUnionType,
+  isLiteralType,
   EnumSubType,
+  LiteralType,
+  isUnionType,
+  isBasicType,
+  isPredefinedType,
   UnionType,
 } from '../types';
 
@@ -29,7 +34,7 @@ export const enum ValueTypeSource {
   Return = 1 << 2,
 }
 
-export type NamedType = InterfaceType | EnumType;
+export type NamedType = InterfaceType | EnumType | UnionType;
 export interface NamedTypeInfo {
   type: NamedType;
   source: ValueTypeSource;
@@ -121,7 +126,7 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
             namedType.name = path;
             namedType.documentation = '';
             namedType.customTags = {};
-          } else if (isUnionType(namedType)) {
+          } else if (isLiteralType(namedType)) {
             const subType = basicTypeOfUnion(namedType);
             const members = membersOfUnion(namedType);
 
@@ -132,6 +137,8 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
             namedType.members = members;
             namedType.documentation = '';
             namedType.customTags = {};
+          } else if (isUnionType(namedType)) {
+            namedType.name = path;
           }
 
           if (typeMap[namedType.name] === undefined) {
@@ -197,7 +204,7 @@ function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTy
 
 function recursiveVisitMembersType(
   valueType: ValueType,
-  visit: (membersType: NamedType | TupleType | UnionType, path: string) => void,
+  visit: (membersType: NamedType | TupleType | LiteralType | UnionType, path: string) => void,
   path: string
 ): void {
   if (isInterfaceType(valueType)) {
@@ -240,18 +247,36 @@ function recursiveVisitMembersType(
     return;
   }
 
-  if (isUnionType(valueType)) {
+  if (isLiteralType(valueType)) {
     visit(valueType, path);
     return;
   }
 
-  if (valueType.kind === ValueTypeKind.basicType) {
+  if (isUnionType(valueType)) {
+    visit(valueType, path);
+    valueType.members.forEach((member) => {
+      let subType: string;
+      if (isBasicType(member)) {
+        subType = member.value;
+      } else if ((member as NamedType).name !== undefined) {
+        subType = (member as NamedType).name;
+      } else {
+        subType = member.kind;
+      }
+      recursiveVisitMembersType(member, visit, `${path}${capitalize(subType)}`);
+    });
+    return;
+  }
+
+  if (isBasicType(valueType)) {
     // string, boolean, etc.
     return;
   }
-  if (valueType.kind === ValueTypeKind.predefinedType) {
+
+  if (isPredefinedType(valueType)) {
     // CodeGen_Int, etc.
     return;
   }
+
   throw Error(`Unhandled value type ${JSON.stringify(valueType)}`);
 }

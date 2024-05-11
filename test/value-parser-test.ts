@@ -2,7 +2,9 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { withTempMethodParser, withTempValueParser } from './utils';
 import { ValueParserError } from '../src/parser/ValueParserError';
-import { BasicType, BasicTypeValue, DictionaryKeyType, DictionaryType, EnumSubType, EnumType, InterfaceType, OptionalType, PredefinedType, TupleType, ValueType, ValueTypeKind } from '../src/types';
+import { BasicType, BasicTypeValue, DictionaryKeyType, DictionaryType, EnumSubType, EnumType, InterfaceType, OptionalType, PredefinedType, TupleType, ValueType, ValueTypeKind, UnionType } from '../src/types';
+import { UnionTypeView } from '../src/renderer/views';
+import { SwiftValueTransformer } from '../src/renderer/value-transformer';
 
 const stringType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.string };
 const numberType: BasicType = { kind: ValueTypeKind.basicType, value: BasicTypeValue.number };
@@ -289,30 +291,102 @@ describe('ValueParser', () => {
     it('Empty types union', () => {
       const valueTypeCode = 'null | undefined';
       withTempValueParser(valueTypeCode, parseFunc => {
-        expect(parseFunc).to.throw('union type null | undefined is invalid');
+        expect(parseFunc).to.throw('type null | undefined is invalid');
       });
     });
+    const customCode = `
+    interface Person {
+      name: string;
+    }
+    `;
 
-    it('Multiple types union', () => {
-      const valueTypeCode = 'string | number';
-      withTempValueParser(valueTypeCode, parseFunc => {
-        expect(parseFunc).to.throw('union type string | number is invalid');
-      });
-    });
-
-    const optionalStringType: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: stringType };
-
-    testValueType('null union', 'string | null', optionalStringType);
-    testValueType('undefined union', 'string | undefined', optionalStringType);
-    testValueType('null and undefined union', 'string | null | undefined', optionalStringType);
-
-    const tupleType: TupleType = { 
-      kind: ValueTypeKind.tupleType, 
-      members: [{ name: 'stringField', type: stringType, documentation: '' }, { name: 'numberField', type: numberType, documentation: '' }],
+    let unionType: UnionType = {
+      customTags: {},
+      name: '',
+      kind: ValueTypeKind.unionType,
+      members: [
+        {
+          kind: ValueTypeKind.basicType,
+          value: BasicTypeValue.string,
+        },
+        {
+          kind: ValueTypeKind.basicType,
+          value: BasicTypeValue.number,
+        },
+        {
+          keyType: DictionaryKeyType.string,
+          kind: ValueTypeKind.dictionaryType,
+          valueType: {
+            kind: ValueTypeKind.basicType,
+            value: BasicTypeValue.string,
+          }
+        },
+        {
+          elementType: {
+            kind: ValueTypeKind.basicType,
+            value: BasicTypeValue.string,
+          },
+          kind: ValueTypeKind.arrayType
+        },
+        {
+          customTags: {},
+          documentation: "",
+          kind: ValueTypeKind.interfaceType,
+          members: [
+            {
+              documentation: "",
+              name: "name",
+              type: {
+                "kind": ValueTypeKind.basicType,
+                "value": BasicTypeValue.string,
+              }
+            }
+          ],
+          methods: [],
+          name: "Person",
+        },
+      ],
     };
-    const optionalTupleType: OptionalType = { kind: ValueTypeKind.optionalType, wrappedType: tupleType };
+    testValueType('Multiple types union', 'string | number | Record<string, string> | string[] | Person', unionType, new Set(), customCode);
 
-    testValueType('merged optional tuple union', '{ stringField: string } | { numberField: number } | null', optionalTupleType);
+    const sortedMembers = new UnionTypeView(unionType, new SwiftValueTransformer({})).members;
+    expect(sortedMembers).to.deep.equal([
+      {
+        capitalizeName: 'StringArray',
+        uncapitalizeName: 'stringArray',
+        type: '[String]',
+        first: true,
+        last: false
+      },
+      {
+        capitalizeName: 'Person',
+        uncapitalizeName: 'person',
+        type: 'Person',
+        first: false,
+        last: false
+      },
+      {
+        capitalizeName: 'StringForStringDictionary',
+        uncapitalizeName: 'stringForStringDictionary',
+        type: '[String: String]',
+        first: false,
+        last: false
+      },
+      {
+        capitalizeName: 'Double',
+        uncapitalizeName: 'double',
+        type: 'Double',
+        first: false,
+        last: false
+      },
+      {
+        capitalizeName: 'String',
+        uncapitalizeName: 'string',
+        type: 'String',
+        first: false,
+        last: true
+      },
+    ]);
   });
 
   describe('Parse alias type', () => {

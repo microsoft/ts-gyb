@@ -1,5 +1,5 @@
 import path from 'path';
-import { BasicTypeValue, EnumField, UnionType } from './types';
+import { BasicTypeValue, EnumField, LiteralType } from './types';
 
 export function capitalize(text: string): string {
   if (text.length === 0) {
@@ -37,11 +37,11 @@ export function uniquePathWithMethodReturnType(ownerName: string, methodName: st
   return `${capitalize(ownerName)}${capitalize(methodName)}ReturnType`;
 }
 
-export function basicTypeOfUnion(union: UnionType): BasicTypeValue {
+export function basicTypeOfUnion(union: LiteralType): BasicTypeValue {
   return union.memberType;
 }
 
-export function membersOfUnion(union: UnionType): EnumField[] {
+export function membersOfUnion(union: LiteralType): EnumField[] {
   const result: EnumField[] = [];
   union.members.forEach((value) => {
     let key = `${value}`;

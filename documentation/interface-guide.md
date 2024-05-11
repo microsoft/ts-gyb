@@ -176,8 +176,10 @@ interface NumberFieldInterface {
 StringFieldInterface | { numberField: number }
 StringFieldInterface | NumberFieldInterface
 
-// not allowed: unsupported union
+// allowed: types union
 string | number
+
+// not allowed: mixing type and tuple
 { stringField: string } | number
 ```
 
@@ -216,7 +218,7 @@ ts-gyb parses tags in [JSDoc](https://jsdoc.app) documentation.
 - `@shouldExport`: Specify whether an `interface` should be exported. Set it to `true` to export.
 - `@overrideModuleName`: Change the name of the interface for ts-gyb. This is helpful for dropping the `I` prefix in TypeScript interface name.
 - `@overrideTypeName`: Similar to `@overrideModuleName`, this is used to override the name of custom types used in method parameters or return values.
-- `@default`: default value for Module Interface's function parameter, 
+- `@default`: default value for Module Interface's function parameter,
 
 ```typescript
 /**

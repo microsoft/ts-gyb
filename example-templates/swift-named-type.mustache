@@ -36,3 +36,37 @@ public enum {{typeName}}: {{valueType}}, Codable {
   {{/members}}
 }
 {{/enum}}
+{{#unionType}}
+public enum {{unionTypeName}}: Codable {
+  {{#members}}
+  case {{uncapitalizeName}}(_ value: {{type}})
+  {{/members}}
+
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    {{#members}}
+    {{^last}}
+    {{^first}}else {{/first}}if let value = try? container.decode({{type}}.self) {
+      self = .{{uncapitalizeName}}(value)
+    } 
+    {{/last}}
+    {{#last}}
+    else {
+      let value = try container.decode({{type}}.self)
+      self = .{{uncapitalizeName}}(value)
+    }
+    {{/last}}
+    {{/members}}
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.singleValueContainer()
+    switch self {
+    {{#members}}
+    case .{{uncapitalizeName}}(let value):
+      try container.encode(value)
+    {{/members}}
+    }
+  }
+}
+{{/unionType}}

@@ -30,6 +30,7 @@ data class OverriddenFullSize(
     @JvmField val nullableStringUnion: OverriddenFullSizeMembersNullableStringUnionType?,
     @JvmField val numUnion1: OverriddenFullSizeMembersNumUnion1Type,
     @JvmField val foo: OverriddenFullSizeMembersFooType,
+    @JvmField val unionType: OverriddenFullSizeMembersUnionTypeType,
     @JvmField val width: Float,
     @JvmField val height: Float,
     @JvmField val scale: Float,
@@ -117,3 +118,59 @@ data class OverriddenFullSizeMembersFooType(
     @JvmField val stringField: String,
     @JvmField val numberField: Float,
 )
+
+sealed class OverriddenFullSizeMembersUnionTypeType(val value: Any) {
+    data class NumEnumValue(val value: NumEnum) : OverriddenFullSizeMembersUnionTypeType()
+    data class DefaultEnumValue(val value: DefaultEnum) : OverriddenFullSizeMembersUnionTypeType()
+    data class StringArrayValue(val value: Array<String>) : OverriddenFullSizeMembersUnionTypeType()
+    data class StringForStringDictionaryValue(val value: Map<String, String>) : OverriddenFullSizeMembersUnionTypeType()
+    data class BooleanValue(val value: Boolean) : OverriddenFullSizeMembersUnionTypeType()
+    data class FloatValue(val value: Float) : OverriddenFullSizeMembersUnionTypeType()
+    data class StringValue(val value: String) : OverriddenFullSizeMembersUnionTypeType()
+}
+
+class OverriddenFullSizeMembersUnionTypeTypeAdapter : JsonSerializer<OverriddenFullSizeMembersUnionTypeType>, JsonDeserializer<OverriddenFullSizeMembersUnionTypeType> {
+    override fun serialize(src: OverriddenFullSizeMembersUnionTypeType, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return context.serialize(src.value)
+    }
+ 
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): OverriddenFullSizeMembersUnionTypeType {
+        try {
+            return OverriddenFullSizeMembersUnionTypeType.NumEnumValue(context.deserialize(json, NumEnum::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+        try {
+            return OverriddenFullSizeMembersUnionTypeType.DefaultEnumValue(context.deserialize(json, DefaultEnum::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+        try {
+            return OverriddenFullSizeMembersUnionTypeType.StringArrayValue(context.deserialize(json, Array<String>::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+        try {
+            return OverriddenFullSizeMembersUnionTypeType.StringForStringDictionaryValue(context.deserialize(json, Map<String, String>::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+        try {
+            return OverriddenFullSizeMembersUnionTypeType.BooleanValue(context.deserialize(json, Boolean::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+        try {
+            return OverriddenFullSizeMembersUnionTypeType.FloatValue(context.deserialize(json, Float::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+        try {
+            return OverriddenFullSizeMembersUnionTypeType.StringValue(context.deserialize(json, String::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+
+        throw IllegalArgumentException("Unexpected JSON type: ${json.javaClass}")
+    }
+}
