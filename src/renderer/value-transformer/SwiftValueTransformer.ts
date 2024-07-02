@@ -129,6 +129,10 @@ export class SwiftValueTransformer implements ValueTransformer {
       return '';
     }
 
+    if (text.toLowerCase() === 'default') {
+      return '`default`';
+    }
+
     let index = 0;
     // Get the index of the first lowercased letter
     while (index < text.length) {
