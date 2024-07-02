@@ -13,6 +13,7 @@ interface CustomSize {
 }
 
 enum StringEnum {
+  default = 'default',
   /**
    * Description for enum member a
    */
@@ -21,11 +22,13 @@ enum StringEnum {
 }
 
 enum NumEnum {
+  default = 0,
   one = 1,
   two = 2,
 }
 
 enum DefaultEnum {
+  default,
   defaultValueC,
   defaultValueD,
 }

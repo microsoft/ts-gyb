@@ -38,6 +38,7 @@ data class OverriddenFullSize(
 )
 
 enum class NumEnum(val value: Int) {
+    DEFAULT(0),
     ONE(1),
     TWO(2);
 
@@ -57,13 +58,15 @@ class NumEnumTypeAdapter : JsonSerializer<NumEnum>, JsonDeserializer<NumEnum> {
 }
 
 enum class StringEnum {
+    @SerializedName("default") DEFAULT,
     @SerializedName("a") A,
     @SerializedName("b") B
 }
 
 enum class DefaultEnum(val value: Int) {
-    DEFAULT_VALUE_C(0),
-    DEFAULT_VALUE_D(1);
+    DEFAULT(0),
+    DEFAULT_VALUE_C(1),
+    DEFAULT_VALUE_D(2);
 
     companion object {
         fun find(value: Int) = values().find { it.value == value }
