@@ -45,19 +45,22 @@ public struct OverriddenFullSize: Codable {
 }
 
 public enum NumEnum: Int, Codable {
+  case `default` = 0
   case one = 1
   case two = 2
 }
 
 public enum StringEnum: String, Codable {
+  case `default` = "default"
   /// Description for enum member a
   case a = "a"
   case b = "b"
 }
 
 public enum DefaultEnum: Int, Codable {
-  case defaultValueC = 0
-  case defaultValueD = 1
+  case `default` = 0
+  case defaultValueC = 1
+  case defaultValueD = 2
 }
 
 public enum OverriddenFullSizeMembersStringUnionType: String, Codable {
