@@ -10,6 +10,7 @@ import {
   isPredefinedType,
   ValueType,
   Value,
+  isUnionType,
 } from '../../types';
 import { ValueTransformer } from './ValueTransformer';
 
@@ -66,6 +67,10 @@ export class KotlinValueTransformer implements ValueTransformer {
       return this.typeNameMap[valueType.name] ?? valueType.name;
     }
 
+    if (isUnionType(valueType)) {
+      return this.convertTypeNameFromCustomMap(valueType.name);
+    }
+
     throw Error('Type not handled');
   }
 
@@ -120,13 +125,21 @@ export class KotlinValueTransformer implements ValueTransformer {
   }
 
   convertEnumKey(text: string): string {
-    return text
-      .replace(/\.?([A-Z]+)/g, (_, p1: string) => `_${p1}`)
-      .replace(/^_/, '')
-      .toUpperCase();
+    let result = text.replace(/\.?([A-Z]+)/g, (_, p1: string) => `_${p1}`);
+
+    const testText = result.replace(/^_/, '');
+    if (Number.isNaN(Number(testText))) {
+      result = testText;
+    }
+
+    return result.toUpperCase();
   }
 
   convertTypeNameFromCustomMap(name: string): string {
     return this.typeNameMap[name] ?? name;
+  }
+
+  null(): string {
+    return 'null';
   }
 }

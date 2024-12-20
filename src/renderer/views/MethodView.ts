@@ -10,13 +10,23 @@ export class MethodView {
   }
 
   get parametersDeclaration(): string {
-    return this.parameters.map((parameter) => `${parameter.name}: ${parameter.type}`).join(', ');
+    return this.parameters.map((parameter) => {
+      let { defaultValue } = parameter;
+      if (defaultValue == null) {
+        return `${parameter.name}: ${parameter.type}`;
+      }
+      if (defaultValue === 'null') {
+        defaultValue = this.valueTransformer.null();
+      }
+      return `${parameter.name}: ${parameter.type} = ${defaultValue}`;
+    }).join(', ');
   }
 
-  get parameters(): { name: string; type: string; last: boolean }[] {
+  get parameters(): { name: string; type: string; defaultValue?: string; last: boolean }[] {
     return this.method.parameters.map((parameter, index) => ({
       name: parameter.name,
       type: this.valueTransformer.convertValueType(parameter.type),
+      defaultValue: parameter.defaultValue,
       last: index === this.method.parameters.length - 1,
     }));
   }

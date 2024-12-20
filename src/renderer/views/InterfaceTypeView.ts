@@ -14,7 +14,7 @@ export class InterfaceTypeView {
     return this.valueTransformer.convertValueType(this.interfaceType);
   }
 
-  get members(): { name: string; type: string; documentationLines: string[]; last: boolean }[] {
+  get members(): { name: string; type: string; documentationLines: string[]; last: boolean, defaultValue?: string }[] {
     const members = this.interfaceType.members.filter((member) => member.staticValue === undefined);
 
     return members.map((member, index) => ({
@@ -22,6 +22,7 @@ export class InterfaceTypeView {
       type: this.valueTransformer.convertValueType(member.type),
       documentationLines: getDocumentationLines(member.documentation),
       last: index === members.length - 1,
+      defaultValue: member.defaultValue,
     }));
   }
 

@@ -20,6 +20,7 @@ export interface Field {
   type: ValueType;
   staticValue?: Value;
   documentation: string;
+  defaultValue?: string;
 }
 
 export type ValueType = NonEmptyType | OptionalType;
@@ -30,7 +31,9 @@ export type NonEmptyType =
   | EnumType
   | ArrayType
   | DictionaryType
-  | PredefinedType;
+  | PredefinedType
+  | LiteralType
+  | UnionType;
 
 export enum ValueTypeKind {
   basicType = 'basicType',
@@ -41,6 +44,8 @@ export enum ValueTypeKind {
   dictionaryType = 'dictionaryType',
   optionalType = 'optionalType',
   predefinedType = 'predefinedType',
+  literalType = 'literalType',
+  unionType = 'unionType',
 }
 
 interface BaseValueType {
@@ -57,7 +62,6 @@ export interface BasicType extends BaseValueType {
   kind: ValueTypeKind.basicType;
   value: BasicTypeValue;
 }
-
 export interface InterfaceType extends BaseValueType, Omit<Module, 'exportedInterfaceBases'> {
   kind: ValueTypeKind.interfaceType;
 }
@@ -113,6 +117,21 @@ export interface PredefinedType extends BaseValueType {
   name: string;
 }
 
+export type UnionLiteralType = string | number;
+
+export interface LiteralType extends BaseValueType {
+  kind: ValueTypeKind.literalType;
+  memberType: BasicTypeValue.string | BasicTypeValue.number;
+  members: UnionLiteralType[];
+}
+
+export interface UnionType extends BaseValueType {
+  name: string;
+  kind: ValueTypeKind.unionType;
+  members: ValueType[];
+  customTags: Record<string, unknown>;
+}
+
 export function isBasicType(valueType: ValueType): valueType is BasicType {
   return valueType.kind === ValueTypeKind.basicType;
 }
@@ -143,6 +162,14 @@ export function isOptionalType(valueType: ValueType): valueType is OptionalType 
 
 export function isPredefinedType(valueType: ValueType): valueType is PredefinedType {
   return valueType.kind === ValueTypeKind.predefinedType;
+}
+
+export function isLiteralType(valueType: ValueType): valueType is LiteralType {
+  return valueType.kind === ValueTypeKind.literalType;
+}
+
+export function isUnionType(valueType: ValueType): valueType is UnionType {
+  return valueType.kind === ValueTypeKind.unionType;
 }
 
 // TODO: Define these types to support recursive definition
