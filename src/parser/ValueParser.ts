@@ -16,11 +16,14 @@ import {
   DictionaryKeyType,
   isInterfaceType,
   PredefinedType,
-  Value,
   TupleType,
   isTupleType,
   EnumField,
   isBasicType,
+  LiteralType,
+  OptionalType,
+  Value,
+  UnionLiteralType,
 } from '../types';
 import { isUndefinedOrNull, parseTypeJSDocTags } from './utils';
 import { ParserLogger } from '../logger/ParserLogger';
@@ -142,6 +145,7 @@ export class ValueParser {
     const documentation = ts.displayPartsToString(symbol?.getDocumentationComment(this.checker));
 
     const staticValue = this.parseLiteralNode(node.type);
+
     if (staticValue !== null) {
       return { name, type: staticValue.type, staticValue: staticValue.value, documentation };
     }
@@ -152,11 +156,32 @@ export class ValueParser {
 
     const valueType = this.valueTypeFromNode(node);
 
-    return {
+    const jsDocTags = symbol?.getJsDocTags(this.checker);
+    let defaultValue: string | undefined;
+    jsDocTags?.forEach((tag) => {
+      if (tag.name === 'default') {
+        if (tag.text?.length !== 1 || tag.text[0].kind !== 'text' || tag.text[0].text.length === 0) {
+          throw new ValueParserError(
+            `Invalid default value for ${name}`,
+            'Default value must be a single value, like `@default 0` or `@default "hello"`'
+          );
+        }
+        defaultValue = tag.text[0].text;
+      }
+    });
+
+    const field: Field = {
       name,
       type: valueType,
-      documentation,
+      documentation
     };
+
+    if (defaultValue != null) {
+      // to fix test fail
+      field.defaultValue = defaultValue;
+    }
+
+    return field;
   }
 
   private parseTypeLiteralNode(typeNode: ts.TypeNode): TupleType | DictionaryType | null {
@@ -201,9 +226,9 @@ export class ValueParser {
   }
 
   private valueTypeFromTypeNode(typeNode: ts.TypeNode): ValueType {
-    const unionType = this.parseUnionTypeNode(typeNode);
-    if (unionType !== null) {
-      return unionType;
+    const literalType = this.parseLiteralOrUnionTypeNode(typeNode);
+    if (literalType !== null) {
+      return literalType;
     }
 
     const referenceType = this.parseReferenceTypeNode(typeNode);
@@ -236,61 +261,130 @@ export class ValueParser {
     );
   }
 
-  private parseUnionTypeNode(node: ts.TypeNode): ValueType | null {
+  private parseLiteralOrUnionTypeNode(node: ts.TypeNode): ValueType | null {
     if (!ts.isUnionTypeNode(node)) {
       return null;
     }
 
     let nullable = false;
-    let valueType: ValueType | undefined;
+    const valueTypes: NonEmptyType[] = [];
+    let hasTupleType = false;
+    const tupleOrInterfaceTypes: (TupleType | InterfaceType)[] = [];
+    const literalValues: {
+      type: BasicTypeValue.string | BasicTypeValue.number;
+      value: Value;
+    }[] = [];
 
     node.types.forEach((typeNode) => {
       if (isUndefinedOrNull(typeNode)) {
         nullable = true;
         return;
       }
-
-      const newValueType = this.valueTypeFromTypeNode(typeNode);
-
-      if (!valueType) {
-        valueType = newValueType;
+      const literalKind = this.parseLiteralNode(typeNode);
+      if (literalKind !== null) {
+        if (
+          literalKind.type.kind === ValueTypeKind.basicType &&
+          (literalKind.type.value === BasicTypeValue.string || literalKind.type.value === BasicTypeValue.number)
+        ) {
+          literalValues.push({
+            type: literalKind.type.value,
+            value: literalKind.value,
+          });
+          return;
+        }
         return;
       }
 
-      if (
-        (!isInterfaceType(valueType) && !isTupleType(valueType)) ||
-        (!isInterfaceType(newValueType) && !isTupleType(newValueType))
-      ) {
-        throw new ValueParserError(
-          `union type ${node.getText()} is invalid`,
-          'Do not support multiple union types except for interface or literal type'
-        );
-      }
+      const newValueType = this.valueTypeFromTypeNode(typeNode) as NonEmptyType;
 
-      const existingMemberNames = new Set(valueType.members.map((member) => member.name));
-      valueType = {
-        kind: ValueTypeKind.tupleType,
-        members: valueType.members.concat(
-          newValueType.members.filter((member) => !existingMemberNames.has(member.name))
-        ),
-      };
+      valueTypes.push(newValueType);
+      if (isTupleType(newValueType)) {
+        hasTupleType = true;
+        tupleOrInterfaceTypes.push(newValueType);
+      }
+      if (isInterfaceType(newValueType)) {
+        tupleOrInterfaceTypes.push(newValueType);
+      }
     });
 
-    if (!valueType) {
+    if (literalValues.length > 0) {
+      const kindSet = new Set(literalValues.map((obj) => obj.type));
+
+      if (kindSet.size !== 1) {
+        throw new ValueParserError(
+          `union type ${node.getText()} has multiple literal type`,
+          'Union type must contain only one supported literal type'
+        );
+      }
+      const members: UnionLiteralType[] = [];
+      literalValues.forEach((obj) => {
+        if (typeof obj.value === 'string') {
+          members.push(obj.value);
+        }
+        if (typeof obj.value === 'number') {
+          members.push(obj.value);
+        }
+      });
+      const literalKind: LiteralType = {
+        kind: ValueTypeKind.literalType,
+        memberType: literalValues[0].type,
+        members,
+      };
+      if (nullable) {
+        const optionalType: OptionalType = {
+          kind: ValueTypeKind.optionalType,
+          wrappedType: literalKind,
+        };
+        return optionalType;
+      }
+      return literalKind;
+    }
+
+    if (valueTypes.length === 0) {
       throw new ValueParserError(
-        `union type ${node.getText()} is invalid`,
-        'Union type must contain one supported non empty type'
+        `type ${node.getText()} is invalid`,
+        'Type must contain one supported non empty type'
       );
     }
 
-    if (!isOptionalType(valueType) && nullable) {
-      return {
-        kind: ValueTypeKind.optionalType,
-        wrappedType: valueType,
-      };
+    if (hasTupleType && valueTypes.length !== tupleOrInterfaceTypes.length) {
+      throw new ValueParserError(
+        `mixing ${node.getText()} is invalid`,
+        'Type must contain types or tuples'
+      );
     }
 
-    return valueType;
+    if (hasTupleType) {
+      const value: TupleType = {
+        kind: ValueTypeKind.tupleType,
+        members: tupleOrInterfaceTypes.map((type) => type.members).flat(),
+      };
+      if (nullable) {
+        const optionalType: OptionalType = {
+          kind: ValueTypeKind.optionalType,
+          wrappedType: value,
+        };
+        return optionalType;
+      }
+      return value;
+    }
+
+    if (valueTypes.length === 1) {
+      if (nullable) {
+        return {
+          kind: ValueTypeKind.optionalType,
+          wrappedType: valueTypes[0],
+        };
+      }
+      return valueTypes[0];
+    }
+
+    return {
+      name: '',
+      kind: ValueTypeKind.unionType,
+      members: valueTypes,
+      customTags: {},
+    };
   }
 
   private basicTypeKindFromTypeNode(node: ts.TypeNode): BasicType | null {

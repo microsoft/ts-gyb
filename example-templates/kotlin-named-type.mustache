@@ -1,7 +1,7 @@
 {{#custom}}
 data class {{typeName}}(
     {{#members}}
-    @JvmField val {{name}}: {{type}},
+    @JvmField val {{name}}: {{type}}{{#defaultValue}} = {{defaultValue}}{{/defaultValue}},
     {{/members}}
     {{#staticMembers}}
     @JvmField val {{name}}: {{type}} = {{{value}}},
@@ -38,3 +38,28 @@ enum class {{typeName}} {
 }
 {{/isStringType}}
 {{/enum}}
+{{#unionType}}
+sealed class {{unionTypeName}}(val value: Any) {
+    {{#members}}
+    data class {{capitalizeName}}Value(val value: {{{type}}}) : {{unionTypeName}}()
+    {{/members}}
+}
+
+class {{unionTypeName}}Adapter : JsonSerializer<{{unionTypeName}}>, JsonDeserializer<{{unionTypeName}}> {
+    override fun serialize(src: {{unionTypeName}}, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return context.serialize(src.value)
+    }
+ 
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): {{unionTypeName}} {
+        {{#members}}
+        try {
+            return {{unionTypeName}}.{{capitalizeName}}Value(context.deserialize(json, {{type}}::class.java))
+        } catch (e: Exception) {
+            // Ignore the exception and try the next type
+        }
+        {{/members}}
+
+        throw IllegalArgumentException("Unexpected JSON type: ${json.javaClass}")
+    }
+}
+{{/unionType}}

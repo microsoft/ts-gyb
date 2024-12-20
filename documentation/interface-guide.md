@@ -146,7 +146,7 @@ Arries defined like `string[]` and `Array<number>` are supported. The element ca
 The support for union types is limited. Only these scenrios are supported:
 
 - Any supported value type union with `null` or/and `undefined` to specify optional type
-- Union two interfaces or object literals to a new object literal
+- Union two interfaces or object literals to a new object literal or union values of the same literal type to enum in the target language, e.g. string, number.
 - Combination of the above two cases
 
 Any other union types would result in an error.
@@ -156,6 +156,12 @@ Any other union types would result in an error.
 string | null
 string | undefined
 string | null | undefined
+'1' | '2' | null;
+
+// allowed: literal values
+'1' | '2';
+1 | 2;
+
 
 interface StringFieldInterface {
   stringField: string;
@@ -170,8 +176,10 @@ interface NumberFieldInterface {
 StringFieldInterface | { numberField: number }
 StringFieldInterface | NumberFieldInterface
 
-// not allowed: unsupported union
+// allowed: types union
 string | number
+
+// not allowed: mixing type and tuple
 { stringField: string } | number
 ```
 
@@ -210,6 +218,7 @@ ts-gyb parses tags in [JSDoc](https://jsdoc.app) documentation.
 - `@shouldExport`: Specify whether an `interface` should be exported. Set it to `true` to export.
 - `@overrideModuleName`: Change the name of the interface for ts-gyb. This is helpful for dropping the `I` prefix in TypeScript interface name.
 - `@overrideTypeName`: Similar to `@overrideModuleName`, this is used to override the name of custom types used in method parameters or return values.
+- `@default`: default value for Module Interface's function parameter,
 
 ```typescript
 /**
@@ -219,6 +228,18 @@ ts-gyb parses tags in [JSDoc](https://jsdoc.app) documentation.
 interface InterfaceWithTags {
   // The name of the module would be `ProperNamedInterface` in generated code
   ...
+
+  foo(bar: {
+    /**
+     * @default null
+     */
+    bool?: boolean;
+    bool2?: boolean;
+    /**
+     * @default 1
+     */
+    num: number;
+  }): void;
 }
 ```
 

@@ -13,6 +13,7 @@ interface CustomSize {
 }
 
 enum StringEnum {
+  default = 'default',
   /**
    * Description for enum member a
    */
@@ -21,11 +22,13 @@ enum StringEnum {
 }
 
 enum NumEnum {
+  default = 0,
   one = 1,
   two = 2,
 }
 
 enum DefaultEnum {
+  default,
   defaultValueC,
   defaultValueD,
 }
@@ -36,18 +39,32 @@ enum DefaultEnum {
  */
 interface FullSize extends BaseSize, CustomSize {
   /**
-  * Example documentation for member
-  */
+   * Example documentation for member
+   */
   member: NumEnum.one;
   size: number;
   count: CodeGen_Int;
   stringEnum: StringEnum;
   numEnum: NumEnum;
   defEnum: DefaultEnum;
+  stringUnion: 'A1' | 'B1';
+  numberStringUnion: '11' | '21';
+  nullableStringUnion: 'A1' | 'B1' | null;
+  numUnion1: 11 | 21;
+  foo: { stringField: string } | { numberField: number };
+  unionType: string | number | boolean | NumEnum | DefaultEnum | string[] | DictionaryWithAnyKey;
 }
 
 interface DictionaryWithAnyKey {
   [key: string]: string;
+}
+
+
+interface ObjectWithDefeaultValue {
+  /**
+    * @default true
+    */
+  defaultValue?: boolean;
 }
 
 /**
@@ -68,7 +85,29 @@ export interface IHtmlApi {
   requestRenderingResult(): void;
   getSize(): FullSize;
   getAliasSize(): AliasSize;
+  getName(): 'A2' | 'B2';
+  getAge({ gender }: { gender: 'Male' | 'Female' }): 21 | 22;
   testDictionaryWithAnyKey({ dict }: { dict: DictionaryWithAnyKey }): void;
+
+  testDefaultValue(options: {
+    /**
+     * @default null
+     */
+    bool?: boolean;
+    bool2?: boolean;
+    /**
+     * @default true
+     */
+    bool3: boolean;
+    /**
+     * @default 1
+     */
+    num: number;
+    /**
+     * @default "hello"
+     */
+    string: string;
+  }): ObjectWithDefeaultValue;
 }
 
 /**
@@ -81,4 +120,5 @@ export interface IImageOptionApi {
   getSourceOfImageWithID({ id }: { id: string }): string | null;
   getImageDataList(): string;
   getContentBoundsOfElementWithID({ id }: { id: string }): string | null;
+  getSize(): FullSize;
 }

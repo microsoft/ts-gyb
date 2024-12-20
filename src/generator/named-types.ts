@@ -1,4 +1,11 @@
-import { capitalize } from '../utils';
+import {
+  basicTypeOfUnion,
+  capitalize,
+  membersOfUnion,
+  uniquePathWithMember,
+  uniquePathWithMethodParameter,
+  uniquePathWithMethodReturnType,
+} from '../utils';
 import {
   isArraryType,
   isInterfaceType,
@@ -12,6 +19,13 @@ import {
   TupleType,
   isTupleType,
   ValueTypeKind,
+  isLiteralType,
+  EnumSubType,
+  LiteralType,
+  isUnionType,
+  isBasicType,
+  isPredefinedType,
+  UnionType,
 } from '../types';
 
 export const enum ValueTypeSource {
@@ -20,7 +34,7 @@ export const enum ValueTypeSource {
   Return = 1 << 2,
 }
 
-export type NamedType = InterfaceType | EnumType;
+export type NamedType = InterfaceType | EnumType | UnionType;
 export interface NamedTypeInfo {
   type: NamedType;
   source: ValueTypeSource;
@@ -40,14 +54,18 @@ export type NamedTypesResult = { associatedTypes: Record<string, NamedTypeInfo[]
 export function dropIPrefixInCustomTypes(modules: Module[]): void {
   modules
     .flatMap((module) => fetchRootTypes(module))
-    .forEach(([valueType]) => {
-      recursiveVisitMembersType(valueType, (namedType) => {
-        if (!isInterfaceType(namedType)) {
-          return;
-        }
+    .forEach(({ valueType, uniquePath }) => {
+      recursiveVisitMembersType(
+        valueType,
+        (namedType) => {
+          if (!isInterfaceType(namedType)) {
+            return;
+          }
 
-        namedType.name = namedType.name?.replace(/^I/, '');
-      });
+          namedType.name = namedType.name?.replace(/^I/, '');
+        },
+        uniquePath
+      );
     });
 }
 
@@ -97,25 +115,42 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
   const typeMap: Record<string, { namedType: NamedType; source: ValueTypeSource; associatedModules: Set<string> }> = {};
 
   modules.forEach((module) => {
-    fetchRootTypes(module).forEach(([valueType, source]) => {
-      recursiveVisitMembersType(valueType, (membersType, path) => {
-        let namedType = membersType;
-        if (isTupleType(namedType)) {
-          namedType = membersType as unknown as InterfaceType;
-          namedType.kind = ValueTypeKind.interfaceType;
-          namedType.name = path;
-          namedType.documentation = '';
-          namedType.customTags = {};
-        }
+    fetchRootTypes(module).forEach(({ valueType, source, uniquePath }) => {
+      recursiveVisitMembersType(
+        valueType,
+        (membersType, path) => {
+          let namedType = membersType;
+          if (isTupleType(namedType)) {
+            namedType = membersType as unknown as InterfaceType;
+            namedType.kind = ValueTypeKind.interfaceType;
+            namedType.name = path;
+            namedType.documentation = '';
+            namedType.customTags = {};
+          } else if (isLiteralType(namedType)) {
+            const subType = basicTypeOfUnion(namedType);
+            const members = membersOfUnion(namedType);
 
-        if (typeMap[namedType.name] === undefined) {
-          typeMap[namedType.name] = { namedType, source, associatedModules: new Set() };
-        }
+            namedType = membersType as unknown as EnumType;
+            namedType.kind = ValueTypeKind.enumType;
+            namedType.name = path;
+            namedType.subType = subType === 'number' ? EnumSubType.number : EnumSubType.string;
+            namedType.members = members;
+            namedType.documentation = '';
+            namedType.customTags = {};
+          } else if (isUnionType(namedType)) {
+            namedType.name = path;
+          }
 
-        const existingResult = typeMap[namedType.name];
-        existingResult.associatedModules.add(module.name);
-        existingResult.source |= source;
-      });
+          if (typeMap[namedType.name] === undefined) {
+            typeMap[namedType.name] = { namedType, source, associatedModules: new Set() };
+          }
+
+          const existingResult = typeMap[namedType.name];
+          existingResult.associatedModules.add(module.name);
+          existingResult.source |= source;
+        },
+        uniquePath
+      );
     });
   });
 
@@ -138,15 +173,30 @@ function fetchNamedTypes(modules: Module[]): NamedTypesResult {
   return { associatedTypes, sharedTypes };
 }
 
-function fetchRootTypes(module: Module): [ValueType, ValueTypeSource][] {
-  const typesInMembers: [ValueType, ValueTypeSource][] = module.members.map((field) => [
-    field.type,
-    ValueTypeSource.Field,
-  ]);
-  const typesInMethods: [ValueType, ValueTypeSource][] = module.methods.flatMap((method) =>
+function fetchRootTypes(module: Module): { valueType: ValueType; source: ValueTypeSource; uniquePath: string }[] {
+  const typesInMembers: ReturnType<typeof fetchRootTypes> = module.members.map((field) => ({
+    valueType: field.type,
+    source: ValueTypeSource.Field,
+    uniquePath: uniquePathWithMember(module.name, field.name),
+  }));
+  const typesInMethods: ReturnType<typeof fetchRootTypes> = module.methods.flatMap((method) =>
     method.parameters
-      .map((parameter): [ValueType, ValueTypeSource] => [parameter.type, ValueTypeSource.Parameter])
-      .concat(method.returnType ? [[method.returnType, ValueTypeSource.Return]] : [])
+      .map((parameter) => ({
+        valueType: parameter.type,
+        source: ValueTypeSource.Parameter,
+        uniquePath: uniquePathWithMethodParameter(module.name, method.name, parameter.name),
+      }))
+      .concat(
+        method.returnType
+          ? [
+              {
+                valueType: method.returnType,
+                source: ValueTypeSource.Return,
+                uniquePath: uniquePathWithMethodReturnType(module.name, method.name),
+              },
+            ]
+          : []
+      )
   );
 
   return typesInMembers.concat(typesInMethods);
@@ -154,14 +204,14 @@ function fetchRootTypes(module: Module): [ValueType, ValueTypeSource][] {
 
 function recursiveVisitMembersType(
   valueType: ValueType,
-  visit: (membersType: NamedType | TupleType, path: string) => void,
-  path = ''
+  visit: (membersType: NamedType | TupleType | LiteralType | UnionType, path: string) => void,
+  path: string
 ): void {
   if (isInterfaceType(valueType)) {
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(member.type, visit, `${path}${valueType.name}Members${capitalize(member.name)}Type`);
+      recursiveVisitMembersType(member.type, visit, uniquePathWithMember(valueType.name, member.name));
     });
 
     return;
@@ -171,7 +221,7 @@ function recursiveVisitMembersType(
     visit(valueType, path);
 
     valueType.members.forEach((member) => {
-      recursiveVisitMembersType(member.type, visit, `${path}Members${capitalize(member.name)}Type`);
+      recursiveVisitMembersType(member.type, visit, uniquePathWithMember(path, member.name));
     });
 
     return;
@@ -194,5 +244,39 @@ function recursiveVisitMembersType(
 
   if (isOptionalType(valueType)) {
     recursiveVisitMembersType(valueType.wrappedType, visit, `${path}`);
+    return;
   }
+
+  if (isLiteralType(valueType)) {
+    visit(valueType, path);
+    return;
+  }
+
+  if (isUnionType(valueType)) {
+    visit(valueType, path);
+    valueType.members.forEach((member) => {
+      let subType: string;
+      if (isBasicType(member)) {
+        subType = member.value;
+      } else if ((member as NamedType).name !== undefined) {
+        subType = (member as NamedType).name;
+      } else {
+        subType = member.kind;
+      }
+      recursiveVisitMembersType(member, visit, `${path}${capitalize(subType)}`);
+    });
+    return;
+  }
+
+  if (isBasicType(valueType)) {
+    // string, boolean, etc.
+    return;
+  }
+
+  if (isPredefinedType(valueType)) {
+    // CodeGen_Int, etc.
+    return;
+  }
+
+  throw Error(`Unhandled value type ${JSON.stringify(valueType)}`);
 }

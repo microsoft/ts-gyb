@@ -10,6 +10,7 @@ import {
   isPredefinedType,
   ValueType,
   Value,
+  isUnionType,
 } from '../../types';
 import { ValueTransformer } from './ValueTransformer';
 
@@ -64,6 +65,10 @@ export class SwiftValueTransformer implements ValueTransformer {
 
     if (isPredefinedType(valueType)) {
       return this.typeNameMap[valueType.name] ?? valueType.name;
+    }
+
+    if (isUnionType(valueType)) {
+      return this.convertTypeNameFromCustomMap(valueType.name);
     }
 
     throw Error('Type not handled');
@@ -124,6 +129,10 @@ export class SwiftValueTransformer implements ValueTransformer {
       return '';
     }
 
+    if (text.toLowerCase() === 'default') {
+      return '`default`';
+    }
+
     let index = 0;
     // Get the index of the first lowercased letter
     while (index < text.length) {
@@ -143,5 +152,9 @@ export class SwiftValueTransformer implements ValueTransformer {
 
   convertTypeNameFromCustomMap(name: string): string {
     return this.typeNameMap[name] ?? name;
+  }
+
+  null(): string {
+    return 'nil';
   }
 }
