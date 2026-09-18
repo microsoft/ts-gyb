@@ -6,15 +6,19 @@ import { Parser } from '../src/parser/Parser';
 import { ValueParserError } from '../src/parser/ValueParserError';
 import { Method, ValueType } from '../src/types';
 
-export function withTempParser(sourceCode: string, handler: (parser: Parser) => void, predefinedTypes: Set<string> = new Set()): void {
+export function withTempSkipParser(sourceCode: string, handler: (parser: Parser) => void, predefinedTypes: Set<string> = new Set(), skipInvalidMethods: boolean = false) {
   const tempPath = fs.mkdtempSync(`${os.tmpdir()}/`);
   const filePath = path.join(tempPath, `${UUID()}.ts`);
   fs.writeFileSync(filePath, sourceCode);
 
-  const parser = new Parser([filePath], predefinedTypes, false, undefined, undefined);
+  const parser = new Parser([filePath], predefinedTypes, skipInvalidMethods, undefined, undefined);
   handler(parser);
 
   fs.rmdirSync(tempPath, { recursive: true });
+}
+
+export function withTempParser(sourceCode: string, handler: (parser: Parser) => void, predefinedTypes: Set<string> = new Set()): void {
+  withTempSkipParser(sourceCode, handler, predefinedTypes, false)
 }
 
 export function withTempMethodParser(methodCode: string, handler: (parseFunc: () => Method | null) => void, predefinedTypes: Set<string> = new Set(), customTypesCode: string = ''): void {

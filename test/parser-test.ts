@@ -1,6 +1,6 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import { withTempParser } from './utils';
+import { withTempParser, withTempSkipParser } from './utils';
 import { ValueParserError } from '../src/parser/ValueParserError';
 import { BasicTypeValue, ValueTypeKind } from '../src/types';
 
@@ -121,5 +121,51 @@ describe('Parser', () => {
     withTempParser(sourceCode, parser => {
       expect(() => parser.parse()).to.throw(ValueParserError).with.property('message', 'it has multiple parameters');
     });
+  });
+
+  it('Multiple parameters with skip flag', () => {
+    const sourceCode = `
+      /**
+      * @shouldExport true
+      */
+      interface MockedInterface {
+        /**
+        * This documentation should be skipped
+        */
+        multipleParamsMethod(foo: string, bar: number);
+        /**
+        * This is an example documentation for the member
+        */
+        mockedMember: string;
+        /**
+        * This is an example documentation for the method
+        */
+        mockedMethod(): void;
+      }
+      `;
+
+    withTempSkipParser(sourceCode, (parser) => {
+      const modules = parser.parse();
+      expect(modules).to.deep.equal([
+        {
+          name: 'MockedInterface',
+          exportedInterfaceBases: [],
+          documentation: '',
+          customTags: {},
+          members: [{
+            name: 'mockedMember',
+            type: { kind: ValueTypeKind.basicType, value: BasicTypeValue.string },
+            documentation: 'This is an example documentation for the member',
+          }],
+          methods: [{
+            name: 'mockedMethod',
+            parameters: [],
+            returnType: null,
+            isAsync: false,
+            documentation: 'This is an example documentation for the method',
+          }],
+        },
+      ]);
+    }, new Set(), true);
   });
 });

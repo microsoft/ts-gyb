@@ -602,6 +602,7 @@ export class ValueParser {
         if (error instanceof ValueParserError) {
           if (this.skipInvalidMethods) {
             this.logger.warnSkippedNode(decrationNode, error.message, error.guide);
+            return;
           }
 
           throw error;
