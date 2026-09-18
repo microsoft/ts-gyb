@@ -8,15 +8,15 @@ jobs:
   npm-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
         with:
           ref: ${{ github.event.release.target_commitish }}
       - name: Use Node.js 14
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2.5.2
         with:
           node-version: 14
       - name: match-tag-to-package-version
-        uses: geritol/match-tag-to-package-version@0.0.2
+        uses: geritol/match-tag-to-package-version@c653bdd54d55b1576705a162417957903cd5851e # 0.0.2
         env:
           TAG_PREFIX: refs/tags/v
       - run: npm install
