@@ -87,12 +87,10 @@ export class CodeGenerator {
     if (path.extname(options.outputPath) === '') {
       // The path is a directory
       moduleViews.forEach((moduleView) => {
+        const outputFilePath = this.getModuleOutputPath(options.outputPath, moduleView.moduleName, options.language);
         const renderedCode = renderCode(options.templatePath, moduleView);
 
-        this.writeFile(
-          renderedCode,
-          path.join(options.outputPath, `${moduleView.moduleName}${this.getFileExtension(options.language)}`)
-        );
+        this.writeFile(renderedCode, outputFilePath);
       });
     } else {
       moduleViews.forEach((moduleView, index) => {
@@ -121,6 +119,21 @@ export class CodeGenerator {
       default:
         throw Error('Unhandled language');
     }
+  }
+
+  private getModuleOutputPath(outputPath: string, moduleName: string, language: RenderingLanguage): string {
+    if (
+      moduleName.length === 0 ||
+      moduleName === '.' ||
+      moduleName === '..' ||
+      path.posix.basename(moduleName) !== moduleName ||
+      path.win32.basename(moduleName) !== moduleName ||
+      moduleName.includes('\0')
+    ) {
+      throw Error(`Invalid module name "${moduleName}": expected a single file name`);
+    }
+
+    return path.join(outputPath, `${moduleName}${this.getFileExtension(language)}`);
   }
 
   private getNamedTypeView(namedType: NamedTypeInfo, valueTransformer: ValueTransformer): NamedTypeView {
