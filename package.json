@@ -7,6 +7,9 @@
     "url": "https://github.com/microsoft/ts-gyb"
   },
   "license": "MIT",
+  "engines": {
+    "node": "22.15.1"
+  },
   "homepage": "https://github.com/microsoft/ts-gyb#readme",
   "keywords": [],
   "scripts": {
@@ -45,7 +48,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-import": "^2.22.1",
-    "mocha": "^12.0.2",
+    "mocha": "12.0.1",
     "prettier": "^2.2.1",
     "ts-node": "^8.10.2",
     "typedoc": "^0.22.11",
@@ -58,5 +61,10 @@
     "mustache": "^4.2.0",
     "typescript": "^4.3.2",
     "yargs": "^16.1.0"
+  },
+  "overrides": {
+    "mocha": {
+      "brace-expansion": "5.0.9"
+    }
   }
 }
